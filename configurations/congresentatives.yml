@@ -1,0 +1,15 @@
+title: "Congressional districts in and around Boston"
+bounding_box:
+  left: 0
+  right: 42
+  top: 0
+  bottom: 42
+style: |
+  water {
+    fill: skyblue;
+    stroke: none;
+  }
+  park {
+    fill: lightgreen;
+    stroke: none;
+  }
