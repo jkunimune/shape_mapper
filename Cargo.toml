@@ -3,4 +3,8 @@ name = "shape_mapper"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "shape_mapper"
+path = "source/main.rs"
+
 [dependencies]
