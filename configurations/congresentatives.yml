@@ -5,11 +5,45 @@ bounding_box:
   top: 0
   bottom: 42
 style: |
-  water {
+  .water {
     fill: skyblue;
     stroke: none;
   }
-  park {
+  .park {
     fill: lightgreen;
     stroke: none;
   }
+  .district {
+    stroke: black;
+    stroke-width: 1px;
+  }
+  .district-1 {
+    fill: red;
+  }
+  .district-2 {
+    fill: orange;
+  }
+  .district-3 {
+    fill: yellow;
+  }
+  .district-4 {
+    fill: green;
+  }
+  .district-5 {
+    fill: blue;
+  }
+  .district-6 {
+    fill: purple;
+  }
+  .district-7 {
+    fill: olive;
+  }
+  .district-8 {
+    fill: grey;
+  }
+  .district-9 {
+    fill: cyan;
+  }
+content:
+  class: "district"
+  filename: "CONGRESSMA118_POLY"
