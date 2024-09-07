@@ -13,37 +13,51 @@ style: |
     fill: lightgreen;
     stroke: none;
   }
-  .district {
+  .town {
     stroke: black;
-    stroke-width: 1px;
+    stroke-width: 1000;
+    stroke-linejoin: round;
+    fill: none;
+  }
+  .district {
+    fill: white;
+    stroke-width: 3000;
+    stroke-linejoin: round;
   }
   .district-1 {
-    fill: red;
+    stroke: red;
   }
   .district-2 {
-    fill: orange;
+    stroke: orange;
   }
   .district-3 {
-    fill: yellow;
+    stroke: yellow;
   }
   .district-4 {
-    fill: green;
+    stroke: green;
   }
   .district-5 {
-    fill: blue;
+    stroke: blue;
   }
   .district-6 {
-    fill: purple;
+    stroke: purple;
   }
   .district-7 {
-    fill: olive;
+    stroke: olive;
   }
   .district-8 {
-    fill: grey;
+    stroke: grey;
   }
   .district-9 {
-    fill: cyan;
+    stroke: cyan;
   }
 content:
-  class: "district"
-  filename: "CONGRESSMA118_POLY"
+  - !Group
+    id: "minimap"
+    content:
+      - !Layer
+        class: "district"
+        filename: "CONGRESSMA118_POLY"
+      - !Layer
+        class: "town"
+        filename: "TOWNSSURVEY_POLY"
