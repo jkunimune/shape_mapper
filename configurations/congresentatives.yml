@@ -15,6 +15,12 @@ style: |
     fill: skyblue;
     stroke: none;
   }
+  .river {
+    fill: none;
+    stroke: blue;
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
   .park {
     fill: lightgreen;
     stroke: none;
@@ -71,7 +77,9 @@ content:
       - !Layer
         class: "town"
         filename: "TOWNSSURVEY_POLYM"
-        region: { left: 215000, right: 253000, bottom: 882000, top: 920000 }
+      - !Layer
+        class: "river"
+        filename: "MAJSTRM_ARC"
   - !Group
     id: "minimap"
     bounding_box: { left: 280, right: 420, top: 0, bottom: 60 }

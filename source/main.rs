@@ -3,7 +3,7 @@ use std::{fs, iter};
 use serde::Deserialize;
 use shapefile::dbase::FieldValue;
 use shapefile::record::EsriShape;
-use shapefile::Shape;
+use shapefile::{Point, Shape};
 
 
 fn main() -> () {
@@ -78,34 +78,25 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                 format!("data/{}.shp", filename)).map_err(|err| err.to_string())?;
             for shape_record in reader.iter_shapes_and_records() {
                 let shape_record = shape_record.unwrap();
-                let (shape, record) = &shape_record;
+                let (shape, record) = shape_record;
                 // first, discard it if its bounding box doesn't intersect the desired region
-                if !any_of_shape_is_in_box(shape, &region) {
+                if !any_of_shape_is_in_box(&shape, &region) {
                     continue;
                 }
-                // come up with a useful class name
+                // convert it to a d string
                 let shape_string = match shape {
                     Shape::Polygon(polygon) => {
-                        let mut path_string = String::new();
-                        for ring in polygon.rings() {
-                            for (i, point) in ring.points().iter().enumerate() {
-                                let point = Transform::apply(&transform, point);
-                                let segment_string = if i == 0 {
-                                    &format!("M{:.3},{:.3} ", point.x, point.y)
-                                }
-                                else if i < ring.len() - 1 {
-                                    &format!("L{:.3},{:.3} ", point.x, point.y)
-                                }
-                                else {
-                                    "Z"
-                                };
-                                path_string.push_str(segment_string);
-                            }
+                        let mut rings_as_nested_vec: Vec<Vec<Point>> = Vec::with_capacity(polygon.rings().len());
+                        for i in 0..polygon.rings().len() {
+                            rings_as_nested_vec.push(polygon.rings()[i].points().to_vec());
                         }
-                        format!("<path d=\"{}\"", path_string)
+                        convert_points_to_path_string(&rings_as_nested_vec, true, &transform)
+                    }
+                    Shape::Polyline(polyline) => {
+                        convert_points_to_path_string(polyline.parts(), false, &transform)
                     }
                     _ => {
-                        panic!("we only do polygons right now.");
+                        panic!("we only do polygons and polylines right now.");
                     }
                 };
                 let sub_class = match &class_column {
@@ -150,6 +141,27 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
         }
     }
     return Ok(string);
+}
+
+
+fn convert_points_to_path_string(sections: &Vec<Vec<Point>>, close_path: bool, transform: &Transform) -> String {
+    let mut path_string = String::new();
+    for section in sections {
+        for (i, point) in section.iter().enumerate() {
+            let point = Transform::apply(transform, &point);
+            let segment_string = if i == 0 {
+                &format!("M{:.3},{:.3} ", point.x, point.y)
+            }
+            else if i == section.len() - 1 && close_path {
+                "Z"
+            }
+            else {
+                &format!("L{:.3},{:.3} ", point.x, point.y)
+            };
+            path_string.push_str(segment_string);
+        }
+    }
+    format!("<path d=\"{}\"", path_string)
 }
 
 
@@ -239,8 +251,8 @@ impl Transform {
         return Transform { x_scale: x_scale, x_shift: x_shift, y_scale: y_scale, y_shift: y_shift };
     }
 
-    fn apply(self: &Transform, input: &shapefile::Point) -> shapefile::Point {
-        return shapefile::Point::new(
+    fn apply(self: &Transform, input: &Point) -> Point {
+        return Point::new(
             input.x*self.x_scale + self.x_shift,
             input.y*self.y_scale + self.y_shift,
         );
