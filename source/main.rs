@@ -7,6 +7,9 @@ use shapefile::record::EsriShape;
 use shapefile::Shape;
 
 
+const IDENTITY_TRANSFORM: Transform = Transform { x_scale: 1., y_scale: 1., x_shift: 0., y_shift: 0. };
+
+
 fn main() -> () {
     let yaml = fs::read_to_string(
         "configurations/congresentatives.yml").unwrap();
@@ -27,7 +30,7 @@ fn main() -> () {
         configuration_width, configuration_height,
         configuration.title, configuration.style,
     );
-    svg_code.push_str(&transcribe_as_svg(&Content::from(configuration), 1).unwrap());
+    svg_code.push_str(&transcribe_as_svg(&Content::from(configuration), 1, &IDENTITY_TRANSFORM).unwrap());
     svg_code.push_str("</svg>\n");
 
     let image_filename = "maps/congresentatives.svg";
@@ -36,18 +39,19 @@ fn main() -> () {
 }
 
 
-fn transcribe_as_svg(content: &Content, indent_level: usize) -> Result<String, MyError> {
+fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transform) -> Result<String, MyError> {
     let indentation: String = iter::repeat("  ").take(indent_level).collect();
     let mut string = String::new();
     match content {
         Content::Group{ id, content: subcontents, bounding_box: output_bounding_box } => {
             let input_bounding_box = extent_of(subcontents)?;
-            let transform = Transform::between(&input_bounding_box, &output_bounding_box);
+            let transform = Transform::concatenate(
+                &Transform::between(&input_bounding_box, &output_bounding_box), &transform);
             string.push_str(&format!(
-                "{}<g id=\"{}\" transform=\"matrix({}, 0, 0, {}, {}, {})\">\n",
-                &indentation, &id, transform.x_scale, transform.y_scale, transform.x_shift, transform.y_shift));
+                "{}<g id=\"{}\">\n",
+                &indentation, &id));
             for subcontent in subcontents {
-                string.push_str(&transcribe_as_svg(subcontent, indent_level + 1)?);
+                string.push_str(&transcribe_as_svg(subcontent, indent_level + 1, &transform)?);
             }
         }
         Content::Layer{ filename, region, class } => {
@@ -83,7 +87,9 @@ fn transcribe_as_svg(content: &Content, indent_level: usize) -> Result<String, M
                         let mut path_string = String::new();
                         for ring in polygon.rings() {
                             for (i, point) in ring.points().iter().enumerate() {
-                                path_string.push_str(&format!("{}{:.3},{:.3} ", if i == 0 {"M"} else {"L"}, point.x, point.y));
+                                let segment_type = if i == 0 {"M"} else {"L"};
+                                let point = Transform::apply(transform, point);
+                                path_string.push_str(&format!("{}{:.3},{:.3} ", segment_type, point.x, point.y));
                             }
                         }
                         string.push_str(&format!(
@@ -240,6 +246,22 @@ impl Transform {
         let y_scale = (output.bottom - output.top)/(input.bottom - input.top);
         let y_shift = output.top - input.top*y_scale;
         return Transform { x_scale: x_scale, x_shift: x_shift, y_scale: y_scale, y_shift: y_shift };
+    }
+
+    fn concatenate(a: &Transform, b: &Transform) -> Transform {
+        return Transform {
+            x_scale: a.x_scale*b.x_scale,
+            x_shift: a.x_shift*b.x_scale + b.x_shift,
+            y_scale: a.y_scale*b.y_scale,
+            y_shift: a.y_shift*b.y_scale + b.y_shift,
+        }
+    }
+
+    fn apply(self: &Transform, point: &shapefile::Point) -> shapefile::Point {
+        return shapefile::Point::new(
+            point.x*self.x_scale + self.x_shift,
+            point.y*self.y_scale + self.y_shift,
+        );
     }
 }
 

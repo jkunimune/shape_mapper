@@ -11,13 +11,13 @@ style: |
   }
   .town {
     stroke: black;
-    stroke-width: 1000;
+    stroke-width: .5mm;
     stroke-linejoin: round;
     fill: none;
   }
   .district {
     fill: white;
-    stroke-width: 3000;
+    stroke-width: 1.5mm;
     stroke-linejoin: round;
   }
   .district-1 {
