@@ -68,7 +68,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             string.push_str(&format!("{}  <use href=\"#{}_rect\" class=\"border\"/>\n", &indentation, &id));
             string.push_str(&format!("{}</g>\n", &indentation))
         }
-        Content::Layer{ filename, class, class_column, self_clip } => {
+        Content::Layer{ filename, class, class_column, self_clip, filters } => {
             let bounding_box = outer_bounding_box;
             let region = outer_region.as_ref().ok_or(format!(
                 "every layer must have a region defined somewhere in its hierarchy, but '{}' does not.", filename))?;
@@ -76,10 +76,26 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             string.push_str(&format!("{}<g class=\"{}\">\n", &indentation, &class));
             let mut reader = shapefile::Reader::from_path(
                 format!("data/{}.shp", filename)).map_err(|err| err.to_string())?;
+            'shape_loop:
             for shape_record in reader.iter_shapes_and_records() {
                 let shape_record = shape_record.unwrap();
                 let (shape, record) = shape_record;
-                // first, discard it if its bounding box doesn't intersect the desired region
+                // first, discard anything that contradicts a filter
+                match &filters {
+                    Some(filters) => {
+                        for Filter {key, valid_values} in filters {
+                            let valid: bool = match record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))? {
+                                FieldValue::Numeric(Some(number)) => valid_values.contains(number),
+                                _ => return Err(String::from("you can only filter on numerical fields right now.")),
+                            };
+                            if !valid {
+                                continue 'shape_loop;
+                            }
+                        }
+                    }
+                    None => {}
+                }
+                // also discard it if its bounding box doesn't intersect the desired region
                 if !any_of_shape_is_in_box(&shape, &region) {
                     continue;
                 }
@@ -211,6 +227,8 @@ enum Content {
         class_column: Option<String>,
         /// whether to make this shape's strokes be confined within its shape
         self_clip: Option<bool>,
+        /// key-[value] pairs used to show only a subset of the shapes in the file
+        filters: Option<Vec<Filter>>,
     },
     Group {
         /// the unique ID to add to this group
@@ -232,6 +250,13 @@ struct Box {
     right: f64,
     top: f64,
     bottom: f64,
+}
+
+
+#[derive(Deserialize)]
+struct Filter {
+    key: String,
+    valid_values: Vec<f64>,
 }
 
 

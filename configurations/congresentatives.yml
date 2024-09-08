@@ -20,20 +20,36 @@ style: |
     stroke: blue;
     stroke-width: 2;
     stroke-linejoin: round;
+    stroke-linecap: round;
   }
   .park {
     fill: lightgreen;
     stroke: none;
   }
   .town {
+    fill: none;
     stroke: black;
     stroke-width: .5;
     stroke-linejoin: round;
+  }
+  .road {
     fill: none;
+    stroke: #bbb;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .road_0, .road_1, .road_2, .road_3, .road_9, .road_10, .road_11 {
+    stroke-width: 0.9;
+  }
+  .road_4 {
+    stroke-width: 0.6;
+  }
+  .road_5, .road_6 {
+    stroke-width: 0.4;
   }
   .district {
     fill: white;
-    stroke-width: 1.5;
+    stroke-width: 6.0;
     stroke-linejoin: round;
   }
   .district_1 {
@@ -75,6 +91,12 @@ content:
         class_column: "DIST_NUM"
         self_clip: true
       - !Layer
+        class: "road"
+        filename: "EOTMAJROADS_ARC"
+        class_column: "CLASS"
+        filters:
+          - {key: "RDTYPE", valid_values: [1, 2, 3, 4]}
+      - !Layer
         class: "town"
         filename: "TOWNSSURVEY_POLYM"
       - !Layer
@@ -90,3 +112,9 @@ content:
         filename: "CONGRESSMA118_POLY"
         class_column: "DIST_NUM"
         self_clip: true
+      - !Layer
+        class: "road"
+        filename: "EOTMAJROADS_ARC"
+        class_column: "CLASS"
+        filters:
+          - {key: "ADMIN_TYPE", valid_values: [1, 2]}
