@@ -39,7 +39,7 @@ fn main() -> () {
 }
 
 
-fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &Option<Box>, indent_level: usize, shape_index: &mut u32) -> Result<String, MyError> {
+fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &Option<Box>, indent_level: usize, shape_index: &mut u32) -> Result<String, String> {
     let indentation: String = iter::repeat("  ").take(indent_level).collect();
     let mut string = String::new();
     match content {
@@ -70,12 +70,12 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
         }
         Content::Layer{ filename, class, class_column, self_clip } => {
             let bounding_box = outer_bounding_box;
-            let region = outer_region.as_ref().ok_or(MyError::new(String::from(
-                "every layer must have a region defined somewhere in its hierarchy.")))?;
+            let region = outer_region.as_ref().ok_or(format!(
+                "every layer must have a region defined somewhere in its hierarchy, but '{}' does not.", filename))?;
             let transform = Transform::between(region, bounding_box);
             string.push_str(&format!("{}<g class=\"{}\">\n", &indentation, &class));
             let mut reader = shapefile::Reader::from_path(
-                format!("data/{}.shp", filename)).map_err(|err| MyError::new(err.to_string()))?;
+                format!("data/{}.shp", filename)).map_err(|err| err.to_string())?;
             for shape_record in reader.iter_shapes_and_records() {
                 let shape_record = shape_record.unwrap();
                 let (shape, record) = &shape_record;
@@ -119,9 +119,9 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                                 Some(number) => Some(format!("{}_{}", class, number)),
                                 None => None,
                             },
-                            _ => return Err(MyError::new(String::from("I don't know how to print this field type."))),
+                            _ => return Err(String::from("I don't know how to print this field type.")),
                         },
-                        None => return Err(MyError::new(format!("there doesn't seem to be a '{}' collum in '{}.shp'.", id_column, &filename))),
+                        None => return Err(format!("there doesn't seem to be a '{}' collum in '{}.shp'.", id_column, &filename)),
                     }
                     None => None,
                 };
@@ -244,19 +244,5 @@ impl Transform {
             input.x*self.x_scale + self.x_shift,
             input.y*self.y_scale + self.y_shift,
         );
-    }
-}
-
-
-/// I need to just have one type of error; I don't need to distinguish errors at all.
-/// I feel like something about this is wrong or bad, but idk we'll see if it works.
-#[derive(Debug)]
-struct MyError {
-    message: String,
-}
-
-impl MyError {
-    fn new(message: String) -> MyError {
-        return MyError {message: message};
     }
 }
