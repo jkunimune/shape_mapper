@@ -90,9 +90,17 @@ fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transfo
                         let mut path_string = String::new();
                         for ring in polygon.rings() {
                             for (i, point) in ring.points().iter().enumerate() {
-                                let segment_type = if i == 0 {"M"} else {"L"};
                                 let point = Transform::apply(transform, point);
-                                path_string.push_str(&format!("{}{:.3},{:.3} ", segment_type, point.x, point.y));
+                                let segment_string = if i == 0 {
+                                    &format!("M{:.3},{:.3} ", point.x, point.y)
+                                }
+                                else if i < ring.len() - 1 {
+                                    &format!("L{:.3},{:.3} ", point.x, point.y)
+                                }
+                                else {
+                                    "Z"
+                                };
+                                path_string.push_str(segment_string);
                             }
                         }
                         string.push_str(&format!(
