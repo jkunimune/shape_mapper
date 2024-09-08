@@ -54,7 +54,7 @@ fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transfo
                 string.push_str(&transcribe_as_svg(subcontent, indent_level + 1, &transform)?);
             }
         }
-        Content::Layer{ filename, region, class } => {
+        Content::Layer{ filename, region, class, id_column } => {
             string.push_str(&format!(
                 "{}<g id=\"{}\" class=\"{}\">\n",
                 &indentation, &filename.to_lowercase(), &class));
@@ -68,18 +68,21 @@ fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transfo
                     continue;
                 }
                 // come up with a useful class name
-                let identifier: String = match record.get("DIST_NUM") {
-                    Some(value) => match value {
-                        FieldValue::Character(characters) => match characters {
-                            Some(characters) => format!("class=\"{}\" ", characters),
-                            None => String::from(""),
+                let identifier: String = match id_column {
+                    Some(id_column) => match record.get(id_column) {
+                        Some(value) => match value {
+                            FieldValue::Character(characters) => match characters {
+                                Some(characters) => format!("id=\"{}\" ", characters.to_lowercase()),
+                                None => String::from(""),
+                            },
+                            FieldValue::Numeric(number) => match number {
+                                Some(number) => format!("id=\"{}-{}\" ", class, number),
+                                None => String::from(""),
+                            },
+                            _ => return Err(MyError::new(String::from("I don't know how to print this field type."))),
                         },
-                        FieldValue::Numeric(number) => match number {
-                            Some(number) => format!("class=\"{}-{}\" ", class, number),
-                            None => String::from(""),
-                        },
-                        _ => return Err(MyError::new(String::from("I don't know how to print this field type."))),
-                    },
+                        None => return Err(MyError::new(format!("there doesn't seem to be a '{}' collum in '{}.shp'.", id_column, &filename))),
+                    }
                     None => String::from(""),
                 };
                 match shape {
@@ -204,6 +207,7 @@ enum Content {
         class: String,
         filename: String,
         region: Box,
+        id_column: Option<String>,
     },
     Group {
         id: String,
