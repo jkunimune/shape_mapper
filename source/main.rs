@@ -39,20 +39,30 @@ fn main() -> () {
 }
 
 
-fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transform, shape_index: &mut u32) -> Result<String, MyError> {
+fn transcribe_as_svg(content: &Content, indent_level: usize, output_transform: &Transform, shape_index: &mut u32) -> Result<String, MyError> {
     let indentation: String = iter::repeat("  ").take(indent_level).collect();
     let mut string = String::new();
     match content {
         Content::Group{ id, content: subcontents, bounding_box: output_bounding_box } => {
+            let absolute_bounding_box = Transform::apply_to_box(output_transform, output_bounding_box);
             let input_bounding_box = extent_of(subcontents)?;
             let transform = Transform::concatenate(
-                &Transform::between(&input_bounding_box, &output_bounding_box), &transform);
+                &Transform::between(&input_bounding_box, &output_bounding_box), &output_transform);
+            string.push_str(&format!("{}<clipPath id=\"{}_clip_path\">\n", &indentation, &id));
             string.push_str(&format!(
-                "{}<g id=\"{}\">\n",
-                &indentation, &id));
+                    "{}  <rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\" id=\"{}_rect\"/>\n",
+                    &indentation, absolute_bounding_box.left, absolute_bounding_box.top,
+                    absolute_bounding_box.right - absolute_bounding_box.left,
+                    absolute_bounding_box.bottom - absolute_bounding_box.top, &id,
+            ));
+            string.push_str(&format!("{}</clipPath>\n", &indentation));
+            string.push_str(&format!("{}<g clip-path=\"url(#{}_clip_path)\" id=\"{}\">\n", &indentation, &id, &id));
+            string.push_str(&format!("{}  <use href=\"#{}_rect\" class=\"background\"/>\n", &indentation, &id));
             for subcontent in subcontents {
                 string.push_str(&transcribe_as_svg(subcontent, indent_level + 1, &transform, shape_index)?);
             }
+            string.push_str(&format!("{}  <use href=\"#{}_rect\" class=\"border\"/>\n", &indentation, &id));
+            string.push_str(&format!("{}</g>\n", &indentation))
         }
         Content::Layer{ filename, region, class, class_column, self_clip } => {
             string.push_str(&format!("{}<g class=\"{}\">\n", &indentation, &class));
@@ -71,7 +81,7 @@ fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transfo
                         let mut path_string = String::new();
                         for ring in polygon.rings() {
                             for (i, point) in ring.points().iter().enumerate() {
-                                let point = Transform::apply(transform, point);
+                                let point = Transform::apply(output_transform, point);
                                 let segment_string = if i == 0 {
                                     &format!("M{:.3},{:.3} ", point.x, point.y)
                                 }
@@ -116,7 +126,10 @@ fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transfo
                         format!("{}<clipPath id=\"clip_path_{}\">\n", &indentation, shape_index) + &
                         format!("{}  {} id=\"shape_{}\"/>\n", &indentation, &shape_string, shape_index) + &
                         format!("{}</clipPath>\n", &indentation) + &
-                        format!("{}<use href=\"#shape_{}\" style=\"clip-path: url(#clip_path_{})\"/>\n", &indentation, shape_index, shape_index)
+                        format!(
+                            "{}<use href=\"#shape_{}\" style=\"clip-path: url(#clip_path_{})\"/>\n",
+                            &indentation, shape_index, shape_index
+                        )
                     }
                     _ => {
                         format!("{}{}/>\n", &indentation, &shape_string)
@@ -125,9 +138,9 @@ fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transfo
                 string.push_str(&shape_string);
                 *shape_index += 1;
             }
+            string.push_str(&format!("{}</g>\n", &indentation));
         }
     }
-    string.push_str(&format!("{}</g>\n", &indentation));
     return Ok(string);
 }
 
@@ -290,11 +303,20 @@ impl Transform {
         }
     }
 
-    fn apply(self: &Transform, point: &shapefile::Point) -> shapefile::Point {
+    fn apply(self: &Transform, input: &shapefile::Point) -> shapefile::Point {
         return shapefile::Point::new(
-            point.x*self.x_scale + self.x_shift,
-            point.y*self.y_scale + self.y_shift,
+            input.x*self.x_scale + self.x_shift,
+            input.y*self.y_scale + self.y_shift,
         );
+    }
+
+    fn apply_to_box(self: &Transform, input: &Box) -> Box {
+        return Box {
+            left: input.left*self.x_scale + self.x_shift,
+            right: input.right*self.x_scale + self.x_shift,
+            top: input.top*self.y_scale + self.y_shift,
+            bottom: input.bottom*self.y_scale + self.y_shift,
+        }
     }
 }
 
