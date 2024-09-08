@@ -54,7 +54,7 @@ fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transfo
                 string.push_str(&transcribe_as_svg(subcontent, indent_level + 1, &transform)?);
             }
         }
-        Content::Layer{ filename, region, class, id_column } => {
+        Content::Layer{ filename, region, class, id_column, self_clip } => {
             string.push_str(&format!(
                 "{}<g id=\"{}\" class=\"{}\">\n",
                 &indentation, &filename.to_lowercase(), &class));
@@ -68,24 +68,24 @@ fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transfo
                     continue;
                 }
                 // come up with a useful class name
-                let identifier: String = match id_column {
+                let identifier: Option<String> = match id_column {
                     Some(id_column) => match record.get(id_column) {
                         Some(value) => match value {
                             FieldValue::Character(characters) => match characters {
-                                Some(characters) => format!("id=\"{}\" ", characters.to_lowercase()),
-                                None => String::from(""),
+                                Some(characters) => Some(characters.to_lowercase()),
+                                None => None,
                             },
                             FieldValue::Numeric(number) => match number {
-                                Some(number) => format!("id=\"{}-{}\" ", class, number),
-                                None => String::from(""),
+                                Some(number) => Some(format!("{}_{}", class, number)),
+                                None => None,
                             },
                             _ => return Err(MyError::new(String::from("I don't know how to print this field type."))),
                         },
                         None => return Err(MyError::new(format!("there doesn't seem to be a '{}' collum in '{}.shp'.", id_column, &filename))),
                     }
-                    None => String::from(""),
+                    None => None,
                 };
-                match shape {
+                let shape_string = match shape {
                     Shape::Polygon(polygon) => {
                         let mut path_string = String::new();
                         for ring in polygon.rings() {
@@ -103,14 +103,30 @@ fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transfo
                                 path_string.push_str(segment_string);
                             }
                         }
-                        string.push_str(&format!(
-                            "{}  <path {}d=\"{}\" />\n",
-                            indentation, identifier, path_string));
+                        format!("<path d=\"{}\"", path_string)
                     }
                     _ => {
                         panic!("we only do polygons right now.");
                     }
-                }
+                };
+                let shape_string: String = match (identifier, self_clip) {
+                    (Some(identifier), Some(true)) => {
+                        format!("{}<clipPath id=\"{}_clip_path\">\n", &indentation, &identifier) + &
+                        format!("{}  {} id=\"{}_shape\"/>\n", &indentation, &shape_string, &identifier) + &
+                        format!("{}</clipPath>\n", &indentation) + &
+                        format!("{}<use href=\"#{}_shape\" style=\"clip-path: url(#{}_clip_path)\" id=\"{}\"/>\n", &indentation, &identifier, &identifier, &identifier)
+                    }
+                    (Some(identifier), _) => {
+                        format!("{}{} id=\"{}\"/>\n", &indentation, &shape_string, &identifier)
+                    }
+                    (None, Some(true)) => {
+                        return Err(MyError::new(String::from("you can't use self_clip unless you provide an id_column.")));
+                    }
+                    (None, _) => {
+                        format!("{}{}/>\n", &indentation, &shape_string)
+                    }
+                };
+                string.push_str(&shape_string);
             }
         }
     }
@@ -119,10 +135,8 @@ fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transfo
 }
 
 
-/**
- * determine the total bounding box of the given components.
- * the contents must all be in the same coordinate system or it'll return an Err.
- */
+/// determine the total bounding box of the given components.
+/// the contents must all be in the same coordinate system or it'll return an Err.
 fn extent_of(contents: &Vec<Content>) -> Result<Box, MyError> {
     let mut x_min = f64::INFINITY;
     let mut x_max = -f64::INFINITY;
@@ -212,14 +226,24 @@ struct Configuration {
 #[derive(Deserialize)]
 enum Content {
     Layer {
+        /// the SVG class to add to the elements in this layer
         class: String,
+        /// the shapefile name containing the data, without the 'data/' or '.shp'. */
         filename: String,
+        /// the geographical region to include. shapes wholly outside this region will be discarded,
+        /// and the content will be scaled to fit this region to the enclosing group's bounding box.
         region: Box,
+        /// the record field key to use to tag each shape with a unique identifier, if such tags are desired.
         id_column: Option<String>,
+        /// whether to make this shape's strokes be confined within its shape
+        self_clip: Option<bool>,
     },
     Group {
+        /// the unique ID to add to this group
         id: String,
+        /// the things to put inside this group
         content: Vec<Content>,
+        /// the box to which to fit this group's content
         bounding_box: Box,
     },
 }
@@ -283,10 +307,8 @@ enum CoordinateSystem {
 }
 
 
-/**
- * I need to just have one type of error; I don't need to distinguish errors at all.
- * I feel like something about this is wrong or bad, but idk we'll see if it works.
- */
+/// I need to just have one type of error; I don't need to distinguish errors at all.
+/// I feel like something about this is wrong or bad, but idk we'll see if it works.
 #[derive(Debug)]
 struct MyError {
     message: String,

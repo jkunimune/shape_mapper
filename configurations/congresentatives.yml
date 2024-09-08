@@ -20,31 +20,31 @@ style: |
     stroke-width: 1.5mm;
     stroke-linejoin: round;
   }
-  #district-1 {
+  #district_1 {
     stroke: red;
   }
-  #district-2 {
+  #district_2 {
     stroke: orange;
   }
-  #district-3 {
+  #district_3 {
     stroke: yellow;
   }
-  #district-4 {
+  #district_4 {
     stroke: green;
   }
-  #district-5 {
+  #district_5 {
     stroke: blue;
   }
-  #district-6 {
+  #district_6 {
     stroke: purple;
   }
-  #district-7 {
+  #district_7 {
     stroke: olive;
   }
-  #district-8 {
+  #district_8 {
     stroke: grey;
   }
-  #district-9 {
+  #district_9 {
     stroke: cyan;
   }
 content:
@@ -57,6 +57,7 @@ content:
         filename: "CONGRESSMA118_POLY"
         id_column: "DIST_NUM"
         region: { left: 215000, right: 253000, bottom: 882000, top: 920000 }
+        self_clip: true
       - !Layer
         class: "town"
         filename: "TOWNSSURVEY_POLYM"
