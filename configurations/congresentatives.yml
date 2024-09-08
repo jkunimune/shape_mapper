@@ -1,9 +1,5 @@
 title: "Congressional districts in and around Boston"
-bounding_box:
-  left: 0
-  right: 42
-  top: 0
-  bottom: 42
+bounding_box: { left: 0, right: 420, top: 0, bottom: 420 }
 style: |
   .water {
     fill: skyblue;
@@ -54,10 +50,13 @@ style: |
 content:
   - !Group
     id: "minimap"
+    bounding_box: { left: -100, right: 100, top: -100, bottom: 100 }
     content:
       - !Layer
         class: "district"
         filename: "CONGRESSMA118_POLY"
+        region: { left: 215000, right: 253000, bottom: 882000, top: 920000 }
       - !Layer
         class: "town"
         filename: "TOWNSSURVEY_POLY"
+        region: { left: 215000, right: 253000, bottom: 882000, top: 920000 }
