@@ -30,7 +30,7 @@ fn main() -> () {
         configuration_width, configuration_height,
         configuration.title, configuration.style,
     );
-    svg_code.push_str(&transcribe_as_svg(&Content::from(configuration), 1, &IDENTITY_TRANSFORM).unwrap());
+    svg_code.push_str(&transcribe_as_svg(&Content::from(configuration), 1, &IDENTITY_TRANSFORM, &mut 0).unwrap());
     svg_code.push_str("</svg>\n");
 
     let image_filename = "maps/congresentatives.svg";
@@ -39,7 +39,7 @@ fn main() -> () {
 }
 
 
-fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transform) -> Result<String, MyError> {
+fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transform, shape_index: &mut u32) -> Result<String, MyError> {
     let indentation: String = iter::repeat("  ").take(indent_level).collect();
     let mut string = String::new();
     match content {
@@ -51,13 +51,11 @@ fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transfo
                 "{}<g id=\"{}\">\n",
                 &indentation, &id));
             for subcontent in subcontents {
-                string.push_str(&transcribe_as_svg(subcontent, indent_level + 1, &transform)?);
+                string.push_str(&transcribe_as_svg(subcontent, indent_level + 1, &transform, shape_index)?);
             }
         }
-        Content::Layer{ filename, region, class, id_column, self_clip } => {
-            string.push_str(&format!(
-                "{}<g id=\"{}\" class=\"{}\">\n",
-                &indentation, &filename.to_lowercase(), &class));
+        Content::Layer{ filename, region, class, class_column, self_clip } => {
+            string.push_str(&format!("{}<g class=\"{}\">\n", &indentation, &class));
             let mut reader = shapefile::Reader::from_path(
                 format!("data/{}.shp", filename)).map_err(|err| MyError::new(err.to_string()))?;
             for shape_record in reader.iter_shapes_and_records() {
@@ -68,23 +66,6 @@ fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transfo
                     continue;
                 }
                 // come up with a useful class name
-                let identifier: Option<String> = match id_column {
-                    Some(id_column) => match record.get(id_column) {
-                        Some(value) => match value {
-                            FieldValue::Character(characters) => match characters {
-                                Some(characters) => Some(characters.to_lowercase()),
-                                None => None,
-                            },
-                            FieldValue::Numeric(number) => match number {
-                                Some(number) => Some(format!("{}_{}", class, number)),
-                                None => None,
-                            },
-                            _ => return Err(MyError::new(String::from("I don't know how to print this field type."))),
-                        },
-                        None => return Err(MyError::new(format!("there doesn't seem to be a '{}' collum in '{}.shp'.", id_column, &filename))),
-                    }
-                    None => None,
-                };
                 let shape_string = match shape {
                     Shape::Polygon(polygon) => {
                         let mut path_string = String::new();
@@ -109,24 +90,40 @@ fn transcribe_as_svg(content: &Content, indent_level: usize, transform: &Transfo
                         panic!("we only do polygons right now.");
                     }
                 };
-                let shape_string: String = match (identifier, self_clip) {
-                    (Some(identifier), Some(true)) => {
-                        format!("{}<clipPath id=\"{}_clip_path\">\n", &indentation, &identifier) + &
-                        format!("{}  {} id=\"{}_shape\"/>\n", &indentation, &shape_string, &identifier) + &
+                let sub_class = match class_column {
+                    Some(id_column) => match record.get(id_column) {
+                        Some(value) => match value {
+                            FieldValue::Character(characters) => match characters {
+                                Some(characters) => Some(characters.to_lowercase()),
+                                None => None,
+                            },
+                            FieldValue::Numeric(number) => match number {
+                                Some(number) => Some(format!("{}_{}", class, number)),
+                                None => None,
+                            },
+                            _ => return Err(MyError::new(String::from("I don't know how to print this field type."))),
+                        },
+                        None => return Err(MyError::new(format!("there doesn't seem to be a '{}' collum in '{}.shp'.", id_column, &filename))),
+                    }
+                    None => None,
+                };
+                let shape_string = match sub_class {
+                    Some(sub_class) => format!("{} class=\"{}\"", shape_string, sub_class),
+                    None => shape_string,
+                };
+                let shape_string = match self_clip {
+                    Some(true) => {
+                        format!("{}<clipPath id=\"clip_path_{}\">\n", &indentation, shape_index) + &
+                        format!("{}  {} id=\"shape_{}\"/>\n", &indentation, &shape_string, shape_index) + &
                         format!("{}</clipPath>\n", &indentation) + &
-                        format!("{}<use href=\"#{}_shape\" style=\"clip-path: url(#{}_clip_path)\" id=\"{}\"/>\n", &indentation, &identifier, &identifier, &identifier)
+                        format!("{}<use href=\"#shape_{}\" style=\"clip-path: url(#clip_path_{})\"/>\n", &indentation, shape_index, shape_index)
                     }
-                    (Some(identifier), _) => {
-                        format!("{}{} id=\"{}\"/>\n", &indentation, &shape_string, &identifier)
-                    }
-                    (None, Some(true)) => {
-                        return Err(MyError::new(String::from("you can't use self_clip unless you provide an id_column.")));
-                    }
-                    (None, _) => {
+                    _ => {
                         format!("{}{}/>\n", &indentation, &shape_string)
                     }
                 };
                 string.push_str(&shape_string);
+                *shape_index += 1;
             }
         }
     }
@@ -233,8 +230,8 @@ enum Content {
         /// the geographical region to include. shapes wholly outside this region will be discarded,
         /// and the content will be scaled to fit this region to the enclosing group's bounding box.
         region: Box,
-        /// the record field key to use to tag each shape with a unique identifier, if such tags are desired.
-        id_column: Option<String>,
+        /// the record field key to use to tag each shape with a unique class, if such tags are desired.
+        class_column: Option<String>,
         /// whether to make this shape's strokes be confined within its shape
         self_clip: Option<bool>,
     },

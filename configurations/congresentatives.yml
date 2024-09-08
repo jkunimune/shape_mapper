@@ -20,46 +20,55 @@ style: |
     stroke-width: 1.5mm;
     stroke-linejoin: round;
   }
-  #district_1 {
+  .district_1 {
     stroke: red;
   }
-  #district_2 {
+  .district_2 {
     stroke: orange;
   }
-  #district_3 {
+  .district_3 {
     stroke: yellow;
   }
-  #district_4 {
+  .district_4 {
     stroke: green;
   }
-  #district_5 {
+  .district_5 {
     stroke: blue;
   }
-  #district_6 {
+  .district_6 {
     stroke: purple;
   }
-  #district_7 {
+  .district_7 {
     stroke: olive;
   }
-  #district_8 {
+  .district_8 {
     stroke: grey;
   }
-  #district_9 {
+  .district_9 {
     stroke: cyan;
   }
 content:
   - !Group
-    id: "minimap"
+    id: "local_map"
     bounding_box: { left: -100, right: 100, top: -100, bottom: 100 }
     content:
       - !Layer
         class: "district"
         filename: "CONGRESSMA118_POLY"
-        id_column: "DIST_NUM"
+        class_column: "DIST_NUM"
         region: { left: 215000, right: 253000, bottom: 882000, top: 920000 }
         self_clip: true
       - !Layer
         class: "town"
         filename: "TOWNSSURVEY_POLYM"
-        id_column: "TOWN"
         region: { left: 215000, right: 253000, bottom: 882000, top: 920000 }
+  - !Group
+    id: "minimap"
+    bounding_box: { left: 30, right: 100, top: -100, bottom: -70 }
+    content:
+      - !Layer
+        class: "district"
+        filename: "CONGRESSMA118_POLY"
+        class_column: "DIST_NUM"
+        region: { left: 0, right: 350000, bottom: 820000, top: 970000 }
+        self_clip: true
