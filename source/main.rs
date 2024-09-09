@@ -7,11 +7,11 @@ use shapefile::record::EsriShape;
 use shapefile::{Point, Shape};
 
 
-fn main() -> () {
+fn main() -> Result<(), String> {
     let yaml = fs::read_to_string(
-        "configurations/congresentatives.yml").unwrap();
+        "configurations/congresentatives.yml").map_err(|err| err.to_string())?;
     let configuration: Configuration = serde_yaml::from_str(&yaml).unwrap();
-    let map_bounding_box = configuration.bounding_box.unwrap();
+    let map_bounding_box = configuration.bounding_box.ok_or("the top level must have a bounding box")?;
     let map_width = f64::abs(map_bounding_box.right - map_bounding_box.left);
     let map_height = f64::abs(map_bounding_box.bottom - map_bounding_box.top);
     let mut svg_code = format!(
@@ -31,13 +31,15 @@ fn main() -> () {
     );
     let element_index: &mut u32 = &mut 0;
     for content in configuration.content {
-        svg_code.push_str(&transcribe_as_svg(content, &map_bounding_box, &configuration.region, 1, element_index).unwrap());
+        svg_code.push_str(&transcribe_as_svg(content, &map_bounding_box, &configuration.region, 1, element_index)?);
     }
     svg_code.push_str("</svg>\n");
 
     let image_filename = "maps/congresentatives.svg";
-    fs::create_dir_all("maps/").unwrap();
-    fs::write(image_filename, svg_code).unwrap();
+    fs::create_dir_all("maps/").map_err(|err| err.to_string())?;
+    fs::write(image_filename, svg_code).map_err(|err| err.to_string())?;
+
+    return Ok(());
 }
 
 
