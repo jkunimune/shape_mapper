@@ -17,6 +17,7 @@ fn main() -> () {
         "\
 <svg viewBox=\"{} {} {} {}\" width=\"{}mm\" height=\"{}mm\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">
   <title>{}</title>
+  <desc>{}</desc>
   <style>
 {}
   </style>
@@ -25,7 +26,7 @@ fn main() -> () {
         map_bounding_box.left, map_bounding_box.top,
         map_width, map_height,
         map_width, map_height,
-        configuration.title, configuration.style,
+        configuration.title, configuration.description, configuration.style,
     );
     let shape_index: &mut u32 = &mut 0;
     for content in configuration.content {
@@ -65,7 +66,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             for sub_content in sub_contents {
                 string.push_str(&transcribe_as_svg(sub_content, bounding_box, region, indent_level + 1, shape_index)?);
             }
-            string.push_str(&format!("{}  <use href=\"#{}_rect\" class=\"border\"/>\n", &indentation, &id));
+            string.push_str(&format!("{}  <use href=\"#{}_rect\" class=\"map_border\"/>\n", &indentation, &id));
             string.push_str(&format!("{}</g>\n", &indentation))
         }
         Content::Layer{ filename, class, class_column, self_clip, filters } => {
@@ -212,6 +213,7 @@ fn any_of_shape_is_in_box(shape: &Shape, boks: &Box) -> bool {
 #[derive(Deserialize)]
 struct Configuration {
     title: String,
+    description: String,
     style: String,
     bounding_box: Option<Box>,
     region: Option<Box>,

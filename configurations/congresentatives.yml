@@ -1,4 +1,11 @@
 title: "Congressional districts in and around Boston"
+description: "
+  A map of the Boston area, with a greater Massachusetts map inset, that shows the borders of the
+  nine Massachusetts Congressional voting districts in relation to municipality borders and streets.
+  All geographic data is taken from the
+  <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
+    Massachusetts Bureau of Geographic Information
+  </a>."
 bounding_box: { left: -5, right: 605, top: -5, bottom: 605 }
 style: |
   path {
@@ -18,7 +25,7 @@ style: |
     stroke: #125588;
     stroke-width: 0.6;
   }
-  .border {
+  .map_border {
     fill: none;
     stroke: black;
     stroke-width: 3.6;
