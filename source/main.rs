@@ -169,13 +169,13 @@ fn convert_points_to_path_string(sections: &Vec<Vec<Point>>, close_path: bool, t
         for (i, point) in section.iter().enumerate() {
             let point = Transform::apply(transform, &point);
             let segment_string = if i == 0 {
-                &format!("M{:.3},{:.3} ", point.x, point.y)
+                &format!("M{:.2},{:.2} ", point.x, point.y)
             }
             else if i == section.len() - 1 && close_path {
                 "Z"
             }
             else {
-                &format!("L{:.3},{:.3} ", point.x, point.y)
+                &format!("L{:.2},{:.2} ", point.x, point.y)
             };
             path_string.push_str(segment_string);
         }
