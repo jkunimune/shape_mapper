@@ -8,13 +8,13 @@ style: |
   .background {
     stroke: none;
   }
-  .water, .background {
+  .pond, .background {
     fill: #ddffff;
   }
-  .river {
+  .stream {
     fill: none;
   }
-  .river, .water {
+  .stream, .pond {
     stroke: #125588;
     stroke-width: 0.6;
   }
@@ -100,30 +100,31 @@ content:
     content:
       - !Layer
         class: "district"
-        filename: "CONGRESSMA118_POLY"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_POLY"
         class_column: "DIST_NUM"
         self_clip: true
       - !Layer
-        class: "river"
-        filename: "MAJSTRM_ARC"
+        class: "stream"
+        filename: "MassGIS/majorhydro/MAJSTRM_ARC"
       - !Layer
-        class: "water"
-        filename: "MAJPOND_POLY"
+        class: "pond"
+        filename: "MassGIS/majorhydro/MAJPOND_POLY"
+        class_column: "NAME"
       - !Layer
         class: "road"
-        filename: "EOTROADS_ARC"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
         class_column: "CLASS"
         filters:
           - {key: "RDTYPE", valid_values: [1, 2, 3, 4, 5]}
       - !Layer
         class: "district_border"
-        filename: "CONGRESSMA118_ARC"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
       - !Layer
         class: "town"
-        filename: "TOWNSSURVEY_POLYM"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
       - !Layer
-        class: "river"
-        filename: "COAST25K_ARC"
+        class: "stream"
+        filename: "MassGIS/coast25k/COAST25K_ARC"
   - !Group
     id: "minimap"
     bounding_box: { left: 350, right: 600, top: 0, bottom: 137.10 }
@@ -131,27 +132,24 @@ content:
     content:
       - !Layer
         class: "district"
-        filename: "CONGRESSMA118_POLY"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_POLY"
         class_column: "DIST_NUM"
         self_clip: true
       - !Layer
         class: "district_border"
-        filename: "CONGRESSMA118_ARC"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
       - !Layer
         class: "road"
-        filename: "EOTMAJROADS_ARC"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         class_column: "CLASS"
         filters:
           - {key: "ADMIN_TYPE", valid_values: [1, 2]}
       - !Layer
         class: "state"
-        filename: "NEWENGLAND_POLY"
+        filename: "MassGIS/newengland/NEWENGLAND_POLY"
         class_column: "NAME"
       - !Layer
-        class: "river"
-        filename: "COAST25K_ARC"
-      - !Layer
         class: "town"
-        filename: "TOWNSSURVEY_POLYM"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
         filters:
           - {key: "TYPE", valid_values: ["C"]}
