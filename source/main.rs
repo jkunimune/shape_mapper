@@ -85,8 +85,11 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                     Some(filters) => {
                         for Filter {key, valid_values} in filters {
                             let valid: bool = match record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))? {
-                                FieldValue::Numeric(Some(number)) => valid_values.contains(number),
-                                _ => return Err(String::from("you can only filter on numerical fields right now.")),
+                                FieldValue::Numeric(Some(number)) => valid_values.contains(&f64::to_string(number)),
+                                FieldValue::Numeric(None) => false,
+                                FieldValue::Character(Some(characters)) => valid_values.contains(characters),
+                                FieldValue::Character(None) => false,
+                                _ => return Err(String::from("you can only filter on numerical and character fields right now.")),
                             };
                             if !valid {
                                 continue 'shape_loop;
@@ -256,7 +259,7 @@ struct Box {
 #[derive(Deserialize)]
 struct Filter {
     key: String,
-    valid_values: Vec<f64>,
+    valid_values: Vec<String>,
 }
 
 

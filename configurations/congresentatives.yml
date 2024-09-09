@@ -118,3 +118,8 @@ content:
         class_column: "CLASS"
         filters:
           - {key: "ADMIN_TYPE", valid_values: [1, 2]}
+      - !Layer
+        class: "town"
+        filename: "TOWNSSURVEY_POLYM"
+        filters:
+          - {key: "TYPE", valid_values: ["C"]}
