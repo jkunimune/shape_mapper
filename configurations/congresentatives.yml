@@ -1,89 +1,102 @@
 title: "Congressional districts in and around Boston"
-bounding_box: { left: -10, right: 430, top: -10, bottom: 430 }
+bounding_box: { left: -5, right: 605, top: -5, bottom: 605 }
 style: |
+  path {
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
   .background {
-    fill: white;
     stroke: none;
+  }
+  .water, .background {
+    fill: #ddffff;
+  }
+  .river {
+    fill: none;
+  }
+  .river, .water {
+    stroke: #125588;
+    stroke-width: 0.6;
   }
   .border {
     fill: none;
     stroke: black;
-    stroke-width: 2;
+    stroke-width: 3.6;
     stroke-linejoin: miter;
   }
-  .water {
-    fill: skyblue;
-    stroke: none;
-  }
-  .river {
-    fill: none;
-    stroke: blue;
-    stroke-width: 2;
-    stroke-linejoin: round;
-    stroke-linecap: round;
-  }
-  .park {
-    fill: lightgreen;
-    stroke: none;
+  .state {
+    fill: white;
+    stroke: black;
+    stroke-width: 0.6;
   }
   .town {
     fill: none;
     stroke: black;
-    stroke-width: .5;
-    stroke-linejoin: round;
+    stroke-width: 0.6;
   }
   .road {
     fill: none;
-    stroke: #bbb;
-    stroke-linejoin: round;
-    stroke-linecap: round;
+    stroke: #777;
   }
   .road_0, .road_1, .road_2, .road_3, .road_9, .road_10, .road_11 {
-    stroke-width: 0.9;
+    stroke-width: 1.0;
   }
   .road_4 {
-    stroke-width: 0.6;
+    stroke-width: 0.5;
   }
   .road_5, .road_6 {
-    stroke-width: 0.4;
+    stroke-width: 0.2;
   }
   .district {
-    fill: white;
-    stroke-width: 6.0;
-    stroke-linejoin: round;
+    stroke-width: 5.0;
   }
-  .district_1 {
-    stroke: red;
+  .district_1 { /* brown */
+    fill: #dbd2d2;
+    stroke: #ba9492;
   }
-  .district_2 {
-    stroke: orange;
+  .district_2 { /* purple */
+    fill: #e4dfee;
+    stroke: #b39fe8;
   }
-  .district_3 {
-    stroke: yellow;
+  .district_3 { /* pink */
+    fill: #fae9f4;
+    stroke: #ee9bd5;
   }
-  .district_4 {
-    stroke: green;
+  .district_4 { /* green */
+    fill: #d1dace;
+    stroke: #80ac75;
   }
-  .district_5 {
-    stroke: blue;
+  .district_5 { /* dark blue */
+    fill: #d3dce8;
+    stroke: #71aae2;
   }
-  .district_6 {
-    stroke: purple;
+  .district_6 { /* teal */
+    fill: #d7e8e4;
+    stroke: #60bdad;
   }
-  .district_7 {
-    stroke: olive;
+  .district_7 { /* orange */
+    fill: #f5f0e2;
+    stroke: #c9b874;
   }
-  .district_8 {
-    stroke: grey;
+  .district_8 { /* red */
+    fill: #eed8da;
+    stroke: #ed8897;
   }
-  .district_9 {
-    stroke: cyan;
+  .district_9 { /* yellow */
+    fill: #f5e4db;
+    stroke: #e79d79;
+  }
+  .district_border {
+    fill: none;
+    stroke: black;
+    stroke-width: 0.4;
+    stroke-dasharray: 0.6 0.6;
   }
 content:
   - !Group
     id: "local_map"
-    bounding_box: { left: 0, right: 420, top: 0, bottom: 420 }
-    region: { left: 215000, right: 253000, bottom: 882000, top: 920000 }
+    bounding_box: { left: 0, right: 600, top: 0, bottom: 600 }
+    region: { left: 216000, right: 245000, bottom: 887000, top: 915000 }
     content:
       - !Layer
         class: "district"
@@ -91,33 +104,52 @@ content:
         class_column: "DIST_NUM"
         self_clip: true
       - !Layer
+        class: "river"
+        filename: "MAJSTRM_ARC"
+      - !Layer
+        class: "water"
+        filename: "MAJPOND_POLY"
+      - !Layer
         class: "road"
-        filename: "EOTMAJROADS_ARC"
+        filename: "EOTROADS_ARC"
         class_column: "CLASS"
         filters:
-          - {key: "RDTYPE", valid_values: [1, 2, 3, 4]}
+          - {key: "RDTYPE", valid_values: [1, 2, 3, 4, 5]}
+      - !Layer
+        class: "district_border"
+        filename: "CONGRESSMA118_ARC"
       - !Layer
         class: "town"
         filename: "TOWNSSURVEY_POLYM"
       - !Layer
         class: "river"
-        filename: "MAJSTRM_ARC"
+        filename: "COAST25K_ARC"
   - !Group
     id: "minimap"
-    bounding_box: { left: 280, right: 420, top: 0, bottom: 60 }
-    region: { left: 0, right: 350000, bottom: 820000, top: 970000 }
+    bounding_box: { left: 350, right: 600, top: 0, bottom: 137.10 }
+    region: { left: 27000, right: 337000, bottom: 795000, top: 965000 }
     content:
       - !Layer
         class: "district"
         filename: "CONGRESSMA118_POLY"
         class_column: "DIST_NUM"
         self_clip: true
+      - !Layer
+        class: "district_border"
+        filename: "CONGRESSMA118_ARC"
       - !Layer
         class: "road"
         filename: "EOTMAJROADS_ARC"
         class_column: "CLASS"
         filters:
           - {key: "ADMIN_TYPE", valid_values: [1, 2]}
+      - !Layer
+        class: "state"
+        filename: "NEWENGLAND_POLY"
+        class_column: "NAME"
+      - !Layer
+        class: "river"
+        filename: "COAST25K_ARC"
       - !Layer
         class: "town"
         filename: "TOWNSSURVEY_POLYM"
