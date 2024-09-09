@@ -28,9 +28,9 @@ fn main() -> () {
         map_width, map_height,
         configuration.title, configuration.description, configuration.style,
     );
-    let shape_index: &mut u32 = &mut 0;
+    let element_index: &mut u32 = &mut 0;
     for content in configuration.content {
-        svg_code.push_str(&transcribe_as_svg(content, &map_bounding_box, &configuration.region, 1, shape_index).unwrap());
+        svg_code.push_str(&transcribe_as_svg(content, &map_bounding_box, &configuration.region, 1, element_index).unwrap());
     }
     svg_code.push_str("</svg>\n");
 
@@ -40,11 +40,11 @@ fn main() -> () {
 }
 
 
-fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &Option<Box>, indent_level: usize, shape_index: &mut u32) -> Result<String, String> {
+fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &Option<Box>, indent_level: usize, element_count: &mut u32) -> Result<String, String> {
     let indentation: String = iter::repeat("  ").take(indent_level).collect();
     let mut string = String::new();
     match content {
-        Content::Group{ id, content: sub_contents, bounding_box: sub_bounding_box, region: sub_region } => {
+        Content::Group{ class, content: sub_contents, bounding_box: sub_bounding_box, region: sub_region } => {
             let bounding_box = match &sub_bounding_box {
                 Some(sub_bounding_box) => sub_bounding_box,
                 None => outer_bounding_box,
@@ -53,28 +53,36 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                 Some(..) => &sub_region,
                 None => outer_region,
             };
-            string.push_str(&format!("{}<clipPath id=\"{}_clip_path\">\n", &indentation, &id));
+            let group_index = *element_count;
+            string.push_str(&format!("{}<clipPath id=\"clip_path_{}\">\n", &indentation, group_index));
             string.push_str(&format!(
-                    "{}  <rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\" id=\"{}_rect\"/>\n",
+                    "{}  <rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\" id=\"rect_{}\"/>\n",
                     &indentation, bounding_box.left, bounding_box.top,
                     bounding_box.right - bounding_box.left,
-                    bounding_box.bottom - bounding_box.top, &id,
+                    bounding_box.bottom - bounding_box.top, group_index,
             ));
             string.push_str(&format!("{}</clipPath>\n", &indentation));
-            string.push_str(&format!("{}<g clip-path=\"url(#{}_clip_path)\" id=\"{}\">\n", &indentation, &id, &id));
-            string.push_str(&format!("{}  <use href=\"#{}_rect\" class=\"background\"/>\n", &indentation, &id));
+            string.push_str(&match class {
+                Some(class) => format!("{}<g clip-path=\"url(#clip_path_{})\" class=\"{}\">\n", &indentation, group_index, &class),
+                None        => format!("{}<g clip-path=\"url(#clip_path_{})\">\n", &indentation, group_index),
+            });
+            string.push_str(&format!("{}  <use href=\"#rect_{}\" class=\"background\"/>\n", &indentation, group_index));
             for sub_content in sub_contents {
-                string.push_str(&transcribe_as_svg(sub_content, bounding_box, region, indent_level + 1, shape_index)?);
+                string.push_str(&transcribe_as_svg(sub_content, bounding_box, region, indent_level + 1, element_count)?);
             }
-            string.push_str(&format!("{}  <use href=\"#{}_rect\" class=\"map_border\"/>\n", &indentation, &id));
-            string.push_str(&format!("{}</g>\n", &indentation))
+            string.push_str(&format!("{}  <use href=\"#rect_{}\" class=\"map_border\"/>\n", &indentation, group_index));
+            string.push_str(&format!("{}</g>\n", &indentation));
+            *element_count += 1;
         }
         Content::Layer{ filename, class, class_column, self_clip, filters } => {
             let bounding_box = outer_bounding_box;
             let region = outer_region.as_ref().ok_or(format!(
                 "every layer must have a region defined somewhere in its hierarchy, but '{}' does not.", filename))?;
             let transform = Transform::between(region, bounding_box);
-            string.push_str(&format!("{}<g class=\"{}\">\n", &indentation, &class));
+            string.push_str(&match class {
+                Some(class) => format!("{}<g class=\"{}\">\n", &indentation, &class),
+                None        => format!("{}<g>\n", &indentation),
+            });
             let mut reader = shapefile::Reader::from_path(
                 format!("data/{}.shp", filename)).map_err(|err| err.to_string())?;
             'shape_loop:
@@ -120,19 +128,19 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                     }
                 };
                 let sub_class = match &class_column {
-                    Some(id_column) => match record.get(id_column) {
+                    Some(class_column) => match record.get(class_column) {
                         Some(value) => match value {
                             FieldValue::Character(characters) => match characters {
                                 Some(characters) => Some(characters.to_lowercase()),
                                 None => None,
                             },
                             FieldValue::Numeric(number) => match number {
-                                Some(number) => Some(format!("{}_{}", class, number)),
+                                Some(number) => Some(format!("{}_{}", class_column.to_lowercase(), number)),
                                 None => None,
                             },
                             _ => return Err(String::from("I don't know how to print this field type.")),
                         },
-                        None => return Err(format!("there doesn't seem to be a '{}' collum in '{}.shp'.", id_column, &filename)),
+                        None => return Err(format!("there doesn't seem to be a '{}' collum in '{}.shp'.", class_column, &filename)),
                     }
                     None => None,
                 };
@@ -140,22 +148,23 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                     Some(sub_class) => format!("{} class=\"{}\"", shape_string, sub_class),
                     None => shape_string,
                 };
+                let shape_index = *element_count;
                 let shape_string = match self_clip {
                     Some(true) => {
-                        format!("{}<clipPath id=\"clip_path_{}\">\n", &indentation, shape_index) + &
-                        format!("{}  {} id=\"shape_{}\"/>\n", &indentation, &shape_string, shape_index) + &
-                        format!("{}</clipPath>\n", &indentation) + &
+                        format!("{}  <clipPath id=\"clip_path_{}\">\n", &indentation, shape_index) + &
+                        format!("{}    {} id=\"shape_{}\"/>\n", &indentation, &shape_string, shape_index) + &
+                        format!("{}  </clipPath>\n", &indentation) + &
                         format!(
-                            "{}<use href=\"#shape_{}\" style=\"clip-path: url(#clip_path_{})\"/>\n",
+                            "{}  <use href=\"#shape_{}\" style=\"clip-path: url(#clip_path_{})\"/>\n",
                             &indentation, shape_index, shape_index
                         )
                     }
                     _ => {
-                        format!("{}{}/>\n", &indentation, &shape_string)
+                        format!("{}  {}/>\n", &indentation, &shape_string)
                     }
                 };
                 string.push_str(&shape_string);
-                *shape_index += 1;
+                *element_count += 1;
             }
             string.push_str(&format!("{}</g>\n", &indentation));
         }
@@ -223,11 +232,12 @@ struct Configuration {
 
 #[derive(Deserialize)]
 enum Content {
+    /// some geographical data loaded from a shapefile
     Layer {
-        /// the SVG class to add to the elements in this layer
-        class: String,
         /// the shapefile name containing the data, without the 'data/' or '.shp'. */
         filename: String,
+        /// the SVG class to add to the shapes in this layer, if any
+        class: Option<String>,
         /// the record field key to use to tag each shape with a unique class, if such tags are desired.
         class_column: Option<String>,
         /// whether to make this shape's strokes be confined within its shape
@@ -235,11 +245,12 @@ enum Content {
         /// key-[value] pairs used to show only a subset of the shapes in the file
         filters: Option<Vec<Filter>>,
     },
+    /// a group of other Contents
     Group {
-        /// the unique ID to add to this group
-        id: String,
         /// the things to put inside this group
         content: Vec<Content>,
+        /// the SVG class to add to the elements in this group, if any
+        class: Option<String>,
         /// the box to which to fit this group's content
         bounding_box: Option<Box>,
         /// the geographical region to include. shapes wholly outside this region will be discarded,

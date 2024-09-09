@@ -33,75 +33,69 @@ style: |
   }
   .state {
     fill: white;
-    stroke: black;
-    stroke-width: 0.6;
+    stroke: none;
   }
-  .town {
+  .state_border, .town {
     fill: none;
     stroke: black;
     stroke-width: 0.6;
+    stroke-linejoin: miter;
+    stroke-miterlimit: 2;
   }
   .road {
     fill: none;
-    stroke: #777;
+    stroke: #776f66;
   }
-  .road_0, .road_1, .road_2, .road_3, .road_9, .road_10, .road_11 {
+  .main_map .road .class_1, .main_map .road .class_2, .main_map .road .class_3 {
     stroke-width: 1.0;
   }
-  .road_4 {
+  .main_map .road .class_4, .minimap .road .admin_type_1, .minimap .road .admin_type_2 {
     stroke-width: 0.5;
   }
-  .road_5, .road_6 {
+  .main_map .road .class_5 {
     stroke-width: 0.2;
   }
   .district {
     stroke-width: 5.0;
   }
-  .district_1 { /* brown */
-    fill: #dbd2d2;
-    stroke: #ba9492;
+  .dist_num_1, .dist_num_9 { /* orange */
+    fill: #f5e4db;
+    stroke: #e79d79;
   }
-  .district_2 { /* purple */
+  .dist_num_2, .dist_num_6 { /* purple */
     fill: #e4dfee;
     stroke: #b39fe8;
   }
-  .district_3 { /* pink */
+  .dist_num_3 { /* pink */
     fill: #fae9f4;
     stroke: #ee9bd5;
   }
-  .district_4 { /* green */
+  .dist_num_4 { /* green */
     fill: #d1dace;
     stroke: #80ac75;
   }
-  .district_5 { /* dark blue */
+  .dist_num_5 { /* dark blue */
     fill: #d3dce8;
     stroke: #71aae2;
   }
-  .district_6 { /* teal */
-    fill: #d7e8e4;
-    stroke: #60bdad;
-  }
-  .district_7 { /* orange */
+  .dist_num_7 { /* yellow */
     fill: #f5f0e2;
     stroke: #c9b874;
   }
-  .district_8 { /* red */
+  .dist_num_8 { /* red */
     fill: #eed8da;
     stroke: #ed8897;
-  }
-  .district_9 { /* yellow */
-    fill: #f5e4db;
-    stroke: #e79d79;
   }
   .district_border {
     fill: none;
     stroke: black;
     stroke-width: 0.4;
+    stroke-linecap: butt;
     stroke-dasharray: 0.6 0.6;
   }
 content:
   - !Group
-    id: "local_map"
+    class: "main_map"
     bounding_box: { left: 0, right: 600, top: 0, bottom: 600 }
     region: { left: 216000, right: 245000, bottom: 887000, top: 915000 }
     content:
@@ -133,10 +127,14 @@ content:
         class: "stream"
         filename: "MassGIS/coast25k/COAST25K_ARC"
   - !Group
-    id: "minimap"
+    class: "minimap"
     bounding_box: { left: 350, right: 600, top: 0, bottom: 137.10 }
     region: { left: 27000, right: 337000, bottom: 795000, top: 965000 }
     content:
+      - !Layer
+        class: "state"
+        filename: "MassGIS/newengland/NEWENGLAND_POLY"
+        class_column: "NAME"
       - !Layer
         class: "district"
         filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_POLY"
@@ -148,11 +146,11 @@ content:
       - !Layer
         class: "road"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
-        class_column: "CLASS"
+        class_column: "ADMIN_TYPE"
         filters:
           - {key: "ADMIN_TYPE", valid_values: [1, 2]}
       - !Layer
-        class: "state"
+        class: "state_border"
         filename: "MassGIS/newengland/NEWENGLAND_POLY"
         class_column: "NAME"
       - !Layer
