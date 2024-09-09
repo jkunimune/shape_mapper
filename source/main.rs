@@ -1,4 +1,5 @@
 use core::f64;
+use regex::Regex;
 use std::{fs, iter};
 use serde::Deserialize;
 use shapefile::dbase::FieldValue;
@@ -131,11 +132,11 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                     Some(class_column) => match record.get(class_column) {
                         Some(value) => match value {
                             FieldValue::Character(characters) => match characters {
-                                Some(characters) => Some(characters.to_lowercase()),
+                                Some(characters) => Some(sanitize(characters)),
                                 None => None,
                             },
                             FieldValue::Numeric(number) => match number {
-                                Some(number) => Some(format!("{}_{}", class_column.to_lowercase(), number)),
+                                Some(number) => Some(format!("{}_{}", sanitize(class_column), number)),
                                 None => None,
                             },
                             _ => return Err(String::from("I don't know how to print this field type.")),
@@ -216,6 +217,11 @@ fn any_of_shape_is_in_box(shape: &Shape, boks: &Box) -> bool {
         x_range[1] > f64::min(boks.left, boks.right) &&
         y_range[0] < f64::max(boks.bottom, boks.top) &&
         y_range[1] > f64::min(boks.bottom, boks.top);
+}
+
+
+fn sanitize(string: &String) -> String {
+    return Regex::new(r"[ {},.:;]").unwrap().replace_all(&string.to_lowercase(), "_").into_owned();
 }
 
 
