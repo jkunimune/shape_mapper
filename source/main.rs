@@ -44,10 +44,19 @@ fn main() -> Result<(), String> {
 
 
 fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &Option<Box>, indent_level: usize, element_count: &mut u32) -> Result<String, String> {
+    // decide how much indentation it will have
     let indentation: String = iter::repeat("  ").take(indent_level).collect();
+    // prepare to add a class if there is any
+    let class_string = match content.get_class() {
+        Some(class) => format!(" class=\"{}\"", sanitize(class)),
+        None => String::from(""),
+    };
+    // everything after that depends on what kind of content it is...
     let mut string = String::new();
     match content {
-        Content::Group{ class, content: sub_contents, bounding_box: sub_bounding_box, region: sub_region } => {
+        // for a group, put down a <rect>, a <g> with whatever the sub-contents are, and then another <rect>
+        Content::Group{ content: sub_contents, bounding_box: sub_bounding_box, region: sub_region, .. } => {
+            // this group may override the outer bounding box and region
             let bounding_box = match &sub_bounding_box {
                 Some(sub_bounding_box) => sub_bounding_box,
                 None => outer_bounding_box,
@@ -57,6 +66,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                 None => outer_region,
             };
             let group_index = *element_count;
+            // write all the stuff
             string.push_str(&format!("{}<clipPath id=\"clip_path_{}\">\n", &indentation, group_index));
             string.push_str(&format!(
                     "{}  <rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\" id=\"rect_{}\"/>\n",
@@ -65,27 +75,21 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                     bounding_box.bottom - bounding_box.top, group_index,
             ));
             string.push_str(&format!("{}</clipPath>\n", &indentation));
-            string.push_str(&match class {
-                Some(class) => format!("{}<g clip-path=\"url(#clip_path_{})\" class=\"{}\">\n", &indentation, group_index, &class),
-                None        => format!("{}<g clip-path=\"url(#clip_path_{})\">\n", &indentation, group_index),
-            });
+            string.push_str(&format!("{}<g clip-path=\"url(#clip_path_{})\"{}>\n", &indentation, group_index, &class_string));
             string.push_str(&format!("{}  <use href=\"#rect_{}\" class=\"background\"/>\n", &indentation, group_index));
             for sub_content in sub_contents {
                 string.push_str(&transcribe_as_svg(sub_content, bounding_box, region, indent_level + 1, element_count)?);
             }
             string.push_str(&format!("{}  <use href=\"#rect_{}\" class=\"map_border\"/>\n", &indentation, group_index));
             string.push_str(&format!("{}</g>\n", &indentation));
-            *element_count += 1;
         }
-        Content::Layer{ filename, class, class_column, self_clip, filters } => {
-            let bounding_box = outer_bounding_box;
-            let region = outer_region.as_ref().ok_or(format!(
-                "every layer must have a region defined somewhere in its hierarchy, but '{}' does not.", filename))?;
-            let transform = Transform::between(region, bounding_box);
-            string.push_str(&match class {
-                Some(class) => format!("{}<g class=\"{}\">\n", &indentation, &class),
-                None        => format!("{}<g>\n", &indentation),
-            });
+        // for a layer, put down a <g> containing a bunch of <path>s or whatever
+        Content::Layer{ filename, class_column, self_clip, filters, .. } => {
+            let region = outer_region.as_ref().ok_or(String::from(
+                "every layer must have a region defined somewhere in its hierarchy."))?;
+            let transform = Transform::between(region, outer_bounding_box);
+
+            string.push_str(&format!("{}<g{}>\n", &indentation, &class_string));
             let mut reader = shapefile::Reader::from_path(
                 format!("data/{}.shp", filename)).map_err(|err| err.to_string())?;
             'shape_loop:
@@ -134,7 +138,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                     Some(class_column) => match record.get(class_column) {
                         Some(value) => match value {
                             FieldValue::Character(characters) => match characters {
-                                Some(characters) => Some(sanitize(characters)),
+                                Some(characters) => Some(sanitize(characters).replace(" ", "_")),
                                 None => None,
                             },
                             FieldValue::Numeric(number) => match number {
@@ -171,7 +175,24 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             }
             string.push_str(&format!("{}</g>\n", &indentation));
         }
+        // for a rectangle, you just need a single <rect>
+        Content::Rectangle { coordinates, .. } => {
+            let region = outer_region.as_ref().ok_or(String::from(
+                "every layer must have a region defined somewhere in its hierarchy."))?;
+            let transform = Transform::between(region, outer_bounding_box);
+
+            string.push_str(&format!(
+                "{}<rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\"{}/>\n",
+                &indentation,
+                coordinates.left*transform.x_scale + transform.x_shift,
+                coordinates.top*transform.y_scale + transform.y_shift,
+                (coordinates.right - coordinates.left)*transform.x_scale,
+                (coordinates.bottom - coordinates.top)*transform.y_scale,
+                &class_string));
+        }
     }
+
+    *element_count += 1;
     return Ok(string);
 }
 
@@ -223,7 +244,7 @@ fn any_of_shape_is_in_box(shape: &Shape, boks: &Box) -> bool {
 
 
 fn sanitize(string: &String) -> String {
-    return Regex::new(r"[ {},.:;]").unwrap().replace_all(&string.to_lowercase(), "_").into_owned();
+    return Regex::new(r"[{},.:;]").unwrap().replace_all(&string.to_lowercase(), "_").into_owned();
 }
 
 
@@ -253,6 +274,13 @@ enum Content {
         /// key-[value] pairs used to show only a subset of the shapes in the file
         filters: Option<Vec<Filter>>,
     },
+    /// a plain box over some geographic area
+    Rectangle {
+        /// the boundaries of the rectangle
+        coordinates: Box,
+        /// the SVG class to add to the element, if any
+        class: Option<String>,
+    },
     /// a group of other Contents
     Group {
         /// the things to put inside this group
@@ -265,6 +293,16 @@ enum Content {
         /// and the content will be scaled to fit this region to the bounding box.
         region: Option<Box>,
     },
+}
+
+impl Content {
+    fn get_class(self: &Content) -> &Option<String> {
+        return match self {
+            Content::Layer { class, .. } => class,
+            Content::Rectangle { class, .. } => class,
+            Content::Group { class, .. } => class,
+        };
+    }
 }
 
 

@@ -8,10 +8,6 @@ description: "
   </a>."
 bounding_box: { left: -5, right: 605, top: -5, bottom: 605 }
 style: |
-  path {
-    stroke-linejoin: round;
-    stroke-linecap: round;
-  }
   .background {
     stroke: none;
   }
@@ -24,6 +20,8 @@ style: |
   .stream, .pond {
     stroke: #125588;
     stroke-width: 0.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
   .map_border {
     fill: none;
@@ -42,9 +40,24 @@ style: |
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
+  .track {
+    fill: none;
+    stroke: #6f6677;
+    stroke-linejoin: round;
+    stroke-linecap: butt;
+  }
+  .track_base {
+    stroke-width: 0.2;
+  }
+  .track_texture {
+    stroke-width: 0.6;
+    stroke-dasharray: 0.4 0.8;
+  }
   .road {
     fill: none;
     stroke: #776f66;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
   .main_map .road .class_1, .main_map .road .class_2, .main_map .road .class_3 {
     stroke-width: 1.0;
@@ -57,12 +70,13 @@ style: |
   }
   .district {
     stroke-width: 5.0;
+    stroke-linejoin: round;
   }
-  .dist_num_1, .dist_num_9 { /* orange */
+  .dist_num_1, .dist_num_6 { /* orange */
     fill: #f5e4db;
     stroke: #e79d79;
   }
-  .dist_num_2, .dist_num_6 { /* purple */
+  .dist_num_2, .dist_num_9 { /* purple */
     fill: #e4dfee;
     stroke: #b39fe8;
   }
@@ -90,7 +104,7 @@ style: |
     fill: none;
     stroke: black;
     stroke-width: 0.4;
-    stroke-linecap: butt;
+    stroke-linejoin: round;
     stroke-dasharray: 0.6 0.6;
   }
 content:
@@ -110,7 +124,14 @@ content:
       - !Layer
         class: "pond"
         filename: "MassGIS/majorhydro/MAJPOND_POLY"
-        class_column: "NAME"
+      - !Layer
+        class: "track track_base"
+        filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
+        class_column: "COMM_LINE"
+      - !Layer
+        class: "track track_texture"
+        filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
+        class_column: "COMM_LINE"
       - !Layer
         class: "road"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
@@ -131,6 +152,9 @@ content:
     bounding_box: { left: 350, right: 600, top: 0, bottom: 137.10 }
     region: { left: 27000, right: 337000, bottom: 795000, top: 965000 }
     content:
+      - !Rectangle
+        class: "state new-york"
+        coordinates: { left: 0, right: 100000, bottom: 760000, top: 1000000}
       - !Layer
         class: "state"
         filename: "MassGIS/newengland/NEWENGLAND_POLY"
@@ -153,6 +177,10 @@ content:
         class: "state_border"
         filename: "MassGIS/newengland/NEWENGLAND_POLY"
         class_column: "NAME"
+      - !Rectangle
+        id: "shown_region_indicator"
+        class: "town"
+        coordinates: { left: 216000, right: 245000, bottom: 887000, top: 915000 }
       - !Layer
         class: "town"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
