@@ -99,13 +99,26 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                 // first, discard anything that contradicts a filter
                 match &filters {
                     Some(filters) => {
-                        for Filter {key, valid_values} in filters {
-                            let valid: bool = match record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))? {
-                                FieldValue::Numeric(Some(number)) => valid_values.contains(&f64::to_string(number)),
-                                FieldValue::Numeric(None) => false,
-                                FieldValue::Character(Some(characters)) => valid_values.contains(characters),
-                                FieldValue::Character(None) => false,
-                                _ => return Err(String::from("you can only filter on numerical and character fields right now.")),
+                        for filter in filters {
+                            let valid = match filter {
+                                Filter::OneOf { key, valid_values } => {
+                                    let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
+                                    match value {
+                                        FieldValue::Numeric(Some(number)) => valid_values.contains(&f64::to_string(number)),
+                                        FieldValue::Numeric(None) => false,
+                                        FieldValue::Character(Some(characters)) => valid_values.contains(characters),
+                                        FieldValue::Character(None) => false,
+                                        _ => return Err(String::from("you can only filter on numerical and character fields right now.")),
+                                    }
+                                }
+                                Filter::GreaterThan { key, cutoff } => {
+                                    let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
+                                    match value {
+                                        FieldValue::Float(Some(number)) => number > cutoff,
+                                        FieldValue::Float(None) => false,
+                                        _ => return Err(String::from("GreaterThan filters must act on float32 fields.")),
+                                    }
+                                }
                             };
                             if !valid {
                                 continue 'shape_loop;
@@ -316,9 +329,15 @@ struct Box {
 
 
 #[derive(Deserialize)]
-struct Filter {
-    key: String,
-    valid_values: Vec<String>,
+enum Filter {
+    OneOf {
+        key: String,
+        valid_values: Vec<String>,
+    },
+    GreaterThan {
+        key: String,
+        cutoff: f32,
+    }
 }
 
 

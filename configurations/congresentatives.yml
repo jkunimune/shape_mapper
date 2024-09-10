@@ -137,7 +137,7 @@ content:
         filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
         class_column: "CLASS"
         filters:
-          - {key: "RDTYPE", valid_values: [1, 2, 3, 4, 5]}
+          - !OneOf {key: "RDTYPE", valid_values: [1, 2, 3, 4, 5]}
       - !Layer
         class: "district_border"
         filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
@@ -172,7 +172,7 @@ content:
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         class_column: "ADMIN_TYPE"
         filters:
-          - {key: "ADMIN_TYPE", valid_values: [1, 2]}
+          - !OneOf {key: "ADMIN_TYPE", valid_values: [1, 2]}
       - !Layer
         class: "state_border"
         filename: "MassGIS/newengland/NEWENGLAND_POLY"
@@ -185,4 +185,4 @@ content:
         class: "town"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
         filters:
-          - {key: "TYPE", valid_values: ["C"]}
+          - !OneOf {key: "NAME", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "LAWRENCE", "HAVERHILL", "GLOUCESTER", "BROCKTON", "PLYMOUTH", "FALL RIVER", "NEW BEDFORD"]}
