@@ -8,16 +8,12 @@ description: "
   </a>."
 bounding_box: { left: -5, right: 605, top: -5, bottom: 605 }
 style: |
-  .background {
-    stroke: none;
-  }
   .pond, .background {
-    fill: #ddffff;
+    fill: #e5f3f4;
+    stroke: none;
   }
   .stream {
     fill: none;
-  }
-  .stream, .pond {
     stroke: #125588;
     stroke-width: 0.6;
     stroke-linejoin: round;
@@ -40,9 +36,16 @@ style: |
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
+  .city {
+    fill: none;
+    stroke: black;
+    stroke-width: 1.2;
+    stroke-linejoin: miter;
+    stroke-miterlimit: 2;
+  }
   .track {
     fill: none;
-    stroke: #6f6677;
+    stroke: #7a608c;
     stroke-linejoin: round;
     stroke-linecap: butt;
   }
@@ -51,22 +54,25 @@ style: |
   }
   .track_texture {
     stroke-width: 0.6;
-    stroke-dasharray: 0.4 0.8;
+    stroke-dasharray: 1.2 1.2;
   }
   .road {
     fill: none;
-    stroke: #776f66;
+    stroke: #935c4a;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
   .main_map .road .class_1, .main_map .road .class_2, .main_map .road .class_3 {
-    stroke-width: 1.0;
+    stroke-width: 0.9;
   }
-  .main_map .road .class_4, .minimap .road .admin_type_1, .minimap .road .admin_type_2 {
+  .main_map .road .class_4, .minimap .road .admin_type_1 {
     stroke-width: 0.5;
   }
   .main_map .road .class_5 {
     stroke-width: 0.2;
+  }
+  .minimap .road {
+    stroke-width: 0.7;
   }
   .district {
     stroke-width: 5.0;
@@ -119,19 +125,31 @@ content:
         class_column: "DIST_NUM"
         self_clip: true
       - !Layer
-        class: "stream"
-        filename: "MassGIS/majorhydro/MAJSTRM_ARC"
-      - !Layer
         class: "pond"
-        filename: "MassGIS/majorhydro/MAJPOND_POLY"
+        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+        class_column: "POLY_CODE"
+        filters:
+          - !OneOf {key: "POLY_CODE", valid_values: [1, 6]}
+      - !Layer
+        class: "stream"
+        filename: "MassGIS/hydro25k/HYDRO25K_ARC"
+        class_column: "ARC_CODE"
+        filters:
+          - !OneOf {key: "ARC_CODE", valid_values: [1, 4, 8, 10]}
       - !Layer
         class: "track track_base"
-        filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
-        class_column: "COMM_LINE"
+        filename: "MassGIS/trains/TRAINS_ARC"
+        filters:
+          - !OneOf {key: "TYPE", valid_values: [1, 9]}
+          - !OneOf {key: "RT_CLASS", valid_values: [0, 1, 2, 3, 4, 6]}
+          - !OneOf {key: "TRACK", valid_values: [1]}
       - !Layer
         class: "track track_texture"
-        filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
-        class_column: "COMM_LINE"
+        filename: "MassGIS/trains/TRAINS_ARC"
+        filters:
+          - !OneOf {key: "TYPE", valid_values: [1, 9]}
+          - !OneOf {key: "RT_CLASS", valid_values: [0, 1, 2, 3, 4, 6]}
+          - !OneOf {key: "TRACK", valid_values: [1]}
       - !Layer
         class: "road"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
@@ -144,13 +162,10 @@ content:
       - !Layer
         class: "town"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
-      - !Layer
-        class: "stream"
-        filename: "MassGIS/coast25k/COAST25K_ARC"
   - !Group
     class: "minimap"
-    bounding_box: { left: 350, right: 600, top: 0, bottom: 137.10 }
-    region: { left: 27000, right: 337000, bottom: 795000, top: 965000 }
+    bounding_box: { left: 0, right: 240, top: 0, bottom: 155.24 }
+    region: { left: 28000, right: 280000, bottom: 801000, top: 964000 }
     content:
       - !Rectangle
         class: "state new-york"
@@ -179,10 +194,11 @@ content:
         class_column: "NAME"
       - !Rectangle
         id: "shown_region_indicator"
-        class: "town"
+        class: "state_border"
         coordinates: { left: 216000, right: 245000, bottom: 887000, top: 915000 }
       - !Layer
-        class: "town"
+        class: "city"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+        self_clip: true
         filters:
           - !OneOf {key: "NAME", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "LAWRENCE", "HAVERHILL", "GLOUCESTER", "BROCKTON", "PLYMOUTH", "FALL RIVER", "NEW BEDFORD"]}
