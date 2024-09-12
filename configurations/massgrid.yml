@@ -1,0 +1,134 @@
+title: "MassGIS coordinate system"
+description: "
+  A map of Massachusets with a grid overlaid."
+bounding_box: { left: 0, right: 300, top: 0, bottom: 300 }
+style: |
+  .state {
+    stroke: black;
+    stroke-width: 1.6;
+    fill: none;
+  }
+  .city {
+    stroke: black;
+    stroke-width: 0.8;
+    fill: none;
+  }
+  .line {
+    stroke: gray;
+    stroke-width: 0.5;
+    fill: none;
+  }
+region: { left: 28000, right: 280000, bottom: 801000, top: 964000 }
+content:
+  - !Layer
+    class: "state"
+    filename: "MassGIS/newengland/NEWENGLAND_POLY"
+    class_column: "NAME"
+  - !Layer
+    class: "city"
+    filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+    filters:
+      - !OneOf {key: "TOWN", valid_values: ["BOSTON", "PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "LAWRENCE", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}
+  - !Label
+    text: "Pittsfield"
+    coordinates: { x: 60000, y: 910000 }
+  - !Label
+    text: "Greenfield"
+    coordinates: { x: 110000, y: 930000 }
+  - !Label
+    text: "Holyoke"
+    coordinates: { x: 110000, y: 890000 }
+  - !Label
+    text: "Springfield"
+    coordinates: { x: 120000, y: 870000 }
+  - !Label
+    text: "Fitchburg"
+    coordinates: { x: 180000, y: 920000 }
+  - !Label
+    text: "Worcester"
+    coordinates: { x: 180000, y: 890000 }
+  - !Label
+    text: "Framingham"
+    coordinates: { x: 210000, y: 890000 }
+  - !Label
+    text: "Lowell"
+    coordinates: { x: 220000, y: 930000 }
+  - !Label
+    text: "Lawrence"
+    coordinates: { x: 230000, y: 940000 }
+  - !Label
+    text: "Haverill"
+    coordinates: { x: 240000, y: 950000 }
+  - !Label
+    text: "Brockton"
+    coordinates: { x: 240000, y: 870000 }
+  - !Label
+    text: "Fall River"
+    coordinates: { x: 240000, y: 830000 }
+  - !Label
+    text: "New Bedford"
+    coordinates: { x: 250000, y: 810000 }
+  - !Line
+    class: "line"
+    start: { x: 50000, y: 800000 }
+    end: { x: 50000, y: 1000000 }
+  - !Label
+    class: "label"
+    text: "50km"
+    coordinates: { x: 50000, y: 920000 }
+  - !Line
+    class: "line"
+    start: { x: 100000, y: 800000 }
+    end: { x: 100000, y: 1000000 }
+  - !Label
+    class: "label"
+    text: "100km"
+    coordinates: { x: 100000, y: 920000 }
+  - !Line
+    class: "line"
+    start: { x: 150000, y: 800000 }
+    end: { x: 150000, y: 1000000 }
+  - !Label
+    class: "label"
+    text: "150km"
+    coordinates: { x: 150000, y: 920000 }
+  - !Line
+    class: "line"
+    start: { x: 200000, y: 800000 }
+    end: { x: 200000, y: 1000000 }
+  - !Label
+    class: "label"
+    text: "200km"
+    coordinates: { x: 200000, y: 920000 }
+  - !Line
+    class: "line"
+    start: { x: 250000, y: 800000 }
+    end: { x: 250000, y: 1000000 }
+  - !Label
+    class: "label"
+    text: "250km"
+    coordinates: { x: 250000, y: 920000 }
+  - !Line
+    class: "line"
+    start: { x: 0, y: 850000 }
+    end: { x: 300000, y: 850000 }
+  - !Label
+    class: "label"
+    text: "850km"
+    coordinates: { x: 120000, y: 850000 }
+  - !Line
+    class: "line"
+    start: { x: 0, y: 900000 }
+    end: { x: 300000, y: 900000 }
+  - !Label
+    class: "label"
+    text: "900km"
+    coordinates: { x: 120000, y: 900000 }
+  - !Line
+    class: "line"
+    start: { x: 0, y: 950000 }
+    end: { x: 300000, y: 950000 }
+  - !Label
+    class: "label"
+    text: "950km"
+    coordinates: { x: 120000, y: 950000 }

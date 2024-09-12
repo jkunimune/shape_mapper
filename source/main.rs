@@ -4,19 +4,24 @@ use std::{fs, iter};
 use serde::Deserialize;
 use shapefile::dbase::FieldValue;
 use shapefile::record::EsriShape;
-use shapefile::{Point, Shape};
+use shapefile::Shape;
 
 
 fn main() -> Result<(), String> {
+    let filename = "congresentatives";
+
     let yaml = fs::read_to_string(
-        "configurations/congresentatives.yml").map_err(|err| err.to_string())?;
-    let configuration: Configuration = serde_yaml::from_str(&yaml).unwrap();
+        format!("configurations/{}.yml", filename)).map_err(|err| err.to_string())?;
+    let configuration: Configuration = serde_yaml::from_str(&yaml).map_err(|err| err.to_string())?;
+
+    println!("generating a map of '{}' based on `configurations/{}.yml`.", configuration.title, filename);
+
     let map_bounding_box = configuration.bounding_box.ok_or("the top level must have a bounding box")?;
     let map_width = f64::abs(map_bounding_box.right - map_bounding_box.left);
     let map_height = f64::abs(map_bounding_box.bottom - map_bounding_box.top);
     let mut svg_code = format!(
         "\
-<svg viewBox=\"{} {} {} {}\" width=\"{}mm\" height=\"{}mm\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">
+<svg viewBox=\"{:.2} {:.2} {:.2} {:.2}\" width=\"{:.2}mm\" height=\"{:.2}mm\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">
   <title>{}</title>
   <desc>{}</desc>
   <style>
@@ -29,16 +34,20 @@ fn main() -> Result<(), String> {
         map_width, map_height,
         configuration.title, configuration.description, configuration.style,
     );
+
     let element_index: &mut u32 = &mut 0;
     for content in configuration.content {
         svg_code.push_str(&transcribe_as_svg(content, &map_bounding_box, &configuration.region, 1, element_index)?);
     }
+
     svg_code.push_str("</svg>\n");
 
-    let image_filename = "maps/congresentatives.svg";
-    fs::create_dir_all("maps/").map_err(|err| err.to_string())?;
-    fs::write(image_filename, svg_code).map_err(|err| err.to_string())?;
+    println!("saving `maps/{}.svg.`", filename);
 
+    fs::create_dir_all("maps/").map_err(|err| err.to_string())?;
+    fs::write(format!("maps/{}.svg", filename), svg_code).map_err(|err| err.to_string())?;
+
+    println!("done!");
     return Ok(());
 }
 
@@ -51,11 +60,13 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
         Some(class) => format!(" class=\"{}\"", sanitize(class)),
         None => String::from(""),
     };
+
     // everything after that depends on what kind of content it is...
     let mut string = String::new();
     match content {
+
         // for a group, put down a <rect>, a <g> with whatever the sub-contents are, and then another <rect>
-        Content::Group{ content: sub_contents, bounding_box: sub_bounding_box, region: sub_region, .. } => {
+        Content::Group{ content: sub_contents, bounding_box: sub_bounding_box, region: sub_region, frame, .. } => {
             // this group may override the outer bounding box and region
             let bounding_box = match &sub_bounding_box {
                 Some(sub_bounding_box) => sub_bounding_box,
@@ -65,24 +76,72 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                 Some(..) => &sub_region,
                 None => outer_region,
             };
+            let frame = frame.unwrap_or(false);
             let group_index = *element_count;
             // write all the stuff
             string.push_str(&format!("{}<clipPath id=\"clip_path_{}\">\n", &indentation, group_index));
             string.push_str(&format!(
-                    "{}  <rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\" id=\"rect_{}\"/>\n",
+                    "{}  <rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\" id=\"rect_{}\"/>\n",
                     &indentation, bounding_box.left, bounding_box.top,
                     bounding_box.right - bounding_box.left,
                     bounding_box.bottom - bounding_box.top, group_index,
             ));
             string.push_str(&format!("{}</clipPath>\n", &indentation));
             string.push_str(&format!("{}<g clip-path=\"url(#clip_path_{})\"{}>\n", &indentation, group_index, &class_string));
-            string.push_str(&format!("{}  <use href=\"#rect_{}\" class=\"background\"/>\n", &indentation, group_index));
+            if frame {
+                string.push_str(&format!("{}  <use href=\"#rect_{}\" class=\"background\"/>\n", &indentation, group_index));
+            }
             for sub_content in sub_contents {
                 string.push_str(&transcribe_as_svg(sub_content, bounding_box, region, indent_level + 1, element_count)?);
             }
-            string.push_str(&format!("{}  <use href=\"#rect_{}\" class=\"map_border\"/>\n", &indentation, group_index));
+            if frame {
+                string.push_str(&format!("{}  <use href=\"#rect_{}\" class=\"frame\"/>\n", &indentation, group_index));
+            }
             string.push_str(&format!("{}</g>\n", &indentation));
         }
+
+        // for a line, jou just need a single <line>
+        Content::Line { start, end, .. } => {
+            let region = outer_region.as_ref().ok_or(String::from(
+                "every layer must have a region defined somewhere in its hierarchy."))?;
+            let transform = Transform::between(region, outer_bounding_box);
+
+            let start = Transform::apply(&transform, &start.to_shapefile_point());
+            let end = Transform::apply(&transform, &end.to_shapefile_point());
+            string.push_str(&format!(
+                "{}<line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\"{}/>/n",
+                &indentation, start.x, start.y, end.x, end.y, class_string));
+        },
+
+        // for a rectangle, use a <rect>
+        Content::Rectangle { coordinates, .. } => {
+            let region = outer_region.as_ref().ok_or(String::from(
+                "every layer must have a region defined somewhere in its hierarchy."))?;
+            let transform = Transform::between(region, outer_bounding_box);
+
+            string.push_str(&format!(
+                "{}<rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\"{}/>\n",
+                &indentation,
+                coordinates.left*transform.x_scale + transform.x_shift,
+                coordinates.top*transform.y_scale + transform.y_shift,
+                (coordinates.right - coordinates.left)*transform.x_scale,
+                (coordinates.bottom - coordinates.top)*transform.y_scale,
+                &class_string));
+        }
+
+        // for a label, use a <text> element
+        Content::Label { text, coordinates, .. } => {
+            let region = outer_region.as_ref().ok_or(String::from(
+                "every layer must have a region defined somewhere in its hierarchy."))?;
+            let transform = Transform::between(region, outer_bounding_box);
+
+            let coordinates = Transform::apply(&transform, &coordinates.to_shapefile_point());
+
+            string.push_str(&format!(
+                "{}<text x=\"{:.2}\" y=\"{:.2}\"{}>{}</text>\n",
+                &indentation, coordinates.x, coordinates.y, &class_string, &text));
+        },
+
         // for a layer, put down a <g> containing a bunch of <path>s or whatever
         Content::Layer{ filename, class_column, self_clip, filters, .. } => {
             let region = outer_region.as_ref().ok_or(String::from(
@@ -92,6 +151,11 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             string.push_str(&format!("{}<g{}>\n", &indentation, &class_string));
             let mut reader = shapefile::Reader::from_path(
                 format!("data/{}.shp", filename)).map_err(|err| err.to_string())?;
+
+            let scale_string = format!("1:{:.0}", 1e3/f64::min(transform.x_scale, -transform.y_scale));
+            let shape_count = reader.shape_count().map_err(|err| err.to_string())?;
+            println!("plotting {} shapes from `{}.shp` at scale {}", shape_count, filename, scale_string);
+    
             'shape_loop:
             for shape_record in reader.iter_shapes_and_records() {
                 let shape_record = shape_record.unwrap();
@@ -134,7 +198,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                 // convert it to a d string
                 let shape_string = match shape {
                     Shape::Polygon(polygon) => {
-                        let mut rings_as_nested_vec: Vec<Vec<Point>> = Vec::with_capacity(polygon.rings().len());
+                        let mut rings_as_nested_vec: Vec<Vec<shapefile::Point>> = Vec::with_capacity(polygon.rings().len());
                         for i in 0..polygon.rings().len() {
                             rings_as_nested_vec.push(polygon.rings()[i].points().to_vec());
                         }
@@ -188,21 +252,6 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             }
             string.push_str(&format!("{}</g>\n", &indentation));
         }
-        // for a rectangle, you just need a single <rect>
-        Content::Rectangle { coordinates, .. } => {
-            let region = outer_region.as_ref().ok_or(String::from(
-                "every layer must have a region defined somewhere in its hierarchy."))?;
-            let transform = Transform::between(region, outer_bounding_box);
-
-            string.push_str(&format!(
-                "{}<rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\"{}/>\n",
-                &indentation,
-                coordinates.left*transform.x_scale + transform.x_shift,
-                coordinates.top*transform.y_scale + transform.y_shift,
-                (coordinates.right - coordinates.left)*transform.x_scale,
-                (coordinates.bottom - coordinates.top)*transform.y_scale,
-                &class_string));
-        }
     }
 
     *element_count += 1;
@@ -210,7 +259,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
 }
 
 
-fn convert_points_to_path_string(sections: &Vec<Vec<Point>>, close_path: bool, transform: &Transform) -> String {
+fn convert_points_to_path_string(sections: &Vec<Vec<shapefile::Point>>, close_path: bool, transform: &Transform) -> String {
     let mut path_string = String::new();
     for section in sections {
         for (i, point) in section.iter().enumerate() {
@@ -287,11 +336,29 @@ enum Content {
         /// key-[value] pairs used to show only a subset of the shapes in the file
         filters: Option<Vec<Filter>>,
     },
+    /// a line segment from one location to another
+    Line {
+        /// one endpoit of the line
+        start: SerializablePoint,
+        /// the other endpoint of the line
+        end: SerializablePoint,
+        /// the SVG class to add to the element, if any
+        class: Option<String>,
+    },
     /// a plain box over some geographic area
     Rectangle {
         /// the boundaries of the rectangle
         coordinates: Box,
         /// the SVG class to add to the element, if any
+        class: Option<String>,
+    },
+    /// a bit of text
+    Label {
+        /// the characters to write
+        text: String,
+        /// the location to put them
+        coordinates: SerializablePoint,
+        /// the SVG class to add to the element
         class: Option<String>,
     },
     /// a group of other Contents
@@ -305,6 +372,8 @@ enum Content {
         /// the geographical region to include. shapes wholly outside this region will be discarded,
         /// and the content will be scaled to fit this region to the bounding box.
         region: Option<Box>,
+        /// whether to add a rect for a background and frame
+        frame: Option<bool>,
     },
 }
 
@@ -312,9 +381,24 @@ impl Content {
     fn get_class(self: &Content) -> &Option<String> {
         return match self {
             Content::Layer { class, .. } => class,
+            Content::Line { class, .. } => class,
             Content::Rectangle { class, .. } => class,
+            Content::Label { class, .. } => class,
             Content::Group { class, .. } => class,
         };
+    }
+}
+
+
+#[derive(Deserialize)]
+struct SerializablePoint {
+    x: f64,
+    y: f64,
+}
+
+impl SerializablePoint {
+    fn to_shapefile_point(self: &SerializablePoint) -> shapefile::Point {
+        return shapefile::Point { x: self.x, y: self.y };
     }
 }
 
@@ -357,8 +441,8 @@ impl Transform {
         return Transform { x_scale: x_scale, x_shift: x_shift, y_scale: y_scale, y_shift: y_shift };
     }
 
-    fn apply(self: &Transform, input: &Point) -> Point {
-        return Point::new(
+    fn apply(self: &Transform, input: &shapefile::Point) -> shapefile::Point {
+        return shapefile::Point::new(
             input.x*self.x_scale + self.x_shift,
             input.y*self.y_scale + self.y_shift,
         );

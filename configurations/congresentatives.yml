@@ -15,11 +15,11 @@ style: |
   .stream {
     fill: none;
     stroke: #125588;
-    stroke-width: 0.6;
+    stroke-width: 0.4;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .map_border {
+  .frame {
     fill: none;
     stroke: black;
     stroke-width: 3.6;
@@ -27,7 +27,10 @@ style: |
   }
   .state {
     fill: white;
-    stroke: none;
+    stroke: black;
+    stroke-width: 0.6;
+    stroke-linejoin: miter;
+    stroke-miterlimit: 2;
   }
   .state_border, .town {
     fill: none;
@@ -39,7 +42,7 @@ style: |
   .city {
     fill: none;
     stroke: black;
-    stroke-width: 1.2;
+    stroke-width: 0.6;
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
@@ -116,6 +119,7 @@ style: |
 content:
   - !Group
     class: "main_map"
+    frame: true
     bounding_box: { left: 0, right: 600, top: 0, bottom: 600 }
     region: { left: 216000, right: 245000, bottom: 887000, top: 915000 }
     content:
@@ -130,12 +134,14 @@ content:
         class_column: "POLY_CODE"
         filters:
           - !OneOf {key: "POLY_CODE", valid_values: [1, 6]}
+          - !GreaterThan {key: "SHAPE_LEN", cutoff: 100}
       - !Layer
         class: "stream"
         filename: "MassGIS/hydro25k/HYDRO25K_ARC"
         class_column: "ARC_CODE"
         filters:
           - !OneOf {key: "ARC_CODE", valid_values: [1, 4, 8, 10]}
+          - !GreaterThan {key: "SHAPE_LEN", cutoff: 100}
       - !Layer
         class: "track track_base"
         filename: "MassGIS/trains/TRAINS_ARC"
@@ -164,6 +170,7 @@ content:
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
   - !Group
     class: "minimap"
+    frame: true
     bounding_box: { left: 0, right: 240, top: 0, bottom: 155.24 }
     region: { left: 28000, right: 280000, bottom: 801000, top: 964000 }
     content:
@@ -190,8 +197,7 @@ content:
           - !OneOf {key: "ADMIN_TYPE", valid_values: [1, 2]}
       - !Layer
         class: "state_border"
-        filename: "MassGIS/newengland/NEWENGLAND_POLY"
-        class_column: "NAME"
+        filename: "MassGIS/outline25k/OUTLINE25K_ARC"
       - !Rectangle
         id: "shown_region_indicator"
         class: "state_border"
@@ -199,6 +205,47 @@ content:
       - !Layer
         class: "city"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
-        self_clip: true
         filters:
-          - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "LAWRENCE", "HAVERHILL", "GLOUCESTER", "BROCKTON", "PLYMOUTH", "FALL RIVER", "NEW BEDFORD"]}
+          - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "LAWRENCE", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}
+      - !Group
+        class: "town_label"
+        content:
+          - !Label
+            text: "Pittsfield"
+            coordinates: { x: 60000, y: 910000 }
+          - !Label
+            text: "Greenfield"
+            coordinates: { x: 110000, y: 930000 }
+          - !Label
+            text: "Holyoke"
+            coordinates: { x: 110000, y: 890000 }
+          - !Label
+            text: "Springfield"
+            coordinates: { x: 120000, y: 870000 }
+          - !Label
+            text: "Fitchburg"
+            coordinates: { x: 180000, y: 920000 }
+          - !Label
+            text: "Worcester"
+            coordinates: { x: 180000, y: 890000 }
+          - !Label
+            text: "Framingham"
+            coordinates: { x: 210000, y: 890000 }
+          - !Label
+            text: "Lowell"
+            coordinates: { x: 220000, y: 930000 }
+          - !Label
+            text: "Lawrence"
+            coordinates: { x: 230000, y: 940000 }
+          - !Label
+            text: "Haverill"
+            coordinates: { x: 240000, y: 950000 }
+          - !Label
+            text: "Brockton"
+            coordinates: { x: 240000, y: 870000 }
+          - !Label
+            text: "Fall River"
+            coordinates: { x: 240000, y: 830000 }
+          - !Label
+            text: "New Bedford"
+            coordinates: { x: 250000, y: 810000 }
