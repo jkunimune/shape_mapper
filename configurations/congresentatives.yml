@@ -201,4 +201,4 @@ content:
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
         self_clip: true
         filters:
-          - !OneOf {key: "NAME", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "LAWRENCE", "HAVERHILL", "GLOUCESTER", "BROCKTON", "PLYMOUTH", "FALL RIVER", "NEW BEDFORD"]}
+          - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "LAWRENCE", "HAVERHILL", "GLOUCESTER", "BROCKTON", "PLYMOUTH", "FALL RIVER", "NEW BEDFORD"]}
