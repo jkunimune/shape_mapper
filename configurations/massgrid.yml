@@ -18,6 +18,9 @@ style: |
     stroke-width: 0.5;
     fill: none;
   }
+  text {
+    font-size: 14pt;
+  }
 region: { left: 28000, right: 280000, bottom: 801000, top: 964000 }
 content:
   - !Layer

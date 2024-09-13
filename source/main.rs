@@ -7,6 +7,10 @@ use shapefile::record::EsriShape;
 use shapefile::Shape;
 
 
+/// the length of one SVG unit in mm
+static POINT: f64 = 0.352778;
+
+
 fn main() -> Result<(), String> {
     let filename = "congresentatives";
 
@@ -21,7 +25,7 @@ fn main() -> Result<(), String> {
     let map_height = f64::abs(map_bounding_box.bottom - map_bounding_box.top);
     let mut svg_code = format!(
         "\
-<svg viewBox=\"{:.2} {:.2} {:.2} {:.2}\" width=\"{:.2}mm\" height=\"{:.2}mm\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">
+<svg viewBox=\"{:.1} {:.1} {:.1} {:.1}\" width=\"{:.1}mm\" height=\"{:.1}mm\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">
   <title>{}</title>
   <desc>{}</desc>
   <style>
@@ -29,8 +33,8 @@ fn main() -> Result<(), String> {
   </style>
 \
         ",
-        map_bounding_box.left, map_bounding_box.top,
-        map_width, map_height,
+        map_bounding_box.left/POINT, map_bounding_box.top/POINT,
+        map_width/POINT, map_height/POINT,
         map_width, map_height,
         configuration.title, configuration.description, configuration.style,
     );
@@ -81,10 +85,10 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             // write all the stuff
             string.push_str(&format!("{}<clipPath id=\"clip_path_{}\">\n", &indentation, group_index));
             string.push_str(&format!(
-                    "{}  <rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\" id=\"rect_{}\"/>\n",
-                    &indentation, bounding_box.left, bounding_box.top,
-                    bounding_box.right - bounding_box.left,
-                    bounding_box.bottom - bounding_box.top, group_index,
+                    "{}  <rect x=\"{:.1}\" y=\"{:.1}\" width=\"{:.1}\" height=\"{:.1}\" id=\"rect_{}\"/>\n",
+                    &indentation, bounding_box.left/POINT, bounding_box.top/POINT,
+                    (bounding_box.right - bounding_box.left)/POINT,
+                    (bounding_box.bottom - bounding_box.top)/POINT, group_index,
             ));
             string.push_str(&format!("{}</clipPath>\n", &indentation));
             string.push_str(&format!("{}<g clip-path=\"url(#clip_path_{})\"{}>\n", &indentation, group_index, &class_string));
@@ -109,8 +113,8 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             let start = Transform::apply(&transform, &start.to_shapefile_point());
             let end = Transform::apply(&transform, &end.to_shapefile_point());
             string.push_str(&format!(
-                "{}<line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\"{}/>/n",
-                &indentation, start.x, start.y, end.x, end.y, class_string));
+                "{}<line x1=\"{:.1}\" y1=\"{:.1}\" x2=\"{:.1}\" y2=\"{:.1}\"{}/>/n",
+                &indentation, start.x/POINT, start.y/POINT, end.x/POINT, end.y/POINT, class_string));
         },
 
         // for a rectangle, use a <rect>
@@ -120,12 +124,12 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             let transform = Transform::between(region, outer_bounding_box);
 
             string.push_str(&format!(
-                "{}<rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\"{}/>\n",
+                "{}<rect x=\"{:.1}\" y=\"{:.1}\" width=\"{:.1}\" height=\"{:.1}\"{}/>\n",
                 &indentation,
-                coordinates.left*transform.x_scale + transform.x_shift,
-                coordinates.top*transform.y_scale + transform.y_shift,
-                (coordinates.right - coordinates.left)*transform.x_scale,
-                (coordinates.bottom - coordinates.top)*transform.y_scale,
+                (coordinates.left*transform.x_scale + transform.x_shift)/POINT,
+                (coordinates.top*transform.y_scale + transform.y_shift)/POINT,
+                (coordinates.right - coordinates.left)*transform.x_scale/POINT,
+                (coordinates.bottom - coordinates.top)*transform.y_scale/POINT,
                 &class_string));
         }
 
@@ -138,8 +142,8 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             let coordinates = Transform::apply(&transform, &coordinates.to_shapefile_point());
 
             string.push_str(&format!(
-                "{}<text x=\"{:.2}\" y=\"{:.2}\"{}>{}</text>\n",
-                &indentation, coordinates.x, coordinates.y, &class_string, &text));
+                "{}<text x=\"{:.1}\" y=\"{:.1}\"{}>{}</text>\n",
+                &indentation, coordinates.x/POINT, coordinates.y/POINT, &class_string, &text));
         },
 
         // for a layer, put down a <g> containing a bunch of <path>s or whatever
@@ -265,13 +269,13 @@ fn convert_points_to_path_string(sections: &Vec<Vec<shapefile::Point>>, close_pa
         for (i, point) in section.iter().enumerate() {
             let point = Transform::apply(transform, &point);
             let segment_string = if i == 0 {
-                &format!("M{:.2},{:.2} ", point.x, point.y)
+                &format!("M{:.1},{:.1} ", point.x/POINT, point.y/POINT)
             }
             else if i == section.len() - 1 && close_path {
                 "Z"
             }
             else {
-                &format!("L{:.2},{:.2} ", point.x, point.y)
+                &format!("L{:.1},{:.1} ", point.x/POINT, point.y/POINT)
             };
             path_string.push_str(segment_string);
         }

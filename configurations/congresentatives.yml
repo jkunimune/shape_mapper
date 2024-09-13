@@ -6,58 +6,69 @@ description: "
   <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
     Massachusetts Bureau of Geographic Information
   </a>."
-bounding_box: { left: -5, right: 605, top: -5, bottom: 605 }
+bounding_box: { left: 0, right: 600, top: 0, bottom: 600 }
 style: |
-  .pond, .background {
+  text {
+    font-family: Cadman, sans-serif;
+  }
+  .legend .background {
+    fill: #ffffff;
+    stroke: none;
+  }
+  .pond, .main_map .background, .minimap .background {
     fill: #e5f3f4;
     stroke: none;
   }
   .stream {
     fill: none;
     stroke: #125588;
-    stroke-width: 0.4;
+    stroke-width: 0.4mm;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
   .frame {
     fill: none;
     stroke: black;
-    stroke-width: 3.6;
+    stroke-width: 3.6mm;
     stroke-linejoin: miter;
   }
   .state {
     fill: white;
     stroke: black;
-    stroke-width: 0.6;
+    stroke-width: 0.6mm;
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
   .state_border, .town {
     fill: none;
     stroke: black;
-    stroke-width: 0.6;
+    stroke-width: 0.6mm;
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
+  }
+  .town_label line {
+    stroke: black;
+    stroke-width: 0.4mm;
   }
   .city {
     fill: none;
     stroke: black;
-    stroke-width: 0.6;
+    stroke-width: 0.6mm;
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
-  .track {
+  .track_base, .track_texture {
     fill: none;
     stroke: #7a608c;
     stroke-linejoin: round;
     stroke-linecap: butt;
   }
   .track_base {
-    stroke-width: 0.2;
+    stroke-width: 0.2mm;
   }
   .track_texture {
-    stroke-width: 0.6;
-    stroke-dasharray: 1.2 1.2;
+    stroke-width: 0.6mm;
+    stroke-dasharray: 1.2mm 1.2mm;
   }
   .road {
     fill: none;
@@ -65,62 +76,117 @@ style: |
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .main_map .road .class_1, .main_map .road .class_2, .main_map .road .class_3 {
-    stroke-width: 0.9;
+  .road .class_1, .road .class_2, .road .class_3 {
+    stroke-width: 1.0mm;
   }
-  .main_map .road .class_4, .minimap .road .admin_type_1 {
-    stroke-width: 0.5;
+  .road .class_4, .road.class_4 {
+    stroke-width: 0.5mm;
   }
-  .main_map .road .class_5 {
-    stroke-width: 0.2;
+  .road .class_5, .road.class_5 {
+    stroke-width: 0.3mm;
   }
   .minimap .road {
-    stroke-width: 0.7;
+    stroke-width: 0.7mm;
   }
   .district {
-    stroke-width: 5.0;
+    stroke-width: 5.0mm;
     stroke-linejoin: round;
   }
   .dist_num_1, .dist_num_6 { /* orange */
     fill: #f5e4db;
     stroke: #e79d79;
   }
+  .district_label_1, .district_label_6 {
+    fill: #684e41;
+  }
   .dist_num_2, .dist_num_9 { /* purple */
     fill: #e4dfee;
     stroke: #b39fe8;
+  }
+  .district_label_2, .district_label_9 {
+    fill: #575069;
   }
   .dist_num_3 { /* pink */
     fill: #fae9f4;
     stroke: #ee9bd5;
   }
+  .district_label_3 {
+    fill: #694c5f;
+  }
   .dist_num_4 { /* green */
     fill: #d1dace;
     stroke: #80ac75;
+  }
+  .district_label_4 {
+    fill: #485743;
   }
   .dist_num_5 { /* dark blue */
     fill: #d3dce8;
     stroke: #71aae2;
   }
+  .district_label_5 {
+    fill: #435569;
+  }
   .dist_num_7 { /* yellow */
     fill: #f5f0e2;
     stroke: #c9b874;
+  }
+  .district_label_7 {
+    fill: #5b543d;
   }
   .dist_num_8 { /* red */
     fill: #eed8da;
     stroke: #ed8897;
   }
+  .district_label_8 {
+    fill: #6d494e;
+  }
   .district_border {
     fill: none;
     stroke: black;
-    stroke-width: 0.4;
+    stroke-width: 0.4mm;
     stroke-linejoin: round;
-    stroke-dasharray: 0.6 0.6;
+    stroke-dasharray: 0.6mm 0.6mm;
+  }
+  .town_label {
+    font-weight: bold;
+  }
+  .main_map .town_label {
+    font-size: 16pt;
+    text-anchor: middle;
+    alignment-baseline: middle;
+  }
+  .minimap .town_label {
+    font-size: 10pt;
+  }
+  .district_label {
+    font-weight: bold;
+  }
+  .main_map .district_label {
+    font-size: 80pt;
+  }
+  .minimap .district_label {
+    font-size: 20pt;
+  }
+  .legend_title {
+    font-weight: normal;
+    font-size: 20pt;
+    text-anchor: middle;
+  }
+  .legend_caption {
+    font-weight: normal;
+    font-size: 16pt;
+    text-anchor: middle;
+  }
+  .legend_label {
+    font-weight: normal;
+    font-size: 16pt;
   }
 content:
   - !Group
     class: "main_map"
     frame: true
-    bounding_box: { left: 0, right: 600, top: 0, bottom: 600 }
+    bounding_box: { left: 5, right: 595, top: 5, bottom: 595 }
     region: { left: 216000, right: 245000, bottom: 887000, top: 915000 }
     content:
       - !Layer
@@ -134,23 +200,44 @@ content:
         class_column: "POLY_CODE"
         filters:
           - !OneOf {key: "POLY_CODE", valid_values: [1, 6]}
-          - !GreaterThan {key: "SHAPE_LEN", cutoff: 100}
       - !Layer
         class: "stream"
         filename: "MassGIS/hydro25k/HYDRO25K_ARC"
         class_column: "ARC_CODE"
         filters:
-          - !OneOf {key: "ARC_CODE", valid_values: [1, 4, 8, 10]}
-          - !GreaterThan {key: "SHAPE_LEN", cutoff: 100}
+          - !OneOf {key: "ARC_CODE", valid_values: [1, 8, 10]}
+      - !Group
+        class: "district_label"
+        content:
+          - !Label
+            class: "district_label_4"
+            text: "4"
+            coordinates: { x: 230000, y: 888000}
+          - !Label
+            class: "district_label_5"
+            text: "5"
+            coordinates: { x: 230000, y: 888000}
+          - !Label
+            class: "district_label_6"
+            text: "6"
+            coordinates: { x: 230000, y: 888000}
+          - !Label
+            class: "district_label_7"
+            text: "7"
+            coordinates: { x: 230000, y: 888000}
+          - !Label
+            class: "district_label_8"
+            text: "8"
+            coordinates: { x: 230000, y: 888000}
       - !Layer
-        class: "track track_base"
+        class: "track_base"
         filename: "MassGIS/trains/TRAINS_ARC"
         filters:
           - !OneOf {key: "TYPE", valid_values: [1, 9]}
           - !OneOf {key: "RT_CLASS", valid_values: [0, 1, 2, 3, 4, 6]}
           - !OneOf {key: "TRACK", valid_values: [1]}
       - !Layer
-        class: "track track_texture"
+        class: "track_texture"
         filename: "MassGIS/trains/TRAINS_ARC"
         filters:
           - !OneOf {key: "TYPE", valid_values: [1, 9]}
@@ -168,10 +255,16 @@ content:
       - !Layer
         class: "town"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+      - !Group
+        class: "town_label"
+        content:
+          - !Label
+            text: "CHELSEA"
+            coordinates: { x: 238400, y: 904700 }
   - !Group
     class: "minimap"
     frame: true
-    bounding_box: { left: 0, right: 240, top: 0, bottom: 155.24 }
+    bounding_box: { left: 5, right: 245, top: 5, bottom: 160.24 }
     region: { left: 28000, right: 280000, bottom: 801000, top: 964000 }
     content:
       - !Rectangle
@@ -186,9 +279,33 @@ content:
         filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_POLY"
         class_column: "DIST_NUM"
         self_clip: true
-      - !Layer
-        class: "district_border"
-        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+      - !Group
+        class: "district_label"
+        content:
+          - !Label
+            class: "district_label_1"
+            text: "1"
+            coordinates: { x: 230000, y: 888000}
+          - !Label
+            class: "district_label_2"
+            text: "2"
+            coordinates: { x: 230000, y: 888000}
+          - !Label
+            class: "district_label_3"
+            text: "3"
+            coordinates: { x: 230000, y: 888000}
+          - !Label
+            class: "district_label_4"
+            text: "4"
+            coordinates: { x: 230000, y: 888000}
+          - !Label
+            class: "district_label_6"
+            text: "6"
+            coordinates: { x: 230000, y: 888000}
+          - !Label
+            class: "district_label_9"
+            text: "9"
+            coordinates: { x: 230000, y: 888000}
       - !Layer
         class: "road"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
@@ -196,8 +313,8 @@ content:
         filters:
           - !OneOf {key: "ADMIN_TYPE", valid_values: [1, 2]}
       - !Layer
-        class: "state_border"
-        filename: "MassGIS/outline25k/OUTLINE25K_ARC"
+        class: "district_border"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
       - !Rectangle
         id: "shown_region_indicator"
         class: "state_border"
@@ -206,46 +323,98 @@ content:
         class: "city"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
         filters:
-          - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "LAWRENCE", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}
+          - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}
       - !Group
         class: "town_label"
         content:
           - !Label
             text: "Pittsfield"
-            coordinates: { x: 60000, y: 910000 }
+            coordinates: { x: 59000, y: 918000 }
           - !Label
             text: "Greenfield"
-            coordinates: { x: 110000, y: 930000 }
+            coordinates: { x: 115000, y: 930000 }
           - !Label
             text: "Holyoke"
-            coordinates: { x: 110000, y: 890000 }
+            coordinates: { x: 110000, y: 885000 }
           - !Label
             text: "Springfield"
-            coordinates: { x: 120000, y: 870000 }
+            coordinates: { x: 120000, y: 869000 }
           - !Label
             text: "Fitchburg"
-            coordinates: { x: 180000, y: 920000 }
+            coordinates: { x: 179000, y: 925000 }
           - !Label
             text: "Worcester"
-            coordinates: { x: 180000, y: 890000 }
+            coordinates: { x: 142000, y: 903000 }
+          - !Line
+            start: { x: 170000, y: 902000 }
+            end: { x: 173000, y: 896000 }
           - !Label
             text: "Framingham"
-            coordinates: { x: 210000, y: 890000 }
+            coordinates: { x: 179000, y: 902000 }
           - !Label
             text: "Lowell"
-            coordinates: { x: 220000, y: 930000 }
+            coordinates: { x: 190000, y: 932000 }
           - !Label
-            text: "Lawrence"
-            coordinates: { x: 230000, y: 940000 }
-          - !Label
-            text: "Haverill"
-            coordinates: { x: 240000, y: 950000 }
+            text: "Haverhill"
+            coordinates: { x: 202000, y: 953000 }
           - !Label
             text: "Brockton"
-            coordinates: { x: 240000, y: 870000 }
+            coordinates: { x: 244000, y: 869000 }
           - !Label
             text: "Fall River"
-            coordinates: { x: 240000, y: 830000 }
+            coordinates: { x: 219000, y: 836000 }
           - !Label
-            text: "New Bedford"
-            coordinates: { x: 250000, y: 810000 }
+            text: "N. Bedford"
+            coordinates: { x: 245000, y: 811000 }
+  - !Group
+    class: "legend legend_label"
+    frame: true
+    bounding_box: { left: 405, right: 595, top: 519, bottom: 595}
+    region: { left: 0, right: 100, bottom: 0, top: 40 }
+    content:
+      - !Label
+        class: "legend_title"
+        text: "Congressional districts"
+        coordinates: { x: 50, y: 31 }
+      - !Label
+        class: "legend_title"
+        text: "of the Boston area"
+        coordinates: { x: 50, y: 25 }
+      - !Label
+        class: "legend_caption"
+        text: "Conformal conic projection, 1:50k"
+        coordinates: { x: 50, y: 20}
+      - !Line
+        class: "road class_4"
+        start: { x: 6, y: 14 }
+        end: { x: 16, y: 14 }
+      - !Label
+        text: "Road"
+        coordinates: { x: 18, y: 13 }
+      - !Line
+        class: "track_base"
+        start: { x: 6, y: 7 }
+        end: { x: 16, y: 7 }
+      - !Line
+        class: "track_texture"
+        start: { x: 6, y: 7 }
+        end: { x: 16, y: 7 }
+      - !Label
+        text: "Train track"
+        coordinates: { x: 18, y: 6 }
+      - !Line
+        class: "town"
+        start: { x: 48, y: 14 }
+        end: { x: 58, y: 14 }
+      - !Label
+        text: "Municipal border"
+        coordinates: { x: 60, y: 13}
+      - !Rectangle
+        class: "pond"
+        coordinates: { left: 48, right: 58, bottom: 5, top: 9 }
+      - !Rectangle
+        class: "stream"
+        coordinates: { left: 48, right: 58, bottom: 5, top: 9 }
+      - !Label
+        text: "Pond or river"
+        coordinates: { x: 60, y: 6 }
