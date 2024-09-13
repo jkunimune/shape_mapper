@@ -83,23 +83,23 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             let frame = frame.unwrap_or(false);
             let group_index = *element_count;
             // write all the stuff
+            let rect_string = format!(
+                "<rect x=\"{:.1}\" y=\"{:.1}\" width=\"{:.1}\" height=\"{:.1}\"",
+                bounding_box.left/POINT, bounding_box.top/POINT,
+                (bounding_box.right - bounding_box.left)/POINT,
+                (bounding_box.bottom - bounding_box.top)/POINT);
             string.push_str(&format!("{}<clipPath id=\"clip_path_{}\">\n", &indentation, group_index));
-            string.push_str(&format!(
-                    "{}  <rect x=\"{:.1}\" y=\"{:.1}\" width=\"{:.1}\" height=\"{:.1}\" id=\"rect_{}\"/>\n",
-                    &indentation, bounding_box.left/POINT, bounding_box.top/POINT,
-                    (bounding_box.right - bounding_box.left)/POINT,
-                    (bounding_box.bottom - bounding_box.top)/POINT, group_index,
-            ));
+            string.push_str(&format!("{}  {}/>\n", &indentation, &rect_string));
             string.push_str(&format!("{}</clipPath>\n", &indentation));
             string.push_str(&format!("{}<g clip-path=\"url(#clip_path_{})\"{}>\n", &indentation, group_index, &class_string));
             if frame {
-                string.push_str(&format!("{}  <use href=\"#rect_{}\" class=\"background\"/>\n", &indentation, group_index));
+                string.push_str(&format!("{}  {} class=\"background\"/>\n", &indentation, &rect_string));
             }
             for sub_content in sub_contents {
                 string.push_str(&transcribe_as_svg(sub_content, bounding_box, region, indent_level + 1, element_count)?);
             }
             if frame {
-                string.push_str(&format!("{}  <use href=\"#rect_{}\" class=\"frame\"/>\n", &indentation, group_index));
+                string.push_str(&format!("{}  {} class=\"frame\"/>\n", &indentation, &rect_string));
             }
             string.push_str(&format!("{}</g>\n", &indentation));
         }
@@ -243,8 +243,8 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                         format!("{}    {} id=\"shape_{}\"/>\n", &indentation, &shape_string, shape_index) + &
                         format!("{}  </clipPath>\n", &indentation) + &
                         format!(
-                            "{}  <use href=\"#shape_{}\" style=\"clip-path: url(#clip_path_{})\"/>\n",
-                            &indentation, shape_index, shape_index
+                            "{}  {} style=\"clip-path: url(#clip_path_{})\"/>\n",
+                            &indentation, &shape_string, shape_index
                         )
                     }
                     _ => {

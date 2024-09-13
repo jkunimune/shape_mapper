@@ -83,7 +83,7 @@ style: |
     stroke-width: 0.5mm;
   }
   .road .class_5, .road.class_5 {
-    stroke-width: 0.3mm;
+    stroke-width: 0.25mm;
   }
   .minimap .road {
     stroke-width: 0.7mm;
@@ -96,50 +96,56 @@ style: |
     fill: #f5e4db;
     stroke: #e79d79;
   }
-  .district_label_1, .district_label_6 {
+  .main_map .district_label_6 {
+    fill: #e79d79;
+  }
+  .minimap .district_label_1, .minimap .district_label_6 {
     fill: #684e41;
   }
   .dist_num_2, .dist_num_9 { /* purple */
     fill: #e4dfee;
     stroke: #b39fe8;
   }
-  .district_label_2, .district_label_9 {
+  .minimap .district_label_2, .minimap .district_label_9 {
     fill: #575069;
   }
   .dist_num_3 { /* pink */
     fill: #fae9f4;
     stroke: #ee9bd5;
   }
-  .district_label_3 {
+  .minimap .district_label_3 {
     fill: #694c5f;
   }
   .dist_num_4 { /* green */
     fill: #d1dace;
     stroke: #80ac75;
   }
-  .district_label_4 {
+  .main_map .district_label_4 {
+    fill: #80ac75;
+  }
+  .minimap .district_label_4 {
     fill: #485743;
   }
   .dist_num_5 { /* dark blue */
     fill: #d3dce8;
     stroke: #71aae2;
   }
-  .district_label_5 {
-    fill: #435569;
+  .main_map .district_label_5 {
+    fill: #71aae2;
   }
   .dist_num_7 { /* yellow */
     fill: #f5f0e2;
     stroke: #c9b874;
   }
-  .district_label_7 {
-    fill: #5b543d;
+  .main_map .district_label_7 {
+    fill: #c9b874;
   }
   .dist_num_8 { /* red */
     fill: #eed8da;
     stroke: #ed8897;
   }
-  .district_label_8 {
-    fill: #6d494e;
+  .main_map .district_label_8 {
+    fill: #ed8897;
   }
   .district_border {
     fill: none;
@@ -163,10 +169,10 @@ style: |
     font-weight: bold;
   }
   .main_map .district_label {
-    font-size: 80pt;
+    font-size: 150pt;
   }
   .minimap .district_label {
-    font-size: 20pt;
+    font-size: 30pt;
   }
   .legend_title {
     font-weight: normal;
