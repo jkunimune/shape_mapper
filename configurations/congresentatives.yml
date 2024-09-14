@@ -29,7 +29,7 @@ style: |
   .frame {
     fill: none;
     stroke: black;
-    stroke-width: 3.6mm;
+    stroke-width: 2.4mm;
     stroke-linejoin: miter;
   }
   .state {
@@ -68,22 +68,22 @@ style: |
   }
   .track_texture {
     stroke-width: 0.6mm;
-    stroke-dasharray: 1.2mm 1.2mm;
+    stroke-dasharray: 3.4 3.4;
   }
   .road {
     fill: none;
-    stroke: #935c4a;
+    stroke: #6a6a6a;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
   .road .class_1, .road .class_2, .road .class_3 {
-    stroke-width: 1.0mm;
+    stroke-width: 0.8mm;
   }
   .road .class_4, .road.class_4 {
-    stroke-width: 0.5mm;
+    stroke-width: 0.4mm;
   }
   .road .class_5, .road.class_5 {
-    stroke-width: 0.25mm;
+    stroke-width: 0.2mm;
   }
   .minimap .road {
     stroke-width: 0.7mm;
@@ -152,7 +152,7 @@ style: |
     stroke: black;
     stroke-width: 0.4mm;
     stroke-linejoin: round;
-    stroke-dasharray: 0.6mm 0.6mm;
+    stroke-dasharray: 1.7 1.7;
   }
   .town_label {
     font-weight: bold;
@@ -200,18 +200,6 @@ content:
         filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_POLY"
         class_column: "DIST_NUM"
         self_clip: true
-      - !Layer
-        class: "pond"
-        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
-        class_column: "POLY_CODE"
-        filters:
-          - !OneOf {key: "POLY_CODE", valid_values: [1, 6]}
-      - !Layer
-        class: "stream"
-        filename: "MassGIS/hydro25k/HYDRO25K_ARC"
-        class_column: "ARC_CODE"
-        filters:
-          - !OneOf {key: "ARC_CODE", valid_values: [1, 8, 10]}
       - !Group
         class: "district_label"
         content:
@@ -235,6 +223,18 @@ content:
             class: "district_label_8"
             text: "8"
             coordinates: { x: 230000, y: 888000}
+      - !Layer
+        class: "pond"
+        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+        class_column: "POLY_CODE"
+        filters:
+          - !OneOf {key: "POLY_CODE", valid_values: [1, 6]}
+      - !Layer
+        class: "stream"
+        filename: "MassGIS/hydro25k/HYDRO25K_ARC"
+        class_column: "ARC_CODE"
+        filters:
+          - !OneOf {key: "ARC_CODE", valid_values: [1, 8, 10]}
       - !Layer
         class: "track_base"
         filename: "MassGIS/trains/TRAINS_ARC"
@@ -391,7 +391,7 @@ content:
         text: "Conformal conic projection, 1:50k"
         coordinates: { x: 50, y: 20}
       - !Line
-        class: "road class_4"
+        class: "road class_3"
         start: { x: 6, y: 14 }
         end: { x: 16, y: 14 }
       - !Label
