@@ -1,6 +1,6 @@
 use core::f64;
 use regex::Regex;
-use std::{fs, iter};
+use std::{env, fs, iter};
 use serde::Deserialize;
 use shapefile::dbase::FieldValue;
 use shapefile::record::EsriShape;
@@ -12,7 +12,11 @@ static POINT: f64 = 0.352778;
 
 
 fn main() -> Result<(), String> {
-    let filename = "congresentatives";
+    let args: Vec<String> = env::args().collect();
+    if args.len() > 2 {
+        return Err(String::from("you must pass only one argument, representing the filename of the configuration file without the 'yml'"));
+    }
+    let filename = args.get(1).ok_or(String::from("Please pass the filename of the configuration file minus the 'yml' as a command line argument."))?;
 
     let yaml = fs::read_to_string(
         format!("configurations/{}.yml", filename)).map_err(|err| err.to_string())?;
@@ -154,7 +158,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
 
             string.push_str(&format!("{}<g{}>\n", &indentation, &class_string));
             let mut reader = shapefile::Reader::from_path(
-                format!("data/{}.shp", filename)).map_err(|err| err.to_string())?;
+                format!("data/{}.shp", filename)).or(Err(format!("could not find `data/{}.dbf`", &filename)))?;
 
             let scale_string = format!("1:{:.0}", 1e3/f64::min(transform.x_scale, -transform.y_scale));
             let shape_count = reader.shape_count().map_err(|err| err.to_string())?;

@@ -59,7 +59,7 @@ style: |
   }
   .track_base, .track_texture {
     fill: none;
-    stroke: #7a608c;
+    stroke: #8557a3;
     stroke-linejoin: round;
     stroke-linecap: butt;
   }

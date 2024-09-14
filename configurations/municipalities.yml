@@ -1,0 +1,85 @@
+title: "Municipalities of the Boston area"
+description: "
+  A map of the many municipalities in the Boston area.
+  All geographic data is taken from the
+  <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
+    Massachusetts Bureau of Geographic Information
+  </a>."
+bounding_box: { left: -3, right: 233, top: -3, bottom: 253 }
+style: |
+  .frame {
+    fill: none;
+    stroke: black;
+    stroke-width: 2.4mm;
+    stroke-linejoin: miter;
+  }
+  .pond, .background {
+    fill: #e5f3f4;
+  }
+  .stream {
+    fill: none;
+  }
+  .pond, .stream {
+    stroke: #125588;
+    stroke-width: 0.4mm;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .rail_base, .rail_texture {
+    fill: none;
+    stroke: #8557a3;
+    stroke-linejoin: round;
+    stroke-linecap: butt;
+  }
+  .rail_base {
+    stroke-width: 0.3mm;
+  }
+  .rail_texture {
+    stroke-width: 0.9mm;
+    stroke-dasharray: 6 6;
+  }
+  .highway {
+    fill: none;
+    stroke: #6a6a6a;
+    stroke-width: 0.6mm;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .town {
+    fill: cyan;
+    stroke: #000000;
+    stroke-width: 
+    stroke-linejoin: miter;
+    stroke-miterlimit: 2;
+  }
+content:
+  - !Group
+    frame: true
+    bounding_box: { left: 0, right: 220, top: 0, bottom: 250 }
+    region: { left: 223000, right: 245000, bottom: 888000, top: 913000 }
+    content:
+      - !Layer
+        class: "town"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+      - !Layer
+        class: "pond"
+        filename: "MassGIS/majorhydro/MAJPOND_POLY"
+      - !Layer
+        class: "stream"
+        filename: "MassGIS/majorhydro/MAJSTRM_ARC"
+      - !Layer
+        class: "rail_base"
+        filename: "MassGIS/trains/TRAINS_ARC"
+        filters:
+          - !OneOf {key: "TYPE", valid_values: [1, 9]}
+          - !OneOf {key: "TRACK", valid_values: [1]}
+      - !Layer
+        class: "highway"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+        filters:
+          - !OneOf {key: "CLASS", valid_values: [1, 2, 3]}
+      - !Layer
+        class: "rail_texture"
+        filename: "MassGIS/trains/TRAINS_ARC"
+        filters:
+          - !OneOf {key: "TYPE", valid_values: [1, 9]}
