@@ -2,7 +2,7 @@ use core::f64;
 use regex::Regex;
 use std::{env, fs, iter};
 use serde::Deserialize;
-use shapefile::dbase::FieldValue;
+use shapefile::dbase::{FieldValue, Record};
 use shapefile::record::EsriShape;
 use shapefile::Shape;
 
@@ -151,7 +151,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
         },
 
         // for a layer, put down a <g> containing a bunch of <path>s or whatever
-        Content::Layer{ filename, class_column, self_clip, filters, .. } => {
+        Content::Layer{ filename, class_column, self_clip, filters, marker, marker_size, class: _ } => {
             let region = outer_region.as_ref().ok_or(String::from(
                 "every layer must have a region defined somewhere in its hierarchy."))?;
             let transform = Transform::between(region, outer_bounding_box);
@@ -164,37 +164,15 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             let shape_count = reader.shape_count().map_err(|err| err.to_string())?;
             println!("plotting {} shapes from `{}.shp` at scale {}", shape_count, filename, scale_string);
     
-            'shape_loop:
             for shape_record in reader.iter_shapes_and_records() {
                 let shape_record = shape_record.unwrap();
                 let (shape, record) = shape_record;
+
                 // first, discard anything that contradicts a filter
                 match &filters {
                     Some(filters) => {
-                        for filter in filters {
-                            let valid = match filter {
-                                Filter::OneOf { key, valid_values } => {
-                                    let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
-                                    match value {
-                                        FieldValue::Numeric(Some(number)) => valid_values.contains(&f64::to_string(number)),
-                                        FieldValue::Numeric(None) => false,
-                                        FieldValue::Character(Some(characters)) => valid_values.contains(characters),
-                                        FieldValue::Character(None) => false,
-                                        _ => return Err(String::from("you can only filter on numerical and character fields right now.")),
-                                    }
-                                }
-                                Filter::GreaterThan { key, cutoff } => {
-                                    let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
-                                    match value {
-                                        FieldValue::Float(Some(number)) => number > cutoff,
-                                        FieldValue::Float(None) => false,
-                                        _ => return Err(String::from("GreaterThan filters must act on float32 fields.")),
-                                    }
-                                }
-                            };
-                            if !valid {
-                                continue 'shape_loop;
-                            }
+                        if !matches(filters, &record)? {
+                            continue;
                         }
                     }
                     None => {}
@@ -203,22 +181,62 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                 if !any_of_shape_is_in_box(&shape, &region) {
                     continue;
                 }
-                // convert it to a d string
-                let shape_string = match shape {
-                    Shape::Polygon(polygon) => {
-                        let mut rings_as_nested_vec: Vec<Vec<shapefile::Point>> = Vec::with_capacity(polygon.rings().len());
-                        for i in 0..polygon.rings().len() {
-                            rings_as_nested_vec.push(polygon.rings()[i].points().to_vec());
+
+                let shape_string: String = match &marker {
+                    // if marker was specified, put a marker at the center of each shape
+                    Some(marker_filename) => {
+                        // make sure we have a marker
+                        let marker_size = match marker_size {
+                            Some(number) => number,
+                            None => {
+                                return Err(format!("the `{}.shp` layer has a marker, but no marker size is given.", filename));
+                            }
+                        };
+                        // check for any incompatible options
+                        match self_clip {
+                            Some(true) => {
+                                return Err(String::from("the `self_clip` option is incompatible with the `marker` option."));
+                            }
+                            _ => {}
                         }
-                        convert_points_to_path_string(&rings_as_nested_vec, true, &transform)
+                        let marker_location = Transform::apply(&transform, &center_of(&shape)?);
+                        position_and_scale_marker(marker_filename, &marker_location, marker_size)?
                     }
-                    Shape::Polyline(polyline) => {
-                        convert_points_to_path_string(polyline.parts(), false, &transform)
-                    }
-                    _ => {
-                        panic!("we only do polygons and polylines right now.");
+                    // if not, draw out the size and shape of each shape
+                    None => {
+                        // check for any incompatible options
+                        match marker_size {
+                            Some(_) => {
+                                return Err(String::from("you may not use the `marker_size` option without the `marker` option."));
+                            }
+                            None => {}
+                        }
+                        // draw it however you draw this shape
+                        match shape {
+                            Shape::Polygon(polygon) => {
+                                // combine the rings of the polygon into a Vec<Vec<Point>>
+                                let mut rings_as_nested_vec: Vec<Vec<shapefile::Point>> = Vec::with_capacity(polygon.rings().len());
+                                for i in 0..polygon.rings().len() {
+                                    rings_as_nested_vec.push(polygon.rings()[i].points().to_vec());
+                                }
+                                // convert it to a d string and make it a path
+                                convert_points_to_path_string(&rings_as_nested_vec, true, &transform)
+                            }
+                            Shape::Polyline(polyline) => {
+                                // convert it to a d string and make a path
+                                convert_points_to_path_string(polyline.parts(), false, &transform)
+                            }
+                            Shape::Point(_) => {
+                                return Err(format!("data/{}.shp is a POINT shapefile.  POINT layers must always have a `marker`.", filename))
+                            }
+                            _ => {
+                                return Err(format!("we don't support {} shapefiles right now.", shape.shapetype().to_string()));
+                            }
+                        }
                     }
                 };
+                
+                // tack on the class, if there is one
                 let sub_class = match &class_column {
                     Some(class_column) => match record.get(class_column) {
                         Some(value) => match value {
@@ -236,10 +254,11 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                     }
                     None => None,
                 };
-                let shape_string = match sub_class {
-                    Some(sub_class) => format!("{} class=\"{}\"", shape_string, sub_class),
-                    None => shape_string,
+                let class_string = match sub_class {
+                    Some(sub_class) => format!("class=\"{}\"", sub_class),
+                    None => String::from(""),
                 };
+                // nest it in a clipPath element, if desired
                 let shape_index = *element_count;
                 let shape_string = match self_clip {
                     Some(true) => {
@@ -252,9 +271,10 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                         )
                     }
                     _ => {
-                        format!("{}  {}/>\n", &indentation, &shape_string)
+                        format!("{}  {}{}/>\n", &indentation, &shape_string, &class_string)
                     }
                 };
+                // add it to the shape
                 string.push_str(&shape_string);
                 *element_count += 1;
             }
@@ -288,28 +308,91 @@ fn convert_points_to_path_string(sections: &Vec<Vec<shapefile::Point>>, close_pa
 }
 
 
+fn position_and_scale_marker(marker_filename: &String, marker_location: &shapefile::Point, marker_size: f64) -> Result<String, String> {
+    let marker_svg = fs::read_to_string(format!("markers/{}.svg", marker_filename)).map_err(|err| err.to_string())?;
+    let regex_match = Regex::new(r"<svg[^>]*>\s*(<[^>]+)/>\s*</svg>").unwrap().captures(&marker_svg);
+    let marker_string = regex_match.ok_or(format!("markers/{}.svg was malformed", marker_filename))?.get(1).ok_or(String::from("bruh"))?.as_str();
+    return Ok(format!(
+        "{} transform=\"translate({}, {}) scale({})\"",
+        &marker_string, marker_location.x/POINT, marker_location.y/POINT, f64::sqrt(marker_size)/POINT));
+}
+
+
+fn matches(filters: &Vec<Filter>, record: &Record) -> Result<bool, String> {
+    for filter in filters {
+        let valid = match filter {
+            Filter::OneOf { key, valid_values } => {
+                let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
+                match value {
+                    FieldValue::Numeric(Some(number)) => valid_values.contains(&f64::to_string(number)),
+                    FieldValue::Numeric(None) => false,
+                    FieldValue::Character(Some(characters)) => valid_values.contains(characters),
+                    FieldValue::Character(None) => false,
+                    _ => return Err(String::from("you can only filter on numerical and character fields right now.")),
+                }
+            }
+            Filter::GreaterThan { key, cutoff } => {
+                let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
+                match value {
+                    FieldValue::Float(Some(number)) => number > cutoff,
+                    FieldValue::Float(None) => false,
+                    _ => return Err(String::from("GreaterThan filters must act on float32 fields.")),
+                }
+            }
+        };
+        if !valid {
+            return Ok(false);
+        }
+    }
+    return Ok(true);
+}
+
+
+fn center_of(shape: &Shape) -> Result<shapefile::Point, String> {
+    return match bounds_of(shape) {
+        Ok([x_range, y_range]) => {
+            Ok(shapefile::Point { x: (x_range[0] + x_range[1])/2., y: (y_range[0] + y_range[1])/2. })
+        }
+        Err(_) => {
+            Err(String::from("I cannot calculate the center of this shape because it has no geometry."))
+        }
+    }
+}
+
+
 fn any_of_shape_is_in_box(shape: &Shape, boks: &Box) -> bool {
-    let (x_range, y_range) = match shape {
-        Shape::NullShape => return false,
-        Shape::Point(shape) => (shape.x_range(), shape.y_range()),
-        Shape::PointM(shape) => (shape.x_range(), shape.y_range()),
-        Shape::PointZ(shape) => (shape.x_range(), shape.y_range()),
-        Shape::Polyline(shape) => (shape.x_range(), shape.y_range()),
-        Shape::PolylineM(shape) => (shape.x_range(), shape.y_range()),
-        Shape::PolylineZ(shape) => (shape.x_range(), shape.y_range()),
-        Shape::Polygon(shape) => (shape.x_range(), shape.y_range()),
-        Shape::PolygonM(shape) => (shape.x_range(), shape.y_range()),
-        Shape::PolygonZ(shape) => (shape.x_range(), shape.y_range()),
-        Shape::Multipoint(shape) => (shape.x_range(), shape.y_range()),
-        Shape::MultipointM(shape) => (shape.x_range(), shape.y_range()),
-        Shape::MultipointZ(shape) => (shape.x_range(), shape.y_range()),
-        Shape::Multipatch(shape) => (shape.x_range(), shape.y_range()),
+    return match bounds_of(shape) {
+        Ok([x_range, y_range]) => {
+            x_range[0] < f64::max(boks.left, boks.right) &&
+            x_range[1] > f64::min(boks.left, boks.right) &&
+            y_range[0] < f64::max(boks.bottom, boks.top) &&
+            y_range[1] > f64::min(boks.bottom, boks.top)
+        }
+        Err(_) => {
+            return false;
+        }
+    }
+}
+
+
+/// extract the bounding box of this shape, or return Err(()) if the shape has no geometry
+fn bounds_of(shape: &Shape) -> Result<[[f64; 2]; 2], ()> {
+    return match shape {
+        Shape::NullShape => return Err(()),
+        Shape::Point(shape) => Ok([shape.x_range(), shape.y_range()]),
+        Shape::PointM(shape) => Ok([shape.x_range(), shape.y_range()]),
+        Shape::PointZ(shape) => Ok([shape.x_range(), shape.y_range()]),
+        Shape::Polyline(shape) => Ok([shape.x_range(), shape.y_range()]),
+        Shape::PolylineM(shape) => Ok([shape.x_range(), shape.y_range()]),
+        Shape::PolylineZ(shape) => Ok([shape.x_range(), shape.y_range()]),
+        Shape::Polygon(shape) => Ok([shape.x_range(), shape.y_range()]),
+        Shape::PolygonM(shape) => Ok([shape.x_range(), shape.y_range()]),
+        Shape::PolygonZ(shape) => Ok([shape.x_range(), shape.y_range()]),
+        Shape::Multipoint(shape) => Ok([shape.x_range(), shape.y_range()]),
+        Shape::MultipointM(shape) => Ok([shape.x_range(), shape.y_range()]),
+        Shape::MultipointZ(shape) => Ok([shape.x_range(), shape.y_range()]),
+        Shape::Multipatch(shape) => Ok([shape.x_range(), shape.y_range()]),
     };
-    return
-        x_range[0] < f64::max(boks.left, boks.right) &&
-        x_range[1] > f64::min(boks.left, boks.right) &&
-        y_range[0] < f64::max(boks.bottom, boks.top) &&
-        y_range[1] > f64::min(boks.bottom, boks.top);
 }
 
 
@@ -339,6 +422,10 @@ enum Content {
         class: Option<String>,
         /// the record field key to use to tag each shape with a unique class, if such tags are desired.
         class_column: Option<String>,
+        /// the name of the SVG (without the 'markers/' or '.svg') to put at the center of this thing
+        marker: Option<String>,
+        /// the desired area of the SVG in square millimeters
+        marker_size: Option<f64>,
         /// whether to make this shape's strokes be confined within its shape
         self_clip: Option<bool>,
         /// key-[value] pairs used to show only a subset of the shapes in the file

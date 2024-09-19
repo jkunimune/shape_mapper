@@ -52,11 +52,15 @@ style: |
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
+  .town_hall {
+    fill: black;
+    stroke: none;
+  }
 content:
   - !Group
     frame: true
-    bounding_box: { left: 0, right: 220, top: 0, bottom: 250 }
-    region: { left: 223000, right: 245000, bottom: 888000, top: 913000 }
+    bounding_box: { left: 0, right: 240, top: 0, bottom: 290 }
+    region: { left: 221000, right: 245000, bottom: 886000, top: 915000 }
     content:
       - !Layer
         class: "town"
@@ -83,3 +87,8 @@ content:
         filename: "MassGIS/trains/TRAINS_ARC"
         filters:
           - !OneOf {key: "TYPE", valid_values: [1, 9]}
+      - !Layer
+        class: "town_hall"
+        marker: "star"
+        marker_size: 10
+        filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
