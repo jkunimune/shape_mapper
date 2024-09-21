@@ -57,16 +57,16 @@ style: |
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
-  .track_base, .track_texture {
+  .track {
     fill: none;
     stroke: #8557a3;
     stroke-linejoin: round;
     stroke-linecap: butt;
   }
-  .track_base {
+  .bottom {
     stroke-width: 0.2mm;
   }
-  .track_texture {
+  .top {
     stroke-width: 0.6mm;
     stroke-dasharray: 3.4 3.4;
   }
@@ -77,13 +77,13 @@ style: |
     stroke-linecap: round;
   }
   .road .class_1, .road .class_2, .road .class_3 {
-    stroke-width: 0.8mm;
+    stroke-width: 1.0mm;
   }
   .road .class_4, .road.class_4 {
-    stroke-width: 0.4mm;
+    stroke-width: 0.5mm;
   }
   .road .class_5, .road.class_5 {
-    stroke-width: 0.2mm;
+    stroke-width: 0.25mm;
   }
   .minimap .road {
     stroke-width: 0.7mm;
@@ -236,15 +236,9 @@ content:
         filters:
           - !OneOf {key: "ARC_CODE", valid_values: [1, 8, 10]}
       - !Layer
-        class: "track_base"
+        class: "track"
         filename: "MassGIS/trains/TRAINS_ARC"
-        filters:
-          - !OneOf {key: "TYPE", valid_values: [1, 9]}
-          - !OneOf {key: "RT_CLASS", valid_values: [0, 1, 2, 3, 4, 6]}
-          - !OneOf {key: "TRACK", valid_values: [1]}
-      - !Layer
-        class: "track_texture"
-        filename: "MassGIS/trains/TRAINS_ARC"
+        double: true
         filters:
           - !OneOf {key: "TYPE", valid_values: [1, 9]}
           - !OneOf {key: "RT_CLASS", valid_values: [0, 1, 2, 3, 4, 6]}
@@ -397,14 +391,17 @@ content:
       - !Label
         text: "Road"
         coordinates: { x: 18, y: 13 }
-      - !Line
-        class: "track_base"
-        start: { x: 6, y: 7 }
-        end: { x: 16, y: 7 }
-      - !Line
-        class: "track_texture"
-        start: { x: 6, y: 7 }
-        end: { x: 16, y: 7 }
+      - !Group
+        class: "track"
+        content:
+          - !Line
+            class: "bottom"
+            start: { x: 6, y: 7 }
+            end: { x: 16, y: 7 }
+          - !Line
+            class: "top"
+            start: { x: 6, y: 7 }
+            end: { x: 16, y: 7 }
       - !Label
         text: "Train track"
         coordinates: { x: 18, y: 6 }

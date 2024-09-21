@@ -151,7 +151,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
         },
 
         // for a layer, put down a <g> containing a bunch of <path>s or whatever
-        Content::Layer{ filename, class_column, self_clip, filters, marker, marker_size, class: _ } => {
+        Content::Layer{ filename, class_column, double, self_clip, filters, marker, marker_size, class: _ } => {
             let region = outer_region.as_ref().ok_or(String::from(
                 "every layer must have a region defined somewhere in its hierarchy."))?;
             let transform = Transform::between(region, outer_bounding_box);
@@ -163,7 +163,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             let scale_string = format!("1:{:.0}", 1e3/f64::min(transform.x_scale, -transform.y_scale));
             let shape_count = reader.shape_count().map_err(|err| err.to_string())?;
             println!("plotting {} shapes from `{}.shp` at scale {}", shape_count, filename, scale_string);
-    
+
             for shape_record in reader.iter_shapes_and_records() {
                 let shape_record = shape_record.unwrap();
                 let (shape, record) = shape_record;
@@ -182,6 +182,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                     continue;
                 }
 
+                // start by converting the shape to an SVG string of some kind
                 let shape_string: String = match &marker {
                     // if marker was specified, put a marker at the center of each shape
                     Some(marker_filename) => {
@@ -235,7 +236,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                         }
                     }
                 };
-                
+
                 // tack on the class, if there is one
                 let sub_class = match &class_column {
                     Some(class_column) => match record.get(class_column) {
@@ -254,26 +255,36 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                     }
                     None => None,
                 };
-                let class_string = match sub_class {
-                    Some(sub_class) => format!("class=\"{}\"", sub_class),
-                    None => String::from(""),
+                let shape_string = match sub_class {
+                    Some(sub_class) => insert_attribute(&shape_string, "class", &sub_class)?,
+                    None => shape_string,
                 };
+
                 // nest it in a clipPath element, if desired
                 let shape_index = *element_count;
                 let shape_string = match self_clip {
                     Some(true) => {
-                        format!("{}  <clipPath id=\"clip_path_{}\">\n", &indentation, shape_index) + &
-                        format!("{}    {} id=\"shape_{}\"/>\n", &indentation, &shape_string, shape_index) + &
-                        format!("{}  </clipPath>\n", &indentation) + &
-                        format!(
-                            "{}  {} style=\"clip-path: url(#clip_path_{})\"/>\n",
-                            &indentation, &shape_string, shape_index
-                        )
+                        format!("  <clipPath id=\"clip_path_{}\">\n", shape_index) + &
+                        "  " + &shape_string + &
+                        "  </clipPath>\n" + &
+                        &insert_attribute(&shape_string, "style", &format!("clip-path: url(#clip_path_{})", shape_index))?
                     }
-                    _ => {
-                        format!("{}  {}{}/>\n", &indentation, &shape_string, &class_string)
-                    }
+                    _ => shape_string,
                 };
+
+                // double it up, if desired
+                let shape_string = match double {
+                    Some(true) => {
+                        insert_attribute(&shape_string, "class", "bottom")? + &
+                        insert_attribute(&shape_string, "class", "top")?
+                    }
+                    _ => shape_string
+                };
+
+                // add the proper indentation
+                let sub_indentation = String::from("  ") + &indentation;
+                let shape_string = prepend_to_each_line(&shape_string, &sub_indentation);
+
                 // add it to the shape
                 string.push_str(&shape_string);
                 *element_count += 1;
@@ -304,17 +315,20 @@ fn convert_points_to_path_string(sections: &Vec<Vec<shapefile::Point>>, close_pa
             path_string.push_str(segment_string);
         }
     }
-    format!("<path d=\"{}\"", path_string)
+    format!("<path d=\"{}\"/>\n", path_string)
 }
 
 
 fn position_and_scale_marker(marker_filename: &String, marker_location: &shapefile::Point, marker_size: f64) -> Result<String, String> {
     let marker_svg = fs::read_to_string(format!("markers/{}.svg", marker_filename)).map_err(|err| err.to_string())?;
-    let regex_match = Regex::new(r"<svg[^>]*>\s*(<[^>]+)/>\s*</svg>").unwrap().captures(&marker_svg);
+    let regex_match = Regex::new(r"<svg[^>]*>\s*(<[^>]+/>\n)\s*</svg>").unwrap().captures(&marker_svg);
     let marker_string = regex_match.ok_or(format!("markers/{}.svg was malformed", marker_filename))?.get(1).ok_or(String::from("bruh"))?.as_str();
-    return Ok(format!(
-        "{} transform=\"translate({}, {}) scale({})\"",
-        &marker_string, marker_location.x/POINT, marker_location.y/POINT, f64::sqrt(marker_size)/POINT));
+    return insert_attribute(
+        marker_string, "transform",
+        &format!(
+            "translate({}, {}) scale({})",
+            marker_location.x/POINT, marker_location.y/POINT,
+            f64::sqrt(marker_size)/POINT));
 }
 
 
@@ -396,7 +410,47 @@ fn bounds_of(shape: &Shape) -> Result<[[f64; 2]; 2], ()> {
 }
 
 
-fn sanitize(string: &String) -> String {
+/// take an SVG string and insert the given attribute key and value to the last tag
+/// in it.  if the key is already there, append to the existing value
+fn insert_attribute(element: &str, key: &str, value: &str) -> Result<String, String> {
+    let key_value_pattern = Regex::new(&format!("{}=\"([^\"]*)\"", key)).unwrap();
+    match key_value_pattern.find(element) {
+        Some(_) => {
+            return Ok(key_value_pattern.replace(element, format!("{}=\"$1 {}\"", key, value)).into_owned());
+        }
+        _ => {}
+    }
+    let tag_pattern = Regex::new(r"<[a-z]+()[ /]").unwrap();
+    let mut last_tag_index: Option<usize> = None;
+    for capture in tag_pattern.captures_iter(element) {
+        last_tag_index = Some(capture.get(1).unwrap().start());
+    };
+    match last_tag_index {
+        Some(last_tag_index) => {
+            return Ok(format!(
+                "{} {}=\"{}\"{}",
+                &element[..last_tag_index], key, value, &element[last_tag_index..]))
+        }
+        None => {
+            return Err(format!("I couldn't find any tags in the string '{}'", element))
+        }
+    }
+}
+
+
+/// break the string up at newlines and add the given string to the start of each section
+fn prepend_to_each_line(string: &str, prefix: &str) -> String {
+    let mut new_string = String::new();
+    for part in Regex::new("\n").unwrap().split(string) {
+        new_string.push_str(prefix);
+        new_string.push_str(part);
+    }
+    return new_string;
+}
+
+
+/// replace problematic characters like , to _ and make it all lowercase
+fn sanitize(string: &str) -> String {
     return Regex::new(r"[{},.:;]").unwrap().replace_all(&string.to_lowercase(), "_").into_owned();
 }
 
@@ -426,6 +480,8 @@ enum Content {
         marker: Option<String>,
         /// the desired area of the SVG in square millimeters
         marker_size: Option<f64>,
+        /// whether to duplicate each shape in this thing
+        double: Option<bool>,
         /// whether to make this shape's strokes be confined within its shape
         self_clip: Option<bool>,
         /// key-[value] pairs used to show only a subset of the shapes in the file

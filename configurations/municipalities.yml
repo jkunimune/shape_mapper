@@ -25,17 +25,18 @@ style: |
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .rail_base, .rail_texture {
+  .rail {
     fill: none;
-    stroke: #8557a3;
     stroke-linejoin: round;
     stroke-linecap: butt;
   }
-  .rail_base {
-    stroke-width: 0.3mm;
-  }
-  .rail_texture {
+  .rail .bottom {
+    stroke: #8557a3;
     stroke-width: 0.9mm;
+  }
+  .rail .top {
+    stroke: cyan;
+    stroke-width: 0.6mm;
     stroke-dasharray: 6 6;
   }
   .highway {
@@ -72,21 +73,16 @@ content:
         class: "stream"
         filename: "MassGIS/majorhydro/MAJSTRM_ARC"
       - !Layer
-        class: "rail_base"
+        class: "rail"
         filename: "MassGIS/trains/TRAINS_ARC"
+        double: true
         filters:
           - !OneOf {key: "TYPE", valid_values: [1, 9]}
-          - !OneOf {key: "TRACK", valid_values: [1]}
       - !Layer
         class: "highway"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         filters:
           - !OneOf {key: "CLASS", valid_values: [1, 2, 3]}
-      - !Layer
-        class: "rail_texture"
-        filename: "MassGIS/trains/TRAINS_ARC"
-        filters:
-          - !OneOf {key: "TYPE", valid_values: [1, 9]}
       - !Layer
         class: "town_hall"
         marker: "star"
