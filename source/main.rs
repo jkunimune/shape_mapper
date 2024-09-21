@@ -117,7 +117,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             let start = Transform::apply(&transform, &start.to_shapefile_point());
             let end = Transform::apply(&transform, &end.to_shapefile_point());
             string.push_str(&format!(
-                "{}<line x1=\"{:.1}\" y1=\"{:.1}\" x2=\"{:.1}\" y2=\"{:.1}\"{}/>/n",
+                "{}<line x1=\"{:.1}\" y1=\"{:.1}\" x2=\"{:.1}\" y2=\"{:.1}\"{}/>\n",
                 &indentation, start.x/POINT, start.y/POINT, end.x/POINT, end.y/POINT, class_string));
         },
 
