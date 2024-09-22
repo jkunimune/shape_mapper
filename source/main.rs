@@ -7,9 +7,6 @@ use shapefile::record::EsriShape;
 use shapefile::Shape;
 
 
-/// the length of one SVG unit in mm
-static POINT: f64 = 0.352778;
-
 
 fn main() -> Result<(), String> {
     let args: Vec<String> = env::args().collect();
@@ -37,8 +34,7 @@ fn main() -> Result<(), String> {
   </style>
 \
         ",
-        map_bounding_box.left/POINT, map_bounding_box.top/POINT,
-        map_width/POINT, map_height/POINT,
+        map_bounding_box.left, map_bounding_box.top, map_width, map_height,
         map_width, map_height,
         configuration.title, configuration.description, configuration.style,
     );
@@ -89,9 +85,9 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             // write all the stuff
             let rect_string = format!(
                 "<rect x=\"{:.1}\" y=\"{:.1}\" width=\"{:.1}\" height=\"{:.1}\"",
-                bounding_box.left/POINT, bounding_box.top/POINT,
-                (bounding_box.right - bounding_box.left)/POINT,
-                (bounding_box.bottom - bounding_box.top)/POINT);
+                bounding_box.left, bounding_box.top,
+                bounding_box.right - bounding_box.left,
+                bounding_box.bottom - bounding_box.top);
             string.push_str(&format!("{}<clipPath id=\"clip_path_{}\">\n", &indentation, group_index));
             string.push_str(&format!("{}  {}/>\n", &indentation, &rect_string));
             string.push_str(&format!("{}</clipPath>\n", &indentation));
@@ -118,7 +114,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             let end = Transform::apply(&transform, &end.to_shapefile_point());
             string.push_str(&format!(
                 "{}<line x1=\"{:.1}\" y1=\"{:.1}\" x2=\"{:.1}\" y2=\"{:.1}\"{}/>\n",
-                &indentation, start.x/POINT, start.y/POINT, end.x/POINT, end.y/POINT, class_string));
+                &indentation, start.x, start.y, end.x, end.y, class_string));
         },
 
         // for a rectangle, use a <rect>
@@ -130,10 +126,10 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             string.push_str(&format!(
                 "{}<rect x=\"{:.1}\" y=\"{:.1}\" width=\"{:.1}\" height=\"{:.1}\"{}/>\n",
                 &indentation,
-                (coordinates.left*transform.x_scale + transform.x_shift)/POINT,
-                (coordinates.top*transform.y_scale + transform.y_shift)/POINT,
-                (coordinates.right - coordinates.left)*transform.x_scale/POINT,
-                (coordinates.bottom - coordinates.top)*transform.y_scale/POINT,
+                coordinates.left*transform.x_scale + transform.x_shift,
+                coordinates.top*transform.y_scale + transform.y_shift,
+                (coordinates.right - coordinates.left)*transform.x_scale,
+                (coordinates.bottom - coordinates.top)*transform.y_scale,
                 &class_string));
         }
 
@@ -147,7 +143,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
 
             string.push_str(&format!(
                 "{}<text x=\"{:.1}\" y=\"{:.1}\"{}>{}</text>\n",
-                &indentation, coordinates.x/POINT, coordinates.y/POINT, &class_string, &text));
+                &indentation, coordinates.x, coordinates.y, &class_string, &text));
         },
 
         // for a layer, put down a <g> containing a bunch of <path>s or whatever
@@ -304,13 +300,13 @@ fn convert_points_to_path_string(sections: &Vec<Vec<shapefile::Point>>, close_pa
         for (i, point) in section.iter().enumerate() {
             let point = Transform::apply(transform, &point);
             let segment_string = if i == 0 {
-                &format!("M{:.1},{:.1} ", point.x/POINT, point.y/POINT)
+                &format!("M{:.1},{:.1} ", point.x, point.y)
             }
             else if i == section.len() - 1 && close_path {
                 "Z"
             }
             else {
-                &format!("L{:.1},{:.1} ", point.x/POINT, point.y/POINT)
+                &format!("L{:.1},{:.1} ", point.x, point.y)
             };
             path_string.push_str(segment_string);
         }
@@ -327,8 +323,7 @@ fn position_and_scale_marker(marker_filename: &String, marker_location: &shapefi
         marker_string, "transform",
         &format!(
             "translate({}, {}) scale({})",
-            marker_location.x/POINT, marker_location.y/POINT,
-            f64::sqrt(marker_size)/POINT));
+            marker_location.x, marker_location.y, f64::sqrt(marker_size)));
 }
 
 

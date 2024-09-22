@@ -22,38 +22,38 @@ style: |
   .stream {
     fill: none;
     stroke: #125588;
-    stroke-width: 0.4mm;
+    stroke-width: 0.6;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
   .frame {
     fill: none;
     stroke: black;
-    stroke-width: 2.4mm;
+    stroke-width: 3.0;
     stroke-linejoin: miter;
   }
   .state {
     fill: white;
     stroke: black;
-    stroke-width: 0.6mm;
+    stroke-width: 1.0;
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
   .state_border, .town {
     fill: none;
     stroke: black;
-    stroke-width: 0.6mm;
+    stroke-width: 1.0;
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
   .town_label line {
     stroke: black;
-    stroke-width: 0.4mm;
+    stroke-width: 0.7;
   }
   .city {
     fill: none;
     stroke: black;
-    stroke-width: 0.6mm;
+    stroke-width: 1.0;
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
@@ -64,11 +64,11 @@ style: |
     stroke-linecap: butt;
   }
   .bottom {
-    stroke-width: 0.2mm;
+    stroke-width: 0.3;
   }
   .top {
-    stroke-width: 0.6mm;
-    stroke-dasharray: 3.4 3.4;
+    stroke-width: 0.8;
+    stroke-dasharray: 1.6 1.6;
   }
   .road {
     fill: none;
@@ -77,19 +77,19 @@ style: |
     stroke-linecap: round;
   }
   .road .class_1, .road .class_2, .road .class_3 {
-    stroke-width: 1.0mm;
+    stroke-width: 1.2;
   }
   .road .class_4, .road.class_4 {
-    stroke-width: 0.5mm;
+    stroke-width: 0.8;
   }
   .road .class_5, .road.class_5 {
-    stroke-width: 0.25mm;
+    stroke-width: 0.4;
   }
   .minimap .road {
-    stroke-width: 0.7mm;
+    stroke-width: 0.8;
   }
   .district {
-    stroke-width: 5.0mm;
+    stroke-width: 10.0;
     stroke-linejoin: round;
   }
   .dist_num_1, .dist_num_6 { /* orange */
@@ -150,43 +150,43 @@ style: |
   .district_border {
     fill: none;
     stroke: black;
-    stroke-width: 0.4mm;
+    stroke-width: 0.6;
     stroke-linejoin: round;
-    stroke-dasharray: 1.7 1.7;
+    stroke-dasharray: 0.8 0.8;
   }
   .town_label {
     font-weight: bold;
   }
   .main_map .town_label {
-    font-size: 16pt;
+    font-size: 6px; // note: 6px is actually 6 millimeters
     text-anchor: middle;
     alignment-baseline: middle;
   }
   .minimap .town_label {
-    font-size: 10pt;
+    font-size: 6px;
   }
   .district_label {
     font-weight: bold;
   }
   .main_map .district_label {
-    font-size: 150pt;
+    font-size: 75px;
   }
   .minimap .district_label {
-    font-size: 30pt;
+    font-size: 15px;
   }
   .legend_title {
     font-weight: normal;
-    font-size: 20pt;
+    font-size: 8px;
     text-anchor: middle;
   }
-  .legend_caption {
+  .legend_subtitle {
     font-weight: normal;
-    font-size: 16pt;
+    font-size: 6px;
     text-anchor: middle;
   }
   .legend_label {
     font-weight: normal;
-    font-size: 16pt;
+    font-size: 6px;
   }
 content:
   - !Group
@@ -381,7 +381,7 @@ content:
         text: "of the Boston area"
         coordinates: { x: 50, y: 25 }
       - !Label
-        class: "legend_caption"
+        class: "legend_subtitle"
         text: "Conformal conic projection, 1:50k"
         coordinates: { x: 50, y: 20}
       - !Line
