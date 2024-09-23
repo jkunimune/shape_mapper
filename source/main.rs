@@ -147,7 +147,9 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
         },
 
         // for a layer, put down a <g> containing a bunch of <path>s or whatever
-        Content::Layer{ filename, class_column, double, self_clip, filters, marker, marker_size, class: _ } => {
+        Content::Layer{
+                filename, class_column, label_column, double, self_clip, filters, marker, marker_size, class: _
+        } => {
             let region = outer_region.as_ref().ok_or(String::from(
                 "every layer must have a region defined somewhere in its hierarchy."))?;
             let transform = Transform::between(region, outer_bounding_box);
@@ -285,6 +287,51 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                 string.push_str(&shape_string);
                 *element_count += 1;
             }
+
+            // now, if labels are desired, go thru and add labels on top of all the shapes
+            match label_column {
+                Some(label_column) => {
+                    let mut reader = shapefile::Reader::from_path(
+                        format!("data/{}.shp", filename)).or(Err(format!("could not find `data/{}.dbf`", &filename)))?;
+                    for shape_record in reader.iter_shapes_and_records() {
+                        let shape_record = shape_record.unwrap();
+                        let (shape, record) = shape_record;
+        
+                        // first, discard anything that contradicts a filter
+                        match &filters {
+                            Some(filters) => {
+                                if !matches(filters, &record)? {
+                                    continue;
+                                }
+                            }
+                            None => {}
+                        }
+                        // also discard it if its bounding box doesn't intersect the desired region
+                        if !any_of_shape_is_in_box(&shape, &region) {
+                            continue;
+                        }
+
+                        // decide what the label should say
+                        let text = match record.get(&label_column) {
+                            Some(FieldValue::Character(characters)) => match characters {
+                                Some(characters) => characters,
+                                None => continue,
+                            },
+                            _ => {
+                                return Err(String::from("you can only label by string columns"));
+                            }
+                        };
+                        // decide where to put the label
+                        let location = Transform::apply(&transform, &center_of(&shape)?);
+                        // add the label to the string
+                        string.push_str(&format!(
+                            "{}  <text class=\"label\" x=\"{:.1}\" y=\"{:.1}\">{}</text>\n",
+                            &indentation, location.x, location.y, text));
+                    }
+                }
+                _ => {}
+            }
+
             string.push_str(&format!("{}</g>\n", &indentation));
         }
     }
@@ -471,6 +518,8 @@ enum Content {
         class: Option<String>,
         /// the record field key to use to tag each shape with a unique class, if such tags are desired.
         class_column: Option<String>,
+        /// the record field key to put in the label that gets added to each shape, if such labels are desired.
+        label_column: Option<String>,
         /// the name of the SVG (without the 'markers/' or '.svg') to put at the center of this thing
         marker: Option<String>,
         /// the desired area of the SVG in square millimeters

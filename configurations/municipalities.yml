@@ -5,7 +5,7 @@ description: "
   <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
     Massachusetts Bureau of Geographic Information
   </a>."
-bounding_box: { left: -3, right: 233, top: -3, bottom: 253 }
+bounding_box: { left: -3, right: 243, top: -3, bottom: 293 }
 style: |
   .frame {
     fill: none;
@@ -57,6 +57,14 @@ style: |
     fill: black;
     stroke: none;
   }
+  .town_hall .label {
+    fill: black;
+    font-family: Helvetic, Helv, sans-serif;
+    font-weight: normal;
+    font-size: 5px;
+    text-anchor: middle;
+    alignment-baseline: middle;
+  }
 content:
   - !Group
     frame: true
@@ -86,5 +94,6 @@ content:
       - !Layer
         class: "town_hall"
         marker: "star"
-        marker_size: 10
+        marker_size: 8
         filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
+        label_column: "CITY"

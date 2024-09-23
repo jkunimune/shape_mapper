@@ -255,12 +255,11 @@ content:
       - !Layer
         class: "town"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
-      - !Group
+      - !Layer
         class: "town_label"
-        content:
-          - !Label
-            text: "CHELSEA"
-            coordinates: { x: 238400, y: 904700 }
+        filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
+        marker: "none"
+        label_column: "CITY"
   - !Group
     class: "minimap"
     frame: true
