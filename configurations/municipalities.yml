@@ -5,7 +5,7 @@ description: "
   <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
     Massachusetts Bureau of Geographic Information
   </a>."
-bounding_box: { left: -3, right: 243, top: -3, bottom: 293 }
+bounding_box: { left: -3, right: 353, top: -3, bottom: 353 }
 style: |
   .frame {
     fill: none;
@@ -14,7 +14,7 @@ style: |
     stroke-linejoin: miter;
   }
   .pond, .background {
-    fill: #e5f3f4;
+    fill: #aadbea;
   }
   .stream {
     fill: none;
@@ -31,49 +31,87 @@ style: |
     stroke-linecap: butt;
   }
   .rail .bottom {
-    stroke: #8557a3;
+    stroke: #3c3549;
     stroke-width: 1.0;
   }
   .rail .top {
-    stroke: cyan;
-    stroke-width: 0.7;
-    stroke-dasharray: 1.7 1.7;
+    stroke: #ffffff;
+    stroke-width: 0.6;
+    stroke-dasharray: 1.0 2.0 1.0 0;
   }
   .highway {
     fill: none;
-    stroke: #6a6a6a;
-    stroke-width: 0.8;
     stroke-linejoin: round;
-    stroke-linecap: round;
+    stroke-linecap: butt;
   }
-  .town {
-    fill: cyan;
+  .highway .bottom {
     stroke: #000000;
-    stroke-width: 0.5;
+    stroke-width: 1.0;
+  }
+  .highway .top {
+    stroke: #dec12c;
+    stroke-width: 0.6;
+  }
+  .town-border {
+    fill: none;
+    stroke: #000000;
+    stroke-width: 0.2;
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
-  .town_hall {
-    fill: black;
+  .town {
     stroke: none;
+  }
+  .revere, .watertown, .medford, .weymouth, .wakefield, .canton, .medfield, .marblehead, .billerica {
+    fill: #AF9CB7; /* purple */
+  }
+  .newton, .westwood, .malden, .hull, .lexington, .lynn, .reading {
+    fill: #DCA5B7; /* pink */
+  }
+  .cambridge, .quincy, .winthrop, .dedham, .woburn, .salem, .lynnfield, .weston, .bedford {
+    fill: #CD8D85; /* red */
+  }
+  .arlington, .saugus, .everett, .dover, .randolph, .wellesley, .lincoln {
+    fill: #D1A07A; /* orange */
+  }
+  .boston, .stoneham, .braintree, .waltham, .norwood, .nahant, .peabody, .burlington {
+    fill: #C7B87F; /* yellow */
+  }
+  .brookline, .somerville, .belmont, .milton, .chelsea, .melrose, .winchester, .needham, .walpole, .swampscott, .hingham {
+    fill: #879C6B; /* green */
+  }
+  .town_hall path {
+    fill: black;
   }
   .town_hall .label {
     fill: black;
     font-family: Helvetic, Helv, sans-serif;
     font-weight: normal;
-    font-size: 5px;
+    font-size: 4px;
     text-anchor: middle;
     alignment-baseline: middle;
   }
 content:
   - !Group
     frame: true
-    bounding_box: { left: 0, right: 240, top: 0, bottom: 290 }
-    region: { left: 221000, right: 245000, bottom: 886000, top: 915000 }
+    bounding_box: { left: 0, right: 350, top: 0, bottom: 350 }
+    region: { left: 218000, right: 253000, bottom: 883000, top: 918000 }
     content:
       - !Layer
         class: "town"
-        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM_GENCOAST"
+        class_column: "TOWN"
+      - !Layer
+        class: "town-border"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC_GENCOAST"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [17]}
+      - !Layer
+        class: "pond"
+        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+        filters:
+          - !OneOf {key: "NAME", valid_values: ["Neponset River"]}
+          - !GreaterThan {key: "SHAPE_AREA", cutoff: 300000}
       - !Layer
         class: "pond"
         filename: "MassGIS/majorhydro/MAJPOND_POLY"
@@ -81,16 +119,25 @@ content:
         class: "stream"
         filename: "MassGIS/majorhydro/MAJSTRM_ARC"
       - !Layer
+        class: "stream"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC_GENCOAST"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [4]}
+      - !Layer
         class: "rail"
         filename: "MassGIS/trains/TRAINS_ARC"
-        double: true
         filters:
-          - !OneOf {key: "TYPE", valid_values: [1, 9]}
+          - !OneOf {key: "LINE_BRNCH", valid_values: ["TRANSIT-RED", "TRANSIT-GREEN", "TRANSIT-BLUE", "TRANSIT-ORANGE"]}
+          - !OneOf {key: "TRACK", valid_values: [1]}
+        double: true
+      - !Layer
+        class: "rail"
+        filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
+        double: true
       - !Layer
         class: "highway"
-        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
-        filters:
-          - !OneOf {key: "CLASS", valid_values: [1, 2, 3]}
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_RTE_MAJOR"
+        double: true
       - !Layer
         class: "town_hall"
         marker: "star"

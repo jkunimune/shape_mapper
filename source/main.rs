@@ -26,7 +26,7 @@ fn main() -> Result<(), String> {
     let map_height = f64::abs(map_bounding_box.bottom - map_bounding_box.top);
     let mut svg_code = format!(
         "\
-<svg viewBox=\"{:.1} {:.1} {:.1} {:.1}\" width=\"{:.1}mm\" height=\"{:.1}mm\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">
+<svg viewBox=\"{:.2} {:.2} {:.2} {:.2}\" width=\"{:.2}mm\" height=\"{:.2}mm\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">
   <title>{}</title>
   <desc>{}</desc>
   <style>
@@ -84,7 +84,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             let group_index = *element_count;
             // write all the stuff
             let rect_string = format!(
-                "<rect x=\"{:.1}\" y=\"{:.1}\" width=\"{:.1}\" height=\"{:.1}\"",
+                "<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\"",
                 bounding_box.left, bounding_box.top,
                 bounding_box.right - bounding_box.left,
                 bounding_box.bottom - bounding_box.top);
@@ -113,7 +113,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             let start = Transform::apply(&transform, &start.to_shapefile_point());
             let end = Transform::apply(&transform, &end.to_shapefile_point());
             string.push_str(&format!(
-                "{}<line x1=\"{:.1}\" y1=\"{:.1}\" x2=\"{:.1}\" y2=\"{:.1}\"{}/>\n",
+                "{}<line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\"{}/>\n",
                 &indentation, start.x, start.y, end.x, end.y, class_string));
         },
 
@@ -124,7 +124,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             let transform = Transform::between(region, outer_bounding_box);
 
             string.push_str(&format!(
-                "{}<rect x=\"{:.1}\" y=\"{:.1}\" width=\"{:.1}\" height=\"{:.1}\"{}/>\n",
+                "{}<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\"{}/>\n",
                 &indentation,
                 coordinates.left*transform.x_scale + transform.x_shift,
                 coordinates.top*transform.y_scale + transform.y_shift,
@@ -142,7 +142,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
             let coordinates = Transform::apply(&transform, &coordinates.to_shapefile_point());
 
             string.push_str(&format!(
-                "{}<text x=\"{:.1}\" y=\"{:.1}\"{}>{}</text>\n",
+                "{}<text x=\"{:.2}\" y=\"{:.2}\"{}>{}</text>\n",
                 &indentation, coordinates.x, coordinates.y, &class_string, &text));
         },
 
@@ -325,7 +325,7 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                         let location = Transform::apply(&transform, &center_of(&shape)?);
                         // add the label to the string
                         string.push_str(&format!(
-                            "{}  <text class=\"label\" x=\"{:.1}\" y=\"{:.1}\">{}</text>\n",
+                            "{}  <text class=\"label\" x=\"{:.2}\" y=\"{:.2}\">{}</text>\n",
                             &indentation, location.x, location.y, text));
                     }
                 }
@@ -347,13 +347,13 @@ fn convert_points_to_path_string(sections: &Vec<Vec<shapefile::Point>>, close_pa
         for (i, point) in section.iter().enumerate() {
             let point = Transform::apply(transform, &point);
             let segment_string = if i == 0 {
-                &format!("M{:.1},{:.1} ", point.x, point.y)
+                &format!("M{:.2},{:.2} ", point.x, point.y)
             }
             else if i == section.len() - 1 && close_path {
                 "Z"
             }
             else {
-                &format!("L{:.1},{:.1} ", point.x, point.y)
+                &format!("L{:.2},{:.2} ", point.x, point.y)
             };
             path_string.push_str(segment_string);
         }

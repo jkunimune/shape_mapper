@@ -363,7 +363,7 @@ content:
             text: "Fall River"
             coordinates: { x: 219000, y: 836000 }
           - !Label
-            text: "N. Bedford"
+            text: "New Bedf."
             coordinates: { x: 245000, y: 811000 }
   - !Group
     class: "legend legend_label"
