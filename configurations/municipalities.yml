@@ -144,3 +144,4 @@ content:
         marker_size: 8
         filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
         label_column: "CITY"
+        label_case: !Sentence

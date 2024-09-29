@@ -148,7 +148,8 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
 
         // for a layer, put down a <g> containing a bunch of <path>s or whatever
         Content::Layer{
-                filename, class_column, label_column, double, self_clip, filters, marker, marker_size, class: _
+                filename, class_column, label_column, label_case,
+                double, self_clip, filters, marker, marker_size, class: _
         } => {
             let region = outer_region.as_ref().ok_or(String::from(
                 "every layer must have a region defined somewhere in its hierarchy."))?;
@@ -321,6 +322,13 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                                 return Err(String::from("you can only label by string columns"));
                             }
                         };
+                        // modify the case if desired
+                        let text = match label_case {
+                            Some(Case::Upper) => &text.to_uppercase(),
+                            Some(Case::Lower) => &text.to_lowercase(),
+                            Some(Case::Sentence) => &(text[..1].to_uppercase() + &text[1..].to_lowercase()),
+                            None => text,
+                        };
                         // decide where to put the label
                         let location = Transform::apply(&transform, &center_of(&shape)?);
                         // add the label to the string
@@ -329,7 +337,11 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                             &indentation, location.x, location.y, text));
                     }
                 }
-                _ => {}
+                _ => {
+                    if label_case.is_some() {
+                        return Err(String::from("you can't use label_case without a label_column."));
+                    }
+                }
             }
 
             string.push_str(&format!("{}</g>\n", &indentation));
@@ -520,6 +532,8 @@ enum Content {
         class_column: Option<String>,
         /// the record field key to put in the label that gets added to each shape, if such labels are desired.
         label_column: Option<String>,
+        /// how to set the case of the label before adding it to the image, if any such modification is desired
+        label_case: Option<Case>,
         /// the name of the SVG (without the 'markers/' or '.svg') to put at the center of this thing
         marker: Option<String>,
         /// the desired area of the SVG in square millimeters
@@ -582,6 +596,14 @@ impl Content {
             Content::Group { class, .. } => class,
         };
     }
+}
+
+
+#[derive(Deserialize)]
+enum Case {
+    Upper,
+    Lower,
+    Sentence,
 }
 
 
