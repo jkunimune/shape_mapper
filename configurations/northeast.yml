@@ -1,0 +1,149 @@
+title: "The Northeast Corridor"
+description: "
+  A map of the states and cities that make up the Northeast Corridor,
+  the northeastern coastal region of the United States of America.
+  All geographic data is taken from
+  <a href=\"https://naturalearthdata.com/\">
+    Natural Earth
+  </a>."
+style: |
+  .graticule {
+    fill: none;
+    stroke: blue;
+    stroke-width: 0.2;
+  }
+  .state {
+    fill: none;
+    stroke: none;
+  }
+  .river {
+    fill: none;
+    stroke: blue;
+    stroke-width: 0.4;
+  }
+  .lake {
+    fill: cyan;
+    storke: none;
+  }
+  .railroad {
+    fill: none;
+    stroke: darkgrey;
+    stroke-width: 0.4;
+  }
+  .state_border {
+    fill: none;
+    stroke: black;
+    stroke-width: 0.2;
+  }
+  .state {
+    stroke: none;
+  }
+  .city {
+    fill: black;
+  }
+  .state .label {
+    fill: black;
+    font-family: "Frutiger LT Pro",sans-serif;
+    font-weight: 500;
+    font-width: expanded;
+    font-size: 10.0px;
+    text-anchor: middle;
+  }
+  .water .label {
+    fill: blue;
+    font-family: "Noto Serif","Times New Roman",serif;
+    font-weight: 500
+    font-style: italic;
+    text-anchor: middle;
+  }
+  .sea .label, .gulf .label, .bay .label, .strait .label {
+    font-size: 8.0px;
+  }
+  .river .label, .channel .label {
+    font-size: 6.0px;
+  }
+  .small_city .label, .big_city .label {
+    fill: black;
+    font-family: "Frutiger LT Pro",sans-serif;
+    font-weight: 900;
+    font-width: condensed;
+    text-anchor: start;
+  }
+  .small_city .label {
+    font-size: 4.0px;
+  }
+  .big_city .label {
+    font-size: 6.0px;
+  }
+bounding_box: { left: -80, right: -68, top: -45, bottom: -35 }
+contents:
+  # - !RasterLayer
+  #   filename: "Natural Earth/ne_shaded_relief"
+  - !Group
+    frame: false
+    # projection:
+    #   !Oblique
+    #   projection:
+    #     !Mercator
+    #     central_meridian: 150
+    #     equatorial_scale: 1000000
+    #   pole_latitude: 32.4
+    #   pole_longitude: 162.9
+    bounding_box: { left: -79, right: -69, top: -44, bottom: -36 }
+    region: { left: -79, right: -69, bottom: 37, top: 44 }
+    contents:
+      - !Graticule
+        class: "graticule"
+        parallel_spacing: 2
+        meridian_spacing: 2
+      - !Layer
+        class: "state"
+        filename: "Natural Earth/ne_10m_admin_1_states_provinces"
+        class_column: "name"
+        label_column: "name"
+        label_case: !Upper
+      - !Layer
+        class: "river"
+        filename: "Natural Earth/ne_10m_rivers_lake_centerlines"
+      - !Layer
+        class: "lake"
+        filename: "Natural Earth/ne_10m_lakes"
+      - !Layer
+        class: "state_border"
+        filename: "Natural Earth/ne_10m_admin_1_states_provinces"
+      - !Layer
+        class: "river"
+        filename: "Natural Earth/ne_10m_coastline"
+      - !Layer
+        class: "railroad"
+        filename: "Natural Earth/ne_10m_railroads"
+      - !Layer
+        class: "sea"
+        filename: "Natural Earth/ne_10m_geography_marine_polys"
+        label_column: "name_en"
+        marker: none
+      - !Layer
+        class: "small_city"
+        filename: "Natural Earth/ne_10m_populated_places_simple"
+        label_column: "name"
+        marker: "circle"
+        marker_size: 1
+        filters:
+          - !Not
+            filter: !GreaterThan {key: "scalerank", cutoff: 2}
+          - !Not
+            filter: !GreaterThan {key: "pop_max", cutoff: 1000000}
+      - !Layer
+        class: "big_city"
+        filename: "Natural Earth/ne_10m_populated_places_simple"
+        label_column: "name"
+        marker: "circle"
+        marker_size: 2
+        filters:
+          - !Not
+            filter: !GreaterThan {key: "scalerank", cutoff: 2}
+          - !GreaterThan {key: "pop_max", cutoff: 1000000}
+      # - !CompassRose
+      #   filename: "cross_arrow"
+      #   label: "N"
+      #   location: { x: -60, y: 40 }

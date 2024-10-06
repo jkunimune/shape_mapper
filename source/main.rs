@@ -113,7 +113,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
             if marker.is_none() && marker_size.is_some() {
                 return Err(String::from("you may not use the `marker_size` option without the `marker` option."));
             }
-            if marker.is_some() && self_clip.is_some_and(|value| value == true) {
+            if marker.as_ref().is_some_and(|value| value != "none") && self_clip == Some(true) {
                 return Err(String::from("the `self_clip` option is incompatible with the `marker` option."));
             }
 
@@ -122,10 +122,14 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
             let mut reader = shapefile::Reader::from_path(
                 format!("data/{}.shp", filename)).or(Err(format!("could not find `data/{}.dbf`", &filename)))?;
 
-            let marker = match marker {
+            let marker_data = match &marker {
+                // if marker was unspecified, don't load anything
+                None => None,
+                // if marker was explicitly "none", don't load anything
+                Some(marker) if marker == "none" => None,
                 // if marker was specified, load its content from disc and unwrap marker_size
                 Some(marker_filename) => {
-                    // make sure we have a marker
+                    // make sure we have a marker size
                     let marker_size = match marker_size {
                         Some(number) => number,
                         None => {
@@ -141,7 +145,6 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                     }
                     Some((load_SVG(&marker_filename)?, marker_size))
                 }
-                None => None,
             };
 
             'shape_loop:
@@ -187,64 +190,74 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                 let location = center_of(&shape)?;
 
                 // convert the shape to a Path or a Marker
-                let shape = match &marker {
-                    // if marker was specified, make a Content::Marker
-                    Some((marker_data, marker_size)) => {
-                        let marker_location = center_of(&shape)?;
-                        Content::Marker {
-                            detail: marker_data.clone(),
-                            location: marker_location,
-                            size: *marker_size,
-                            class: shape_class }
-                    }
-                    // if not, make a Content::Path
-                    None => {
-                        // unwrap self_clip
-                        let self_clip = self_clip.unwrap_or(false);
-                        // draw it however you draw this shape
-                        let (parts, closed) = match shape {
-                            Shape::Polygon(polygon) => {
-                                // combine the rings of the polygon into a Vec<Vec<Point>>
-                                let mut rings_as_nested_vec: Vec<Vec<shapefile::Point>> = Vec::with_capacity(polygon.rings().len());
-                                for i in 0..polygon.rings().len() {
-                                    rings_as_nested_vec.push(polygon.rings()[i].points().to_vec());
-                                }
-                                (SerializablePoint::deep_convert(&rings_as_nested_vec), true)
+                let shape = if marker.is_none() {
+                    // if no marker was specified, try to make a Content::Path
+                    // unwrap self_clip
+                    let self_clip = self_clip.unwrap_or(false);
+                    // draw it however you draw this shape
+                    let (parts, closed) = match shape {
+                        Shape::Polygon(polygon) => {
+                            // combine the rings of the polygon into a Vec<Vec<Point>>
+                            let mut rings_as_nested_vec: Vec<Vec<shapefile::Point>> = Vec::with_capacity(polygon.rings().len());
+                            for i in 0..polygon.rings().len() {
+                                rings_as_nested_vec.push(polygon.rings()[i].points().to_vec());
                             }
-                            Shape::Polyline(polyline) => {
-                                (SerializablePoint::deep_convert(polyline.parts()), false)
-                            }
-                            Shape::Point(_) => {
-                                return Err(format!("data/{}.shp is a POINT shapefile.  POINT layers must always have a `marker`.", filename))
-                            }
-                            _ => {
-                                return Err(format!("we don't support {} shapefiles right now.", shape.shapetype().to_string()));
-                            }
-                        };
-                        // pull it all together as a Content::Path
-                        Content::Path {
-                            parts, closed, self_clip,
-                            class: shape_class,
+                            (SerializablePoint::deep_convert(&rings_as_nested_vec), true)
+                        }
+                        Shape::Polyline(polyline) => {
+                            (SerializablePoint::deep_convert(polyline.parts()), false)
+                        }
+                        Shape::Point(_) => {
+                            return Err(format!("data/{}.shp is a POINT shapefile.  POINT layers must always have a `marker`.", filename))
+                        }
+                        _ => {
+                            return Err(format!("we don't support {} shapefiles right now.", shape.shapetype().to_string()));
+                        }
+                    };
+                    // pull it all together as a Content::Path
+                    Some(Content::Path {
+                        parts, closed, self_clip,
+                        class: shape_class,
+                    })
+                }
+                else {
+                    match &marker_data {
+                        // if marker was specified, make a Content::Marker
+                        Some((marker_detail, marker_size)) => {
+                            let marker_location = center_of(&shape)?;
+                            Some(Content::Marker {
+                                detail: marker_detail.clone(),
+                                location: marker_location,
+                                size: *marker_size,
+                                class: shape_class,
+                            })
+                        }
+                        // if marker was specified as "none", don't do anything
+                        None => {
+                            None
                         }
                     }
                 };
 
                 // append it to the list, twice if so desired
-                match double {
-                    Some(true) => {
-                        for position in ["bottom", "top"] {
-                            let compound_class = match shape.get_class() {
-                                Some(class) => Some(String::from(class) + " " + position),
-                                None => Some(String::from(position)),
-                            };
-                            let shape = shape.clone().set_class(compound_class);
+                match shape {
+                    Some(shape) => match double {
+                        Some(true) => {
+                            for position in ["bottom", "top"] {
+                                let compound_class = match shape.get_class() {
+                                    Some(class) => Some(String::from(class) + " " + position),
+                                    None => Some(String::from(position)),
+                                };
+                                let shape = shape.clone().set_class(compound_class);
+                                contents.push(shape);
+                            }
+                        }
+                        _ => {
                             contents.push(shape);
                         }
                     }
-                    _ => {
-                        contents.push(shape);
-                    }
-                };
+                    None => {}
+                }
 
                 // add the corresponding label, if desired
                 match &label_column {
@@ -255,8 +268,11 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                                 Some(characters) => characters,
                                 None => continue,
                             },
-                            _ => {
-                                return Err(String::from("you can only label by string columns"));
+                            Some(value) => {
+                                return Err(format!("you can only label by string columns, but '{}' is a {} column.", label_column, value.field_type().to_string()));
+                            }
+                            None => {
+                                return Err(format!("you can't label by the column '{}' because it doesn't seem to exist.", label_column));
                             }
                         };
                         // modify the case if desired

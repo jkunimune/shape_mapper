@@ -150,20 +150,35 @@ style: |
   .district_border {
     fill: none;
     stroke: black;
-    stroke-width: 0.6;
+    stroke-width: 0.4;
     stroke-linejoin: round;
-    stroke-dasharray: 0.8 0.8;
+    stroke-dasharray: 0.6 0.6;
+  }
+  .pond_label {
+    fill: #125588;
+    font-size: 3.5px;
+    font-style: italic;
+    text-anchor: middle;
+    alignment-baseline: baseline;
+  }
+  .airport_label {
+    fill: #3b3b3b;
+    font-size: 3.5px;
+    text-anchor: middle;
+    alignment-baseline: baseline;
   }
   .town_label {
     font-weight: bold;
   }
   .main_map .town_label {
-    font-size: 6px; // note: 6px is actually 6 millimeters
+    font-size: 6px; // note: 6px is actually 6 millimeters (about 17pt)
     text-anchor: middle;
     alignment-baseline: middle;
   }
   .minimap .town_label {
-    font-size: 6px;
+    font-size: 5px;
+    text-anchor: left;
+    alignment-baseline: baseline;
   }
   .district_label {
     font-weight: bold;
@@ -256,10 +271,25 @@ contents:
         class: "town"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
       - !Layer
+        class: "pond_label"
+        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+        marker: none
+        label_column: "NAME"
+        label_case: !Upper
+        filters:
+          - !GreaterThan {key: "SHAPE_AREA", cutoff: 270000}
+      - !Layer
+        class: "airport_label"
+        filename: "MassDOT/Airports"
+        marker: none
+        label_column: "AIRPORT_NA"
+        label_case: !Upper
+      - !Layer
         class: "town_label"
-        filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
-        marker: "none"
-        label_column: "CITY"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+        marker: none
+        label_column: "TOWN"
+        label_case: !Upper
   - !Group
     class: "minimap"
     frame: true
