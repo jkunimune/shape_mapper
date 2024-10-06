@@ -173,11 +173,11 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                     Some(class_column) => match record.get(class_column) {
                         Some(value) => match value {
                             FieldValue::Character(characters) => match characters {
-                                Some(characters) => Some(sanitize(characters).replace(" ", "_")),
+                                Some(characters) => Some(sanitize_CSS(characters).replace(" ", "_")),
                                 None => None,
                             },
                             FieldValue::Numeric(number) => match number {
-                                Some(number) => Some(format!("{}_{}", sanitize(class_column), number)),
+                                Some(number) => Some(format!("{}_{}", sanitize_CSS(class_column), number)),
                                 None => None,
                             },
                             _ => return Err(String::from("I don't know how to print this field type.")),
@@ -282,6 +282,8 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                             Some(Case::Sentence) => text[..1].to_uppercase() + &text[1..].to_lowercase(),
                             None => text.to_owned(),
                         };
+                        // add necessary escape sequences (make sure you do this after setting the case)
+                        let text = sanitize_XML(&text);
                         // decide where to put the label
                         labels.push(Content::Label {
                             text, location,
@@ -558,7 +560,7 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
 
     // tack on the class, if there is one
     let string = match class {
-        Some(class) => insert_attribute(&string, "class", &sanitize(&class))?,
+        Some(class) => insert_attribute(&string, "class", &sanitize_CSS(&class))?,
         None => string,
     };
     // add the proper indentation
@@ -672,8 +674,19 @@ fn prepend_to_each_line(string: &str, prefix: &str) -> String {
 
 
 /// replace problematic characters like , to _ and make it all lowercase
-fn sanitize(string: &str) -> String {
+fn sanitize_CSS(string: &str) -> String {
     return Regex::new(r"[{},.:;]").unwrap().replace_all(&string.to_lowercase(), "_").into_owned();
+}
+
+
+/// replace problematic characters like & to their XML escape sequences
+fn sanitize_XML(string: &str) -> String {
+    let string = string.replace("&", "&amp;");
+    let string = string.replace("<", "&lt;");
+    let string = string.replace(">", "&gt;");
+    let string = string.replace("'", "&apos;");
+    let string = string.replace("\"", "&quot;");
+    return string;
 }
 
 

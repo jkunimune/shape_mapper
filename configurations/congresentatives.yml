@@ -77,13 +77,13 @@ style: |
     stroke-linecap: round;
   }
   .road .class_1, .road .class_2, .road .class_3 {
-    stroke-width: 1.2;
+    stroke-width: 0.9;
   }
   .road .class_4, .road.class_4 {
-    stroke-width: 0.8;
+    stroke-width: 0.6;
   }
   .road .class_5, .road.class_5 {
-    stroke-width: 0.4;
+    stroke-width: 0.3;
   }
   .minimap .road {
     stroke-width: 0.8;
@@ -153,6 +153,13 @@ style: |
     stroke-width: 0.4;
     stroke-linejoin: round;
     stroke-dasharray: 0.6 0.6;
+  }
+  .park_label {
+    fill: #2d4e1f;
+    font-size: 3.5px;
+    font-style: italic;
+    text-anchor: middle;
+    alignment-baseline: baseline;
   }
   .pond_label {
     fill: #125588;
@@ -270,6 +277,14 @@ contents:
       - !Layer
         class: "town"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+      - !Layer
+        class: "park_label"
+        filename: "MassGIS/openspace/OPENSPACE_POLY"
+        marker: none
+        label_column: "SITE_NAME"
+        label_case: !Upper
+        filters:
+          - !GreaterThan {key: "SHAPE_AREA", cutoff: 540000}
       - !Layer
         class: "pond_label"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"

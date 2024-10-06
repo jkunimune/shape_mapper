@@ -31,13 +31,13 @@ style: |
     stroke-linecap: butt;
   }
   .rail .bottom {
-    stroke: #3c3549;
+    stroke: #4e455e;
     stroke-width: 1.0;
   }
   .rail .top {
     stroke: #ffffff;
     stroke-width: 0.6;
-    stroke-dasharray: 1.0 2.0 1.0 0;
+    stroke-dasharray: 0 1.0 2.0 1.0;
   }
   .highway {
     fill: none;
@@ -68,7 +68,7 @@ style: |
   .newton, .westwood, .malden, .hull, .lexington, .lynn, .reading {
     fill: #DCA5B7; /* pink */
   }
-  .cambridge, .quincy, .winthrop, .dedham, .woburn, .salem, .lynnfield, .weston, .bedford {
+  .cambridge, .quincy, .winthrop, .dedham, .woburn, .salem, .lynnfield, .weston {
     fill: #CD8D85; /* red */
   }
   .arlington, .saugus, .everett, .dover, .randolph, .wellesley, .lincoln {
@@ -77,19 +77,26 @@ style: |
   .boston, .stoneham, .braintree, .waltham, .norwood, .nahant, .peabody, .burlington {
     fill: #C7B87F; /* yellow */
   }
-  .brookline, .somerville, .belmont, .milton, .chelsea, .melrose, .winchester, .needham, .walpole, .swampscott, .hingham {
+  .brookline, .somerville, .belmont, .milton, .chelsea, .melrose, .winchester, .needham, .walpole, .swampscott, .hingham, .bedford {
     fill: #879C6B; /* green */
   }
   .town_hall path {
     fill: black;
   }
-  .town_hall .label {
+  .label {
     fill: black;
     font-family: Helvetic, Helv, sans-serif;
     font-weight: normal;
-    font-size: 4px;
+  }
+  .town_hall .label {
+    font-size: 4.5px;
+    text-anchor: start;
+    alignment-baseline: baseline;
+  }
+  .neighborhood .label {
+    font-size: 3.5px;
     text-anchor: middle;
-    alignment-baseline: middle;
+    alignment-baseline: baseline;
   }
 contents:
   - !Group
@@ -156,3 +163,25 @@ contents:
         filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
         label_column: "CITY"
         label_case: !Sentence
+      - !Layer
+        class: "neighborhood"
+        marker: "none"
+        filename: "MassGIS/geonames_shp/GEONAMES_PT_PLACES"
+        label_column: "LABELTEXT"
+        label_case: !Sentence
+        filters:
+          - !OneOf
+            key: "LABELTEXT"
+            valid_values:
+              - "EAST BOSTON"
+              - "SOUTH BOSTON"
+              - "CHARLESTOWN"
+              - "DORCHESTER"
+              - "ALLSTON"
+              - "BRIGHTON"
+              - "ROXBURY"
+              - "WEST ROXBURY"
+              - "ROSLINDALE"
+              - "JAMAICA PLAIN"
+              - "MATTAPAN"
+              - "HYDE PARK"
