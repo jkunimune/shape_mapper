@@ -2,7 +2,7 @@ use core::f64;
 use regex::Regex;
 use std::{env, fs, iter};
 use serde::Deserialize;
-use shapefile::dbase::{FieldValue, Record};
+use shapefile::dbase::FieldValue;
 use shapefile::record::EsriShape;
 use shapefile::Shape;
 
@@ -38,10 +38,12 @@ fn main() -> Result<(), String> {
         map_width, map_height,
         configuration.title, configuration.description, configuration.style,
     );
-
     let element_index: &mut u32 = &mut 0;
     for content in configuration.content {
-        svg_code.push_str(&transcribe_as_svg(content, &map_bounding_box, &configuration.region, 1, element_index)?);
+        let content = load_content(content, &configuration.region)?;
+        let content = transform_content(content, &map_bounding_box, &configuration.region)?;
+        let content = transcribe_content_as_svg(content, &map_bounding_box, &configuration.region, 1, element_index)?;
+        svg_code.push_str(&content);
     }
 
     svg_code.push_str("</svg>\n");
@@ -56,113 +58,94 @@ fn main() -> Result<(), String> {
 }
 
 
-fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &Option<Box>, indent_level: usize, element_count: &mut u32) -> Result<String, String> {
-    // decide how much indentation it will have
-    let indentation: String = iter::repeat("  ").take(indent_level).collect();
-    // prepare to add a class if there is any
-    let class_string = match content.get_class() {
-        Some(class) => format!(" class=\"{}\"", sanitize(class)),
-        None => String::from(""),
-    };
-
-    // everything after that depends on what kind of content it is...
-    let mut string = String::new();
+/// return a copy of this content that is the same except that any Layers and Graticules
+/// are resolved into groups of Paths
+fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content, String> {
     match content {
 
-        // for a group, put down a <rect>, a <g> with whatever the sub-contents are, and then another <rect>
-        Content::Group{ content: sub_contents, bounding_box: sub_bounding_box, region: sub_region, frame, .. } => {
-            // this group may override the outer bounding box and region
-            let bounding_box = match &sub_bounding_box {
-                Some(sub_bounding_box) => sub_bounding_box,
-                None => outer_bounding_box,
-            };
-            let region = match &sub_region {
+        // for a Group, load its children recursively
+        Content::Group { content: sub_contents, bounding_box, region: sub_region, frame, class } => {
+            let region: &Option<Box> = match &sub_region {
                 Some(..) => &sub_region,
                 None => outer_region,
             };
-            let frame = frame.unwrap_or(false);
-            let group_index = *element_count;
-            // write all the stuff
-            let rect_string = format!(
-                "<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\"",
-                bounding_box.left, bounding_box.top,
-                bounding_box.right - bounding_box.left,
-                bounding_box.bottom - bounding_box.top);
-            string.push_str(&format!("{}<clipPath id=\"clip_path_{}\">\n", &indentation, group_index));
-            string.push_str(&format!("{}  {}/>\n", &indentation, &rect_string));
-            string.push_str(&format!("{}</clipPath>\n", &indentation));
-            string.push_str(&format!("{}<g clip-path=\"url(#clip_path_{})\"{}>\n", &indentation, group_index, &class_string));
-            if frame {
-                string.push_str(&format!("{}  {} class=\"background\"/>\n", &indentation, &rect_string));
-            }
+            let mut loaded_sub_contents = Vec::with_capacity(sub_contents.len());
             for sub_content in sub_contents {
-                string.push_str(&transcribe_as_svg(sub_content, bounding_box, region, indent_level + 1, element_count)?);
+                loaded_sub_contents.push(load_content(
+                    sub_content,
+                    region)?);
             }
-            if frame {
-                string.push_str(&format!("{}  {} class=\"frame\"/>\n", &indentation, &rect_string));
+            // add in some rectangles if desired
+            match frame {
+                Some(true) => {
+                    let region = match region {
+                        Some(region) => region,
+                        None => return Err(String::from("if a Group has frame: true, it must also set a region.")),
+                    };
+                    loaded_sub_contents.insert(
+                        0, Content::Rectangle {
+                            coordinates: region.clone(),
+                            class: Some(String::from("background")),
+                        },
+                    );
+                    loaded_sub_contents.push(
+                        Content::Rectangle {
+                            coordinates: region.clone(),
+                            class: Some(String::from("frame")),
+                        },
+                    );
+                }
+                _ => {}
             }
-            string.push_str(&format!("{}</g>\n", &indentation));
+            return Ok(Content::Group {
+                content: loaded_sub_contents,
+                class: class,
+                bounding_box: bounding_box,
+                region: sub_region,
+                frame: Some(false),
+            });
         }
 
-        // for a line, jou just need a single <line>
-        Content::Line { start, end, .. } => {
+        // resolve a Layer by loading geographic data from disc and making a bunch of Paths or Markers
+        Content::Layer { filename, class, class_column, label_column, label_case, marker, marker_size, double, self_clip, filters } => {
             let region = outer_region.as_ref().ok_or(String::from(
                 "every layer must have a region defined somewhere in its hierarchy."))?;
-            let transform = Transform::between(region, outer_bounding_box);
+            // check for incompatible options
+            if marker.is_none() && marker_size.is_some() {
+                return Err(String::from("you may not use the `marker_size` option without the `marker` option."));
+            }
+            if marker.is_some() && self_clip.is_some_and(|value| value == true) {
+                return Err(String::from("the `self_clip` option is incompatible with the `marker` option."));
+            }
 
-            let start = Transform::apply(&transform, &start.to_shapefile_point());
-            let end = Transform::apply(&transform, &end.to_shapefile_point());
-            string.push_str(&format!(
-                "{}<line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\"{}/>\n",
-                &indentation, start.x, start.y, end.x, end.y, class_string));
-        },
-
-        // for a rectangle, use a <rect>
-        Content::Rectangle { coordinates, .. } => {
-            let region = outer_region.as_ref().ok_or(String::from(
-                "every layer must have a region defined somewhere in its hierarchy."))?;
-            let transform = Transform::between(region, outer_bounding_box);
-
-            string.push_str(&format!(
-                "{}<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\"{}/>\n",
-                &indentation,
-                coordinates.left*transform.x_scale + transform.x_shift,
-                coordinates.top*transform.y_scale + transform.y_shift,
-                (coordinates.right - coordinates.left)*transform.x_scale,
-                (coordinates.bottom - coordinates.top)*transform.y_scale,
-                &class_string));
-        }
-
-        // for a label, use a <text> element
-        Content::Label { text, coordinates, .. } => {
-            let region = outer_region.as_ref().ok_or(String::from(
-                "every layer must have a region defined somewhere in its hierarchy."))?;
-            let transform = Transform::between(region, outer_bounding_box);
-
-            let coordinates = Transform::apply(&transform, &coordinates.to_shapefile_point());
-
-            string.push_str(&format!(
-                "{}<text x=\"{:.2}\" y=\"{:.2}\"{}>{}</text>\n",
-                &indentation, coordinates.x, coordinates.y, &class_string, &text));
-        },
-
-        // for a layer, put down a <g> containing a bunch of <path>s or whatever
-        Content::Layer{
-                filename, class_column, label_column, label_case,
-                double, self_clip, filters, marker, marker_size, class: _
-        } => {
-            let region = outer_region.as_ref().ok_or(String::from(
-                "every layer must have a region defined somewhere in its hierarchy."))?;
-            let transform = Transform::between(region, outer_bounding_box);
-
-            string.push_str(&format!("{}<g{}>\n", &indentation, &class_string));
+            let mut contents = Vec::new();
+            let mut labels = Vec::new();
             let mut reader = shapefile::Reader::from_path(
                 format!("data/{}.shp", filename)).or(Err(format!("could not find `data/{}.dbf`", &filename)))?;
 
-            let scale_string = format!("1:{:.0}", 1e3/f64::min(transform.x_scale, -transform.y_scale));
-            let shape_count = reader.shape_count().map_err(|err| err.to_string())?;
-            println!("plotting {} shapes from `{}.shp` at scale {}", shape_count, filename, scale_string);
+            let marker = match marker {
+                // if marker was specified, load its content from disc and unwrap marker_size
+                Some(marker_filename) => {
+                    // make sure we have a marker
+                    let marker_size = match marker_size {
+                        Some(number) => number,
+                        None => {
+                            return Err(format!("the `{}.shp` layer has a marker, but no marker size is given.", filename));
+                        }
+                    };
+                    // check for any incompatible options
+                    match self_clip {
+                        Some(true) => {
+                            return Err(String::from("the `self_clip` option is incompatible with the `marker` option."));
+                        }
+                        _ => {}
+                    }
+                    Some((load_SVG(&marker_filename)?, marker_size))
+                }
+                None => None,
+            };
 
+            'shape_loop:
             for shape_record in reader.iter_shapes_and_records() {
                 let shape_record = shape_record.unwrap();
                 let (shape, record) = shape_record;
@@ -170,8 +153,30 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                 // first, discard anything that contradicts a filter
                 match &filters {
                     Some(filters) => {
-                        if !matches(filters, &record)? {
-                            continue;
+                        for filter in filters {
+                            let valid = match filter {
+                                Filter::OneOf { key, valid_values } => {
+                                    let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
+                                    match value {
+                                        FieldValue::Numeric(Some(number)) => valid_values.contains(&f64::to_string(number)),
+                                        FieldValue::Numeric(None) => false,
+                                        FieldValue::Character(Some(characters)) => valid_values.contains(characters),
+                                        FieldValue::Character(None) => false,
+                                        _ => return Err(String::from("you can only filter on numerical and character fields right now.")),
+                                    }
+                                }
+                                Filter::GreaterThan { key, cutoff } => {
+                                    let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
+                                    match value {
+                                        FieldValue::Float(Some(number)) => number > cutoff,
+                                        FieldValue::Float(None) => false,
+                                        _ => return Err(String::from("GreaterThan filters must act on float32 fields.")),
+                                    }
+                                }
+                            };
+                            if !valid {
+                                continue 'shape_loop;
+                            }
                         }
                     }
                     None => {}
@@ -181,63 +186,8 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                     continue;
                 }
 
-                // start by converting the shape to an SVG string of some kind
-                let shape_string: String = match &marker {
-                    // if marker was specified, put a marker at the center of each shape
-                    Some(marker_filename) => {
-                        // make sure we have a marker
-                        let marker_size = match marker_size {
-                            Some(number) => number,
-                            None => {
-                                return Err(format!("the `{}.shp` layer has a marker, but no marker size is given.", filename));
-                            }
-                        };
-                        // check for any incompatible options
-                        match self_clip {
-                            Some(true) => {
-                                return Err(String::from("the `self_clip` option is incompatible with the `marker` option."));
-                            }
-                            _ => {}
-                        }
-                        let marker_location = Transform::apply(&transform, &center_of(&shape)?);
-                        position_and_scale_marker(marker_filename, &marker_location, marker_size)?
-                    }
-                    // if not, draw out the size and shape of each shape
-                    None => {
-                        // check for any incompatible options
-                        match marker_size {
-                            Some(_) => {
-                                return Err(String::from("you may not use the `marker_size` option without the `marker` option."));
-                            }
-                            None => {}
-                        }
-                        // draw it however you draw this shape
-                        match shape {
-                            Shape::Polygon(polygon) => {
-                                // combine the rings of the polygon into a Vec<Vec<Point>>
-                                let mut rings_as_nested_vec: Vec<Vec<shapefile::Point>> = Vec::with_capacity(polygon.rings().len());
-                                for i in 0..polygon.rings().len() {
-                                    rings_as_nested_vec.push(polygon.rings()[i].points().to_vec());
-                                }
-                                // convert it to a d string and make it a path
-                                convert_points_to_path_string(&rings_as_nested_vec, true, &transform)
-                            }
-                            Shape::Polyline(polyline) => {
-                                // convert it to a d string and make a path
-                                convert_points_to_path_string(polyline.parts(), false, &transform)
-                            }
-                            Shape::Point(_) => {
-                                return Err(format!("data/{}.shp is a POINT shapefile.  POINT layers must always have a `marker`.", filename))
-                            }
-                            _ => {
-                                return Err(format!("we don't support {} shapefiles right now.", shape.shapetype().to_string()));
-                            }
-                        }
-                    }
-                };
-
-                // tack on the class, if there is one
-                let sub_class = match &class_column {
+                // determine if we should add a class to this
+                let shape_class = match &class_column {
                     Some(class_column) => match record.get(class_column) {
                         Some(value) => match value {
                             FieldValue::Character(characters) => match characters {
@@ -254,66 +204,76 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                     }
                     None => None,
                 };
-                let shape_string = match sub_class {
-                    Some(sub_class) => insert_attribute(&shape_string, "class", &sub_class)?,
-                    None => shape_string,
-                };
 
-                // nest it in a clipPath element, if desired
-                let shape_index = *element_count;
-                let shape_string = match self_clip {
-                    Some(true) => {
-                        format!("  <clipPath id=\"clip_path_{}\">\n", shape_index) + &
-                        "  " + &shape_string + &
-                        "  </clipPath>\n" + &
-                        &insert_attribute(&shape_string, "style", &format!("clip-path: url(#clip_path_{})", shape_index))?
+                let location = center_of(&shape)?;
+
+                // convert the shape to a Path or a Marker
+                let shape = match &marker {
+                    // if marker was specified, make a Content::Marker
+                    Some((marker_data, marker_size)) => {
+                        let marker_location = center_of(&shape)?;
+                        Content::Marker {
+                            detail: marker_data.clone(),
+                            location: marker_location,
+                            size: *marker_size,
+                            class: shape_class }
                     }
-                    _ => shape_string,
-                };
-
-                // double it up, if desired
-                let shape_string = match double {
-                    Some(true) => {
-                        insert_attribute(&shape_string, "class", "bottom")? + &
-                        insert_attribute(&shape_string, "class", "top")?
-                    }
-                    _ => shape_string
-                };
-
-                // add the proper indentation
-                let sub_indentation = String::from("  ") + &indentation;
-                let shape_string = prepend_to_each_line(&shape_string, &sub_indentation);
-
-                // add it to the shape
-                string.push_str(&shape_string);
-                *element_count += 1;
-            }
-
-            // now, if labels are desired, go thru and add labels on top of all the shapes
-            match label_column {
-                Some(label_column) => {
-                    let mut reader = shapefile::Reader::from_path(
-                        format!("data/{}.shp", filename)).or(Err(format!("could not find `data/{}.dbf`", &filename)))?;
-                    for shape_record in reader.iter_shapes_and_records() {
-                        let shape_record = shape_record.unwrap();
-                        let (shape, record) = shape_record;
-        
-                        // first, discard anything that contradicts a filter
-                        match &filters {
-                            Some(filters) => {
-                                if !matches(filters, &record)? {
-                                    continue;
+                    // if not, make a Content::Path
+                    None => {
+                        // unwrap self_clip
+                        let self_clip = self_clip.unwrap_or(false);
+                        // draw it however you draw this shape
+                        let (parts, closed) = match shape {
+                            Shape::Polygon(polygon) => {
+                                // combine the rings of the polygon into a Vec<Vec<Point>>
+                                let mut rings_as_nested_vec: Vec<Vec<shapefile::Point>> = Vec::with_capacity(polygon.rings().len());
+                                for i in 0..polygon.rings().len() {
+                                    rings_as_nested_vec.push(polygon.rings()[i].points().to_vec());
                                 }
+                                (SerializablePoint::deep_convert(&rings_as_nested_vec), true)
                             }
-                            None => {}
+                            Shape::Polyline(polyline) => {
+                                (SerializablePoint::deep_convert(polyline.parts()), false)
+                            }
+                            Shape::Point(_) => {
+                                return Err(format!("data/{}.shp is a POINT shapefile.  POINT layers must always have a `marker`.", filename))
+                            }
+                            _ => {
+                                return Err(format!("we don't support {} shapefiles right now.", shape.shapetype().to_string()));
+                            }
+                        };
+                        // pull it all together as a Content::Path
+                        Content::Path {
+                            parts: parts,
+                            closed: closed,
+                            self_clip: self_clip,
+                            class: shape_class,
                         }
-                        // also discard it if its bounding box doesn't intersect the desired region
-                        if !any_of_shape_is_in_box(&shape, &region) {
-                            continue;
-                        }
+                    }
+                };
 
+                // append it to the list, twice if so desired
+                match double {
+                    Some(true) => {
+                        for position in ["bottom", "top"] {
+                            let compound_class = match shape.get_class() {
+                                Some(class) => Some(String::from(class) + " " + position),
+                                None => Some(String::from(position)),
+                            };
+                            let shape = shape.clone().set_class(compound_class);
+                            contents.push(shape);
+                        }
+                    }
+                    _ => {
+                        contents.push(shape);
+                    }
+                };
+
+                // add the corresponding label, if desired
+                match &label_column {
+                    Some(label_column) => {
                         // decide what the label should say
-                        let text = match record.get(&label_column) {
+                        let text = match record.get(label_column) {
                             Some(FieldValue::Character(characters)) => match characters {
                                 Some(characters) => characters,
                                 None => continue,
@@ -324,102 +284,312 @@ fn transcribe_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &
                         };
                         // modify the case if desired
                         let text = match label_case {
-                            Some(Case::Upper) => &text.to_uppercase(),
-                            Some(Case::Lower) => &text.to_lowercase(),
-                            Some(Case::Sentence) => &(text[..1].to_uppercase() + &text[1..].to_lowercase()),
-                            None => text,
+                            Some(Case::Upper) => text.to_uppercase(),
+                            Some(Case::Lower) => text.to_lowercase(),
+                            Some(Case::Sentence) => text[..1].to_uppercase() + &text[1..].to_lowercase(),
+                            None => text.to_owned(),
                         };
                         // decide where to put the label
-                        let location = Transform::apply(&transform, &center_of(&shape)?);
-                        // add the label to the string
-                        string.push_str(&format!(
-                            "{}  <text class=\"label\" x=\"{:.2}\" y=\"{:.2}\">{}</text>\n",
-                            &indentation, location.x, location.y, text));
+                        labels.push(Content::Label {
+                            text: text,
+                            coordinates: location,
+                            class: Some(String::from("label")),
+                        });
                     }
-                }
-                _ => {
-                    if label_case.is_some() {
-                        return Err(String::from("you can't use label_case without a label_column."));
-                    }
+                    _ => {}
                 }
             }
 
-            string.push_str(&format!("{}</g>\n", &indentation));
+            contents.append(&mut labels);
+
+            return Ok(Content::Group {
+                content: contents,
+                class: class,
+                bounding_box: None,
+                region: None,
+                frame: None,
+            });
         }
+
+        // resolve a Graticule by generating an array of lines
+        Content::Graticule { parallel_spacing, meridian_spacing, class } => {
+            let region = match outer_region {
+                Some(region) => region,
+                None => return Err(String::from(
+                    "every layer must have a region defined somewhere in its hierarchy.")),
+            };
+            let mut shapes = Vec::new();
+
+            let south = f64::ceil(region.bottom/parallel_spacing) as i32;
+            let north = f64::floor(region.top/parallel_spacing) as i32;
+            let west = f64::ceil(region.left/meridian_spacing) as i32;
+            let east = f64::floor(region.right/meridian_spacing) as i32;
+            for i in south..north + 1 {
+                let latitude = (i as f64)*parallel_spacing;
+                let start = SerializablePoint { x: region.left, y: latitude };
+                let end = SerializablePoint { x: region.right, y: latitude };
+                shapes.push(Content::Path {
+                    parts: vec![vec![start, end]],
+                    closed: false,
+                    self_clip: false,
+                    class: None
+                });
+            }
+            for j in west..east + 1 {
+                let longitude = (j as f64)*meridian_spacing;
+                let start = SerializablePoint { x: longitude, y: region.bottom };
+                let end = SerializablePoint { x: longitude, y: region.top };
+                shapes.push(Content::Path {
+                    parts: vec![vec![start, end]],
+                    closed: false,
+                    self_clip: false,
+                    class: None
+                })
+            }
+
+            return Ok(Content::Group {
+                content: shapes,
+                class: class,
+                bounding_box: None,
+                region: None,
+                frame: None,
+            });
+        }
+
+        // any other form of content can just continue on as it is
+        other => Ok(other),
     }
+}
+
+
+/// apply all necessary coordinate transforms to the points in this box.
+/// all geographic data should come out in SVG coordinates rather than in shapefile coordinates.
+fn transform_content(content: Content, outer_bounding_box: &Box, outer_region: &Option<Box>) -> Result<Content, String> {
+    match content {
+        Content::Group { content: sub_contents, bounding_box: sub_bounding_box, region: sub_region, frame, class } => {
+            let bounding_box = match &sub_bounding_box {
+                Some(sub_bounding_box) => sub_bounding_box,
+                None => outer_bounding_box,
+            };
+            let region = match &sub_region {
+                Some(..) => &sub_region,
+                None => outer_region,
+            };
+            let mut transformed_contents = Vec::with_capacity(sub_contents.len());
+            for sub_content in sub_contents {
+                transformed_contents.push(transform_content(sub_content, bounding_box, region)?);
+            }
+            return Ok(Content::Group {
+                content: transformed_contents,
+                bounding_box: sub_bounding_box,
+                region: sub_region,
+                frame: frame,
+                class: class,
+            });
+        },
+        Content::Line { start, end, class } => {
+            let region = outer_region.as_ref().ok_or(String::from(
+                "every layer must have a region defined somewhere in its hierarchy."))?;
+            let transform = Transform::between(region, outer_bounding_box);
+            return Ok(Content::Line {
+                start: Transform::apply(&transform, start),
+                end: Transform::apply(&transform, end),
+                class: class,
+            });
+        },
+        Content::Rectangle { coordinates, class } => {
+            let region = outer_region.as_ref().ok_or(String::from(
+                "every layer must have a region defined somewhere in its hierarchy."))?;
+            let transform = Transform::between(region, outer_bounding_box);
+            return Ok(Content::Rectangle {
+                coordinates: Transform::apply_to_box(&transform, coordinates),
+                class: class,
+            });
+        },
+        Content::Path { parts, closed, self_clip, class } => {
+            let region = outer_region.as_ref().ok_or(String::from(
+                "every layer must have a region defined somewhere in its hierarchy."))?;
+            let transform = Transform::between(region, outer_bounding_box);
+            let mut transformed_parts = Vec::with_capacity(parts.len());
+            for part in parts {
+                let mut transformed_part = Vec::with_capacity(part.len());
+                for point in part {
+                    transformed_part.push(Transform::apply(&transform, point));
+                }
+                transformed_parts.push(transformed_part);
+            }
+            return Ok(Content::Path {
+                parts: transformed_parts,
+                closed: closed,
+                self_clip: self_clip,
+                class: class,
+            });
+        },
+        Content::Marker { detail, location, size, class } => {
+            let region = outer_region.as_ref().ok_or(String::from(
+                "every layer must have a region defined somewhere in its hierarchy."))?;
+            let transform = Transform::between(region, outer_bounding_box);
+            return Ok(Content::Marker {
+                detail: detail,
+                location: Transform::apply(&transform, location),
+                size: size,
+                class: class,
+            });
+        },
+        Content::Label { text, coordinates, class } => {
+            let region = outer_region.as_ref().ok_or(String::from(
+                "every layer must have a region defined somewhere in its hierarchy."))?;
+            let transform = Transform::between(region, outer_bounding_box);
+            return Ok(Content::Label {
+                text: text,
+                coordinates: Transform::apply(&transform, coordinates),
+                class: class,
+            });
+        },
+        Content::Layer { .. } => {
+            return Err(String::from("Layers should have been purged by now"));
+        },
+        Content::Graticule { .. } => {
+            return Err(String::from("Graticules should have been purged by now"));
+        },
+    }
+}
+
+
+fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &Option<Box>, indent_level: usize, element_count: &mut u32) -> Result<String, String> {
+    let class = content.get_class().clone();
+
+    let string = match content {
+
+        // for a group, put down a <g> with whatever the sub-contents are
+        Content::Group{ content: sub_contents, bounding_box: sub_bounding_box, region: sub_region, .. } => {
+            // this group may override the outer bounding box and region
+            let bounding_box = match &sub_bounding_box {
+                Some(sub_bounding_box) => sub_bounding_box,
+                None => outer_bounding_box,
+            };
+            let region = match &sub_region {
+                Some(..) => &sub_region,
+                None => outer_region,
+            };
+            let group_index = *element_count;
+            // write all the stuff
+            let mut string = String::new();
+            string.push_str(&format!("<clipPath id=\"clip_path_{}\">\n", group_index));
+            string.push_str(&format!(
+                "  <rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\"/>\n",
+                bounding_box.left, bounding_box.top,
+                bounding_box.right - bounding_box.left,
+                bounding_box.bottom - bounding_box.top,
+            ));
+            string.push_str(&format!("</clipPath>\n"));
+            string.push_str(&format!("<g clip-path=\"url(#clip_path_{})\">\n", group_index));
+            for sub_content in sub_contents {
+                string.push_str(&transcribe_content_as_svg(sub_content, bounding_box, region, indent_level + 1, element_count)?);
+            }
+            string.push_str(&format!("</g>\n"));
+            string
+        }
+
+        // for a line, you just need a single <line>
+        Content::Line { start, end, .. } =>
+            format!(
+                "<line x1=\"{:.2}\" y1=\"{:.2}\" x2=\"{:.2}\" y2=\"{:.2}\"/>\n",
+                start.x, start.y, end.x, end.y,
+            ),
+
+        // for a rectangle, use a <rect>
+        Content::Rectangle { coordinates, .. } =>
+            format!(
+                "<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\"/>\n",
+                coordinates.left, coordinates.top,
+                coordinates.right - coordinates.left,
+                coordinates.bottom - coordinates.top,
+            ),
+
+        // for a label, use a <text> element
+        Content::Label { text, coordinates, .. } =>
+            format!(
+                "<text x=\"{:.2}\" y=\"{:.2}\">{}</text>\n",
+                coordinates.x, coordinates.y, &text,
+            ),
+
+        Content::Marker { detail, location, size, .. } =>
+            insert_attribute(
+                &detail, "transform",
+                &format!(
+                    "translate({}, {}) scale({})",
+                    location.x, location.y, f64::sqrt(size),
+                ),
+            )?,
+
+        Content::Path { parts, closed, self_clip, .. } => {
+            // convert it to a d string and make it a path
+            let mut path_string = String::new();
+            for part in parts {
+                for (i, point) in part.iter().enumerate() {
+                    let segment_string = if i == 0 {
+                        &format!("M{:.2},{:.2} ", point.x, point.y)
+                    }
+                    else if i == part.len() - 1 && closed {
+                        "Z"
+                    }
+                    else {
+                        &format!("L{:.2},{:.2} ", point.x, point.y)
+                    };
+                    path_string.push_str(segment_string);
+                }
+            }
+            let shape_string = format!("<path d=\"{}\"/>\n", path_string);
+
+            // nest it in a clipPath element, if desired
+            let shape_index = *element_count;
+            let shape_string = if self_clip {
+                format!("<clipPath id=\"clip_path_{}\">\n", shape_index) + &
+                shape_string + &
+                "</clipPath>\n" + &
+                insert_attribute(&shape_string, "style", &format!("clip-path: url(#clip_path_{})", shape_index))?
+            }
+            else {
+                shape_string
+            };
+            shape_string
+        }
+
+        Content::Graticule { .. } => {
+            return Err(String::from("the graticules should have all been purged by now."));    
+        }
+        Content::Layer{ .. } => {
+            return Err(String::from("the Layers should have all been purged by now."));
+        }
+    };
+
+    // tack on the class, if there is one
+    let string = match class {
+        Some(class) => insert_attribute(&string, "class", &sanitize(&class))?,
+        None => string,
+    };
+    // add the proper indentation
+    let indentation: String = iter::repeat("  ").take(indent_level).collect();
+    let string = prepend_to_each_line(&string, &indentation);
 
     *element_count += 1;
     return Ok(string);
 }
 
 
-fn convert_points_to_path_string(sections: &Vec<Vec<shapefile::Point>>, close_path: bool, transform: &Transform) -> String {
-    let mut path_string = String::new();
-    for section in sections {
-        for (i, point) in section.iter().enumerate() {
-            let point = Transform::apply(transform, &point);
-            let segment_string = if i == 0 {
-                &format!("M{:.2},{:.2} ", point.x, point.y)
-            }
-            else if i == section.len() - 1 && close_path {
-                "Z"
-            }
-            else {
-                &format!("L{:.2},{:.2} ", point.x, point.y)
-            };
-            path_string.push_str(segment_string);
-        }
-    }
-    format!("<path d=\"{}\"/>\n", path_string)
-}
-
-
-fn position_and_scale_marker(marker_filename: &String, marker_location: &shapefile::Point, marker_size: f64) -> Result<String, String> {
-    let marker_svg = fs::read_to_string(format!("markers/{}.svg", marker_filename)).map_err(|err| err.to_string())?;
+fn load_SVG(marker_filename: &String) -> Result<String, String> {
+    let marker_svg = fs::read_to_string(format!("markers/{}.svg", marker_filename)).or(Err(format!("couldn't read `markers/{}.svg`", marker_filename)))?;
     let regex_match = Regex::new(r"<svg[^>]*>\s*(<[^>]+/>\n)\s*</svg>").unwrap().captures(&marker_svg);
     let marker_string = regex_match.ok_or(format!("markers/{}.svg was malformed", marker_filename))?.get(1).ok_or(String::from("bruh"))?.as_str();
-    return insert_attribute(
-        marker_string, "transform",
-        &format!(
-            "translate({}, {}) scale({})",
-            marker_location.x, marker_location.y, f64::sqrt(marker_size)));
+    return Ok(String::from(marker_string));
 }
 
 
-fn matches(filters: &Vec<Filter>, record: &Record) -> Result<bool, String> {
-    for filter in filters {
-        let valid = match filter {
-            Filter::OneOf { key, valid_values } => {
-                let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
-                match value {
-                    FieldValue::Numeric(Some(number)) => valid_values.contains(&f64::to_string(number)),
-                    FieldValue::Numeric(None) => false,
-                    FieldValue::Character(Some(characters)) => valid_values.contains(characters),
-                    FieldValue::Character(None) => false,
-                    _ => return Err(String::from("you can only filter on numerical and character fields right now.")),
-                }
-            }
-            Filter::GreaterThan { key, cutoff } => {
-                let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
-                match value {
-                    FieldValue::Float(Some(number)) => number > cutoff,
-                    FieldValue::Float(None) => false,
-                    _ => return Err(String::from("GreaterThan filters must act on float32 fields.")),
-                }
-            }
-        };
-        if !valid {
-            return Ok(false);
-        }
-    }
-    return Ok(true);
-}
-
-
-fn center_of(shape: &Shape) -> Result<shapefile::Point, String> {
+fn center_of(shape: &Shape) -> Result<SerializablePoint, String> {
     return match bounds_of(shape) {
         Ok([x_range, y_range]) => {
-            Ok(shapefile::Point { x: (x_range[0] + x_range[1])/2., y: (y_range[0] + y_range[1])/2. })
+            Ok(SerializablePoint { x: (x_range[0] + x_range[1])/2., y: (y_range[0] + y_range[1])/2. })
         }
         Err(_) => {
             Err(String::from("I cannot calculate the center of this shape because it has no geometry."))
@@ -464,26 +634,34 @@ fn bounds_of(shape: &Shape) -> Result<[[f64; 2]; 2], ()> {
 }
 
 
-/// take an SVG string and insert the given attribute key and value to the last tag
-/// in it.  if the key is already there, append to the existing value
+/// take an SVG string and insert the given attribute key and value to the last top-level
+/// tag in it.  if the key is already there, append to the existing value
 fn insert_attribute(element: &str, key: &str, value: &str) -> Result<String, String> {
-    let key_value_pattern = Regex::new(&format!("{}=\"([^\"]*)\"", key)).unwrap();
-    match key_value_pattern.find(element) {
-        Some(_) => {
-            return Ok(key_value_pattern.replace(element, format!("{}=\"$1 {}\"", key, value)).into_owned());
-        }
-        _ => {}
-    }
-    let tag_pattern = Regex::new(r"<[a-z]+()[ /]").unwrap();
-    let mut last_tag_index: Option<usize> = None;
-    for capture in tag_pattern.captures_iter(element) {
-        last_tag_index = Some(capture.get(1).unwrap().start());
+    // find the index of the last top-level tag in the string
+    let tag_pattern = Regex::new(r"(?m)^<[a-z]+([^>]*)>").unwrap();
+    let mut last_tag_index: Option<(usize, usize)> = None;
+    for captures in tag_pattern.captures_iter(element) {
+        let capture = captures.get(1).unwrap();
+        last_tag_index = Some((capture.start(), capture.end()));
     };
     match last_tag_index {
-        Some(last_tag_index) => {
-            return Ok(format!(
-                "{} {}=\"{}\"{}",
-                &element[..last_tag_index], key, value, &element[last_tag_index..]))
+        Some((attributes_start, attributes_end)) => {
+            // check if the desired attribute key is already present
+            let key_value_pattern = Regex::new(&format!("{}=\"([^\"]*)\"", key)).unwrap();
+            match key_value_pattern.captures_at(&element[..attributes_end], attributes_start) {
+                Some(captures) => {
+                    // if it is, append this value to what's already there
+                    let key_index = captures.get(1).unwrap().end();
+                    return Ok(format!(
+                        "{} {}{}", &element[..key_index], value, &element[key_index..]))
+                }
+                None => {
+                    // if it's not, you have to add the whole key-value expression
+                    return Ok(format!(
+                        "{} {}=\"{}\"{}",
+                        &element[..attributes_start], key, value, &element[attributes_start..]))
+                }
+            }
         }
         None => {
             return Err(format!("I couldn't find any tags in the string '{}'", element))
@@ -520,7 +698,7 @@ struct Configuration {
 }
 
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 enum Content {
     /// some geographical data loaded from a shapefile
     Layer {
@@ -545,6 +723,15 @@ enum Content {
         /// key-[value] pairs used to show only a subset of the shapes in the file
         filters: Option<Vec<Filter>>,
     },
+    /// a mesh of lines of latitude and longitude
+    Graticule {
+        /// the spacing between each adjacent pair of lines of latitude in degrees
+        parallel_spacing: f64,
+        /// the spacing between each adjacent pair of lines of longitude in degrees
+        meridian_spacing: f64,
+        /// the SVG class to add to the element, if any
+        class: Option<String>,
+    },
     /// a line segment from one location to another
     Line {
         /// one endpoit of the line
@@ -558,6 +745,28 @@ enum Content {
     Rectangle {
         /// the boundaries of the rectangle
         coordinates: Box,
+        /// the SVG class to add to the element, if any
+        class: Option<String>,
+    },
+    /// a shape made of an arbitrary number of arbitrary polylines
+    Path {
+        /// the coordinates of the vertices in each part
+        parts: Vec<Vec<SerializablePoint>>,
+        /// whether each polyline should form a complete loop
+        closed: bool,
+        /// whether to make this shape's strokes be confined within its shape
+        self_clip: bool,
+        /// the SVG class to add to the element, if any
+        class: Option<String>,
+    },
+    /// a little shape that represents a point on the map
+    Marker {
+        /// the SVG string that will be used verbatim to define the shape of the marker
+        detail: String,
+        /// the coordinates in geographical space to which the marker detail's origin will be shifted
+        location: SerializablePoint,
+        /// a multiplier that will be applied to the shape's area
+        size: f64,
         /// the SVG class to add to the element, if any
         class: Option<String>,
     },
@@ -590,16 +799,31 @@ impl Content {
     fn get_class(self: &Content) -> &Option<String> {
         return match self {
             Content::Layer { class, .. } => class,
+            Content::Graticule { class, .. } => class,
             Content::Line { class, .. } => class,
             Content::Rectangle { class, .. } => class,
             Content::Label { class, .. } => class,
+            Content::Path { class, .. } => class,
+            Content::Marker { class, .. } => class,
             Content::Group { class, .. } => class,
         };
+    }
+
+    fn set_class(self: Content, class: Option<String>) -> Content {
+        return match self {
+            Content::Path { parts, closed, self_clip, .. } => Content::Path {
+                class, parts: parts, closed: closed, self_clip: self_clip,
+            },
+            Content::Marker { detail, location, size, .. } => Content::Marker {
+                class, detail: detail, location: location, size: size,
+            },
+            _ => panic!("this function should only be used on Paths and Markers"),
+        }
     }
 }
 
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 enum Case {
     Upper,
     Lower,
@@ -607,20 +831,23 @@ enum Case {
 }
 
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 struct SerializablePoint {
     x: f64,
     y: f64,
 }
 
 impl SerializablePoint {
-    fn to_shapefile_point(self: &SerializablePoint) -> shapefile::Point {
-        return shapefile::Point { x: self.x, y: self.y };
+    fn from(point: &shapefile::Point) -> SerializablePoint {
+        return SerializablePoint { x: point.x, y: point.y };
+    }
+    fn deep_convert(points: &Vec<Vec<shapefile::Point>>) -> Vec<Vec<SerializablePoint>> {
+        return points.iter().map(|ring| ring.iter().map(SerializablePoint::from).collect()).collect();
     }
 }
 
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 struct Box {
     left: f64,
     right: f64,
@@ -629,7 +856,7 @@ struct Box {
 }
 
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 enum Filter {
     OneOf {
         key: String,
@@ -658,10 +885,19 @@ impl Transform {
         return Transform { x_scale: x_scale, x_shift: x_shift, y_scale: y_scale, y_shift: y_shift };
     }
 
-    fn apply(self: &Transform, input: &shapefile::Point) -> shapefile::Point {
-        return shapefile::Point::new(
-            input.x*self.x_scale + self.x_shift,
-            input.y*self.y_scale + self.y_shift,
-        );
+    fn apply(self: &Transform, input: SerializablePoint) -> SerializablePoint {
+        return SerializablePoint {
+            x: input.x*self.x_scale + self.x_shift,
+            y: input.y*self.y_scale + self.y_shift,
+        };
+    }
+
+    fn apply_to_box(self: &Transform, input: Box) -> Box {
+        return Box {
+            left: input.left*self.x_scale + self.x_shift,
+            right: input.right*self.x_scale + self.x_shift,
+            top: input.top*self.y_scale + self.y_shift,
+            bottom: input.bottom*self.y_scale + self.y_shift,
+        }
     }
 }
