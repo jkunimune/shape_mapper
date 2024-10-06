@@ -110,7 +110,19 @@ contents:
         class: "pond"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
         filters:
-          - !OneOf {key: "NAME", valid_values: ["Neponset River"]}
+          - !OneOf {key: "NAME", valid_values: ["Mystic River"]}
+          - !Not {filter: !GreaterThan {key: "SHAPE_AREA", cutoff: 8000}}
+      - !Layer
+        class: "pond"
+        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+        filters:
+          - !OneOf {key: "NAME", valid_values: ["Charles River"]}
+          - !Not {filter: !GreaterThan {key: "SHAPE_AREA", cutoff: 5000}}
+      - !Layer
+        class: "pond"
+        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+        filters:
+          - !OneOf {key: "NAME", valid_values: ["Neponset River", "Mystic River"]}
           - !GreaterThan {key: "SHAPE_AREA", cutoff: 300000}
       - !Layer
         class: "pond"
@@ -125,10 +137,9 @@ contents:
           - !OneOf {key: "OUTLINE", valid_values: [4]}
       - !Layer
         class: "rail"
-        filename: "MassGIS/trains/TRAINS_ARC"
+        filename: "MassGIS/mbta_rapid_transit/MBTA_ARC"
         filters:
-          - !OneOf {key: "LINE_BRNCH", valid_values: ["TRANSIT-RED", "TRANSIT-GREEN", "TRANSIT-BLUE", "TRANSIT-ORANGE"]}
-          - !OneOf {key: "TRACK", valid_values: [1]}
+          - !OneOf {key: "LINE", valid_values: ["RED", "GREEN", "BLUE", "ORANGE"]}
         double: true
       - !Layer
         class: "rail"

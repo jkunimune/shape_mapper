@@ -4,7 +4,7 @@ use core::f64;
 use regex::Regex;
 use std::{env, fs, iter};
 use serde::Deserialize;
-use shapefile::dbase::FieldValue;
+use shapefile::dbase::{FieldValue, Record};
 use shapefile::record::EsriShape;
 use shapefile::Shape;
 
@@ -153,27 +153,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                 match &filters {
                     Some(filters) => {
                         for filter in filters {
-                            let valid = match filter {
-                                Filter::OneOf { key, valid_values } => {
-                                    let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
-                                    match value {
-                                        FieldValue::Numeric(Some(number)) => valid_values.contains(&f64::to_string(number)),
-                                        FieldValue::Numeric(None) => false,
-                                        FieldValue::Character(Some(characters)) => valid_values.contains(characters),
-                                        FieldValue::Character(None) => false,
-                                        _ => return Err(String::from("you can only filter on numerical and character fields right now.")),
-                                    }
-                                }
-                                Filter::GreaterThan { key, cutoff } => {
-                                    let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
-                                    match value {
-                                        FieldValue::Float(Some(number)) => number > cutoff,
-                                        FieldValue::Float(None) => false,
-                                        _ => return Err(String::from("GreaterThan filters must act on float32 fields.")),
-                                    }
-                                }
-                            };
-                            if !valid {
+                            if !filter.matches(&record)? {
                                 continue 'shape_loop;
                             }
                         }
@@ -860,7 +840,39 @@ enum Filter {
     },
     GreaterThan {
         key: String,
-        cutoff: f32,
+        cutoff: f64,
+    },
+    Not {
+        filter: std::boxed::Box<Filter>,
+    }
+}
+
+impl Filter {
+    fn matches(self: &Filter, record: &Record) -> Result<bool, String> {
+        match self {
+            Filter::OneOf { key, valid_values } => {
+                let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
+                match value {
+                    FieldValue::Numeric(Some(number)) => Ok(valid_values.contains(&f64::to_string(number))),
+                    FieldValue::Numeric(None) => Ok(false),
+                    FieldValue::Character(Some(characters)) => Ok(valid_values.contains(characters)),
+                    FieldValue::Character(None) => Ok(false),
+                    _ => return Err(String::from("you can only filter on numerical and character fields right now.")),
+                }
+            }
+            Filter::GreaterThan { key, cutoff } => {
+                let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
+                match value {
+                    FieldValue::Numeric(Some(number)) => Ok(number > cutoff),
+                    FieldValue::Float(Some(number)) => Ok(&f64::from(*number) > cutoff),
+                    FieldValue::Float(None) => Ok(false),
+                    other => return Err(format!("GreaterThan filters must act on numeric or float32 fields, but '{}' is a {}.", key, other.field_type().to_string())),
+                }
+            }
+            Filter::Not { filter } => {
+                return filter.matches(record);
+            }
+        }
     }
 }
 
