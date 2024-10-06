@@ -664,12 +664,10 @@ fn insert_attribute(element: &str, key: &str, value: &str) -> Result<String, Str
 
 /// break the string up at newlines and add the given string to the start of each section
 fn prepend_to_each_line(string: &str, prefix: &str) -> String {
-    let mut new_string = String::new();
-    for part in Regex::new("\n").unwrap().split(string) {
-        new_string.push_str(prefix);
-        new_string.push_str(part);
-    }
-    return new_string;
+    let newline = Regex::new("\n").unwrap();
+    let parts = newline.split(string);
+    let new_parts: Vec<String> = parts.map(|part| format!("{}{}", prefix, part)).collect();
+    return new_parts.join("\n");
 }
 
 
