@@ -91,12 +91,12 @@ style: |
     text-anchor: middle;
     alignment-baseline: middle;
   }
-content:
+contents:
   - !Group
     frame: true
     bounding_box: { left: 0, right: 350, top: 0, bottom: 350 }
     region: { left: 218000, right: 253000, bottom: 883000, top: 918000 }
-    content:
+    contents:
       - !Layer
         class: "town"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM_GENCOAST"

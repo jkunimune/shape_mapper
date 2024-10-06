@@ -41,7 +41,7 @@ fn main() -> Result<(), String> {
         configuration.title, configuration.description, configuration.style,
     );
     let element_index: &mut u32 = &mut 0;
-    for content in configuration.content {
+    for content in configuration.contents {
         let content = load_content(content, &configuration.region)?;
         let content = transform_content(content, &map_bounding_box, &configuration.region)?;
         let content = transcribe_content_as_svg(content, &map_bounding_box, &configuration.region, 1, element_index)?;
@@ -66,16 +66,14 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
     match content {
 
         // for a Group, load its children recursively
-        Content::Group { content: sub_contents, bounding_box, region: sub_region, frame, class } => {
+        Content::Group { contents: sub_contents, bounding_box, region: sub_region, frame, class } => {
             let region: &Option<Box> = match &sub_region {
                 Some(..) => &sub_region,
                 None => outer_region,
             };
             let mut loaded_sub_contents = Vec::with_capacity(sub_contents.len());
             for sub_content in sub_contents {
-                loaded_sub_contents.push(load_content(
-                    sub_content,
-                    region)?);
+                loaded_sub_contents.push(load_content(sub_content, region)?);
             }
             // add in some rectangles if desired
             match frame {
@@ -100,10 +98,9 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                 _ => {}
             }
             return Ok(Content::Group {
-                content: loaded_sub_contents,
-                class: class,
-                bounding_box: bounding_box,
+                contents: loaded_sub_contents,
                 region: sub_region,
+                bounding_box, class,
                 frame: Some(false),
             });
         }
@@ -246,9 +243,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                         };
                         // pull it all together as a Content::Path
                         Content::Path {
-                            parts: parts,
-                            closed: closed,
-                            self_clip: self_clip,
+                            parts, closed, self_clip,
                             class: shape_class,
                         }
                     }
@@ -293,8 +288,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                         };
                         // decide where to put the label
                         labels.push(Content::Label {
-                            text: text,
-                            coordinates: location,
+                            text, location,
                             class: Some(String::from("label")),
                         });
                     }
@@ -305,7 +299,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
             contents.append(&mut labels);
 
             return Ok(Content::Group {
-                content: contents,
+                contents,
                 class: class,
                 bounding_box: None,
                 region: None,
@@ -350,7 +344,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
             }
 
             return Ok(Content::Group {
-                content: shapes,
+                contents: shapes,
                 class: class,
                 bounding_box: None,
                 region: None,
@@ -368,7 +362,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
 /// all geographic data should come out in SVG coordinates rather than in shapefile coordinates.
 fn transform_content(content: Content, outer_bounding_box: &Box, outer_region: &Option<Box>) -> Result<Content, String> {
     match content {
-        Content::Group { content: sub_contents, bounding_box: sub_bounding_box, region: sub_region, frame, class } => {
+        Content::Group { contents: sub_contents, bounding_box: sub_bounding_box, region: sub_region, frame, class } => {
             let bounding_box = match &sub_bounding_box {
                 Some(sub_bounding_box) => sub_bounding_box,
                 None => outer_bounding_box,
@@ -382,7 +376,7 @@ fn transform_content(content: Content, outer_bounding_box: &Box, outer_region: &
                 transformed_contents.push(transform_content(sub_content, bounding_box, region)?);
             }
             return Ok(Content::Group {
-                content: transformed_contents,
+                contents: transformed_contents,
                 bounding_box: sub_bounding_box,
                 region: sub_region,
                 frame: frame,
@@ -438,13 +432,13 @@ fn transform_content(content: Content, outer_bounding_box: &Box, outer_region: &
                 class: class,
             });
         },
-        Content::Label { text, coordinates, class } => {
+        Content::Label { text, location: coordinates, class } => {
             let region = outer_region.as_ref().ok_or(String::from(
                 "every layer must have a region defined somewhere in its hierarchy."))?;
             let transform = Transform::between(region, outer_bounding_box);
             return Ok(Content::Label {
                 text: text,
-                coordinates: Transform::apply(&transform, coordinates),
+                location: Transform::apply(&transform, coordinates),
                 class: class,
             });
         },
@@ -464,7 +458,7 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
     let string = match content {
 
         // for a group, put down a <g> with whatever the sub-contents are
-        Content::Group{ content: sub_contents, bounding_box: sub_bounding_box, region: sub_region, .. } => {
+        Content::Group{ contents: sub_contents, bounding_box: sub_bounding_box, region: sub_region, .. } => {
             // this group may override the outer bounding box and region
             let bounding_box = match &sub_bounding_box {
                 Some(sub_bounding_box) => sub_bounding_box,
@@ -510,7 +504,7 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
             ),
 
         // for a label, use a <text> element
-        Content::Label { text, coordinates, .. } =>
+        Content::Label { text, location: coordinates, .. } =>
             format!(
                 "<text x=\"{:.2}\" y=\"{:.2}\">{}</text>\n",
                 coordinates.x, coordinates.y, &text,
@@ -696,7 +690,7 @@ struct Configuration {
     style: String,
     bounding_box: Option<Box>,
     region: Option<Box>,
-    content: Vec<Content>,
+    contents: Vec<Content>,
 }
 
 
@@ -777,20 +771,20 @@ enum Content {
         /// the characters to write
         text: String,
         /// the location to put them
-        coordinates: SerializablePoint,
+        location: SerializablePoint,
         /// the SVG class to add to the element
         class: Option<String>,
     },
     /// a group of other Contents
     Group {
         /// the things to put inside this group
-        content: Vec<Content>,
+        contents: Vec<Content>,
         /// the SVG class to add to the elements in this group, if any
         class: Option<String>,
-        /// the box to which to fit this group's content
+        /// the box to which to fit this group's contents
         bounding_box: Option<Box>,
         /// the geographical region to include. shapes wholly outside this region will be discarded,
-        /// and the content will be scaled to fit this region to the bounding box.
+        /// and the contents will be scaled to fit this region to the bounding box.
         region: Option<Box>,
         /// whether to add a rect for a background and frame
         frame: Option<bool>,

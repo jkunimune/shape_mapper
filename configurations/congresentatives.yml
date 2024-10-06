@@ -188,13 +188,13 @@ style: |
     font-weight: normal;
     font-size: 6px;
   }
-content:
+contents:
   - !Group
     class: "main_map"
     frame: true
     bounding_box: { left: 5, right: 595, top: 5, bottom: 595 }
     region: { left: 216000, right: 245000, bottom: 887000, top: 915000 }
-    content:
+    contents:
       - !Layer
         class: "district"
         filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_POLY"
@@ -202,27 +202,27 @@ content:
         self_clip: true
       - !Group
         class: "district_label"
-        content:
+        contents:
           - !Label
             class: "district_label_4"
             text: "4"
-            coordinates: { x: 230000, y: 888000}
+            location: { x: 230000, y: 888000}
           - !Label
             class: "district_label_5"
             text: "5"
-            coordinates: { x: 230000, y: 888000}
+            location: { x: 230000, y: 888000}
           - !Label
             class: "district_label_6"
             text: "6"
-            coordinates: { x: 230000, y: 888000}
+            location: { x: 230000, y: 888000}
           - !Label
             class: "district_label_7"
             text: "7"
-            coordinates: { x: 230000, y: 888000}
+            location: { x: 230000, y: 888000}
           - !Label
             class: "district_label_8"
             text: "8"
-            coordinates: { x: 230000, y: 888000}
+            location: { x: 230000, y: 888000}
       - !Layer
         class: "pond"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
@@ -265,7 +265,7 @@ content:
     frame: true
     bounding_box: { left: 5, right: 245, top: 5, bottom: 160.24 }
     region: { left: 28000, right: 280000, bottom: 801000, top: 964000 }
-    content:
+    contents:
       - !Rectangle
         class: "state new-york"
         coordinates: { left: 0, right: 100000, bottom: 760000, top: 1000000}
@@ -280,31 +280,31 @@ content:
         self_clip: true
       - !Group
         class: "district_label"
-        content:
+        contents:
           - !Label
             class: "district_label_1"
             text: "1"
-            coordinates: { x: 230000, y: 888000}
+            location: { x: 230000, y: 888000}
           - !Label
             class: "district_label_2"
             text: "2"
-            coordinates: { x: 230000, y: 888000}
+            location: { x: 230000, y: 888000}
           - !Label
             class: "district_label_3"
             text: "3"
-            coordinates: { x: 230000, y: 888000}
+            location: { x: 230000, y: 888000}
           - !Label
             class: "district_label_4"
             text: "4"
-            coordinates: { x: 230000, y: 888000}
+            location: { x: 230000, y: 888000}
           - !Label
             class: "district_label_6"
             text: "6"
-            coordinates: { x: 230000, y: 888000}
+            location: { x: 230000, y: 888000}
           - !Label
             class: "district_label_9"
             text: "9"
-            coordinates: { x: 230000, y: 888000}
+            location: { x: 230000, y: 888000}
       - !Layer
         class: "road"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
@@ -325,74 +325,74 @@ content:
           - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}
       - !Group
         class: "town_label"
-        content:
+        contents:
           - !Label
             text: "Pittsfield"
-            coordinates: { x: 59000, y: 918000 }
+            location: { x: 59000, y: 918000 }
           - !Label
             text: "Greenfield"
-            coordinates: { x: 115000, y: 930000 }
+            location: { x: 115000, y: 930000 }
           - !Label
             text: "Holyoke"
-            coordinates: { x: 110000, y: 885000 }
+            location: { x: 110000, y: 885000 }
           - !Label
             text: "Springfield"
-            coordinates: { x: 120000, y: 869000 }
+            location: { x: 120000, y: 869000 }
           - !Label
             text: "Fitchburg"
-            coordinates: { x: 179000, y: 925000 }
+            location: { x: 179000, y: 925000 }
           - !Label
             text: "Worcester"
-            coordinates: { x: 142000, y: 903000 }
+            location: { x: 142000, y: 903000 }
           - !Line
             start: { x: 170000, y: 902000 }
             end: { x: 173000, y: 896000 }
           - !Label
             text: "Framingham"
-            coordinates: { x: 179000, y: 902000 }
+            location: { x: 179000, y: 902000 }
           - !Label
             text: "Lowell"
-            coordinates: { x: 190000, y: 932000 }
+            location: { x: 190000, y: 932000 }
           - !Label
             text: "Haverhill"
-            coordinates: { x: 202000, y: 953000 }
+            location: { x: 202000, y: 953000 }
           - !Label
             text: "Brockton"
-            coordinates: { x: 244000, y: 869000 }
+            location: { x: 244000, y: 869000 }
           - !Label
             text: "Fall River"
-            coordinates: { x: 219000, y: 836000 }
+            location: { x: 219000, y: 836000 }
           - !Label
             text: "New Bedf."
-            coordinates: { x: 245000, y: 811000 }
+            location: { x: 245000, y: 811000 }
   - !Group
     class: "legend legend_label"
     frame: true
     bounding_box: { left: 405, right: 595, top: 519, bottom: 595}
     region: { left: 0, right: 100, bottom: 0, top: 40 }
-    content:
+    contents:
       - !Label
         class: "legend_title"
         text: "Congressional districts"
-        coordinates: { x: 50, y: 31 }
+        location: { x: 50, y: 31 }
       - !Label
         class: "legend_title"
         text: "of the Boston area"
-        coordinates: { x: 50, y: 25 }
+        location: { x: 50, y: 25 }
       - !Label
         class: "legend_subtitle"
         text: "Conformal conic projection, 1:50k"
-        coordinates: { x: 50, y: 20}
+        location: { x: 50, y: 20}
       - !Line
         class: "road class_3"
         start: { x: 6, y: 14 }
         end: { x: 16, y: 14 }
       - !Label
         text: "Road"
-        coordinates: { x: 18, y: 13 }
+        location: { x: 18, y: 13 }
       - !Group
         class: "track"
-        content:
+        contents:
           - !Line
             class: "bottom"
             start: { x: 6, y: 7 }
@@ -403,14 +403,14 @@ content:
             end: { x: 16, y: 7 }
       - !Label
         text: "Train track"
-        coordinates: { x: 18, y: 6 }
+        location: { x: 18, y: 6 }
       - !Line
         class: "town"
         start: { x: 48, y: 14 }
         end: { x: 58, y: 14 }
       - !Label
         text: "Municipal border"
-        coordinates: { x: 60, y: 13}
+        location: { x: 60, y: 13}
       - !Rectangle
         class: "pond"
         coordinates: { left: 48, right: 58, bottom: 5, top: 9 }
@@ -419,4 +419,4 @@ content:
         coordinates: { left: 48, right: 58, bottom: 5, top: 9 }
       - !Label
         text: "Pond or river"
-        coordinates: { x: 60, y: 6 }
+        location: { x: 60, y: 6 }
