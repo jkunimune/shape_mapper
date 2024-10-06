@@ -1,3 +1,5 @@
+#![allow(non_snake_case)]
+
 use core::f64;
 use regex::Regex;
 use std::{env, fs, iter};
