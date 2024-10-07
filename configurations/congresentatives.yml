@@ -302,6 +302,15 @@ contents:
           - !Not
             filter: !OneOf {key: "ROUTE", valid_values: ["B - Boston College", "C - Cleveland Circle", "E - Health Street", "Mattapan Trolley"]}
       - !Layer
+        class: "station"
+        filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
+        marker: "mbta"
+        marker_size: 3
+        class_column: "LINE"
+        label_column: "STATION"
+        filters:
+          - !OneOf {key: "STATION", valid_values: ["Boston College", "Health Street", "Mattapan"]}
+      - !Layer
         class: "park_label"
         filename: "MassGIS/openspace/OPENSPACE_POLY"
         marker: none

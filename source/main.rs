@@ -268,6 +268,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                         // add necessary escape sequences (make sure you do this after setting the case)
                         let text = sanitize_XML(&text);
                         // decide where to put the label
+                        let location = coerce_in_box(&location, region);
                         labels.push(Content::Label {
                             text, location,
                             class: Some(String::from("label")),
@@ -612,6 +613,19 @@ fn any_of_shape_is_in_box(shape: &Shape, boks: &Box) -> bool {
         Err(_) => {
             return false;
         }
+    }
+}
+
+
+fn coerce_in_box(point: &SerializablePoint, boks: &Box) -> SerializablePoint {
+    if boks.bottom > boks.top {
+        return coerce_in_box(point, &Box {
+            left: boks.left, right: boks.right, bottom: boks.top, top: boks.bottom,
+        });
+    }
+    return SerializablePoint {
+        x: f64::max(boks.left, f64::min(boks.right, point.x)),
+        y: f64::max(boks.bottom, f64::min(boks.top, point.y)),
     }
 }
 
