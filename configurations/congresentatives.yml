@@ -190,7 +190,7 @@ style: |
     font-weight: bold;
   }
   .main_map .town_label {
-    font-size: 6px; // note: 6px is actually 6 millimeters (about 17pt)
+    font-size: 6px; /* note: 6px is actually 6 millimeters (about 17pt) */
     text-anchor: middle;
     alignment-baseline: middle;
   }

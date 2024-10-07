@@ -118,18 +118,19 @@ contents:
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
         filters:
           - !OneOf {key: "NAME", valid_values: ["Mystic River"]}
-          - !Not {filter: !GreaterThan {key: "SHAPE_AREA", cutoff: 8000}}
+          - !Not {filter: !GreaterThan {key: "SHAPE_AREA", cutoff: 100000}}
       - !Layer
         class: "pond"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
         filters:
           - !OneOf {key: "NAME", valid_values: ["Charles River"]}
-          - !Not {filter: !GreaterThan {key: "SHAPE_AREA", cutoff: 5000}}
+          - !GreaterThan {key: "SHAPE_AREA", cutoff: 80000}
+          - !Not {filter: !GreaterThan {key: "SHAPE_AREA", cutoff: 100000}}
       - !Layer
         class: "pond"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
         filters:
-          - !OneOf {key: "NAME", valid_values: ["Neponset River", "Mystic River"]}
+          - !OneOf {key: "NAME", valid_values: ["Neponset River"]}
           - !GreaterThan {key: "SHAPE_AREA", cutoff: 300000}
       - !Layer
         class: "pond"

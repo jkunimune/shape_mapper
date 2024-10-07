@@ -2,7 +2,7 @@
 
 use core::f64;
 use regex::Regex;
-use std::{env, fs, iter, marker};
+use std::{env, fs};
 use serde::Deserialize;
 use shapefile::dbase::{FieldValue, Record};
 use shapefile::record::EsriShape;
@@ -17,8 +17,11 @@ fn main() -> Result<(), String> {
     }
     let filename = args.get(1).ok_or(String::from("Please pass the filename of the configuration file minus the 'yml' as a command line argument."))?;
 
-    let yaml = fs::read_to_string(
-        format!("configurations/{}.yml", filename)).map_err(|err| err.to_string())?;
+    let file = fs::read_to_string(format!("configurations/{}.yml", filename));
+    let yaml = match file {
+        Ok(yaml) => yaml,
+        Err(message) => return Err(format!("I could not read 'configurations/{}.yml' because {}", filename, message)),
+    };
     let configuration: Configuration = serde_yaml::from_str(&yaml).map_err(|err| err.to_string())?;
 
     println!("generating a map of '{}' based on `configurations/{}.yml`.", configuration.title, filename);
@@ -67,7 +70,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
     match content {
 
         // for a Group, load its children recursively
-        Content::Group { contents: sub_contents, bounding_box, region: sub_region, frame, class } => {
+        Content::Group { contents: sub_contents, bounding_box, region: sub_region, clip, frame, class } => {
             let region: &Option<Box> = match &sub_region {
                 Some(..) => &sub_region,
                 None => outer_region,
@@ -76,33 +79,12 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
             for sub_content in sub_contents {
                 loaded_sub_contents.push(load_content(sub_content, region)?);
             }
-            // add in some rectangles if desired
-            match frame {
-                Some(true) => {
-                    let region = match region {
-                        Some(region) => region,
-                        None => return Err(String::from("if a Group has frame: true, it must also set a region.")),
-                    };
-                    loaded_sub_contents.insert(
-                        0, Content::Rectangle {
-                            coordinates: region.clone(),
-                            class: Some(String::from("background")),
-                        },
-                    );
-                    loaded_sub_contents.push(
-                        Content::Rectangle {
-                            coordinates: region.clone(),
-                            class: Some(String::from("frame")),
-                        },
-                    );
-                }
-                _ => {}
-            }
             return Ok(Content::Group {
                 contents: loaded_sub_contents,
                 region: sub_region,
                 bounding_box, class,
-                frame: Some(false),
+                clip: clip,
+                frame: frame,
             });
         }
 
@@ -302,7 +284,8 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                 class: class,
                 bounding_box: None,
                 region: None,
-                frame: None,
+                clip: Some(false),
+                frame: Some(false),
             });
         }
 
@@ -347,7 +330,8 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                 class: class,
                 bounding_box: None,
                 region: None,
-                frame: None,
+                clip: Some(false),
+                frame: Some(false),
             });
         }
 
@@ -361,7 +345,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
 /// all geographic data should come out in SVG coordinates rather than in shapefile coordinates.
 fn transform_content(content: Content, outer_bounding_box: &Box, outer_region: &Option<Box>) -> Result<Content, String> {
     match content {
-        Content::Group { contents: sub_contents, bounding_box: sub_bounding_box, region: sub_region, frame, class } => {
+        Content::Group { contents: sub_contents, bounding_box: sub_bounding_box, region: sub_region, clip, frame, class } => {
             let bounding_box = match &sub_bounding_box {
                 Some(sub_bounding_box) => sub_bounding_box,
                 None => outer_bounding_box,
@@ -378,8 +362,7 @@ fn transform_content(content: Content, outer_bounding_box: &Box, outer_region: &
                 contents: transformed_contents,
                 bounding_box: sub_bounding_box,
                 region: sub_region,
-                frame: frame,
-                class: class,
+                clip, frame, class,
             });
         },
         Content::Line { start, end, class } => {
@@ -457,7 +440,7 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
     let string = match content {
 
         // for a group, put down a <g> with whatever the sub-contents are
-        Content::Group{ contents: sub_contents, bounding_box: sub_bounding_box, region: sub_region, .. } => {
+        Content::Group{ contents: sub_contents, bounding_box: sub_bounding_box, region: sub_region, clip, frame, .. } => {
             // this group may override the outer bounding box and region
             let bounding_box = match &sub_bounding_box {
                 Some(sub_bounding_box) => sub_bounding_box,
@@ -467,20 +450,33 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
                 Some(..) => &sub_region,
                 None => outer_region,
             };
-            let group_index = *element_count;
-            // write all the stuff
-            let mut string = String::new();
-            string.push_str(&format!("<clipPath id=\"clip_path_{}\">\n", group_index));
-            string.push_str(&format!(
-                "  <rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\"/>\n",
+            // convert the bounding box to a rectangle, as this may be useful multiple times later
+            let rect_string = format!(
+                "<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\"/>\n",
                 bounding_box.left, bounding_box.top,
                 bounding_box.right - bounding_box.left,
                 bounding_box.bottom - bounding_box.top,
-            ));
-            string.push_str(&format!("</clipPath>\n"));
-            string.push_str(&format!("<g clip-path=\"url(#clip_path_{})\">\n", group_index));
+            );
+            let group_index = *element_count;
+            // write all the stuff
+            let mut string = String::new();
+            if clip.unwrap_or(true) {
+                string.push_str(&format!("<clipPath id=\"clip_path_{}\">\n", group_index));
+                string.push_str(&format!("  {}", rect_string));
+                string.push_str(&format!("</clipPath>\n"));
+                string.push_str(&format!("<g clip-path=\"url(#clip_path_{})\">\n", group_index));
+            }
+            else {
+                string.push_str("<g>\n");
+            }
+            if frame.unwrap_or(false) {
+                string.push_str(&insert_attribute(&rect_string, "class", "background")?);
+            }
             for sub_content in sub_contents {
                 string.push_str(&transcribe_content_as_svg(sub_content, bounding_box, region, element_count)?);
+            }
+            if frame.unwrap_or(false) {
+                string.push_str(&insert_attribute(&rect_string, "class", "frame")?);
             }
             string.push_str(&format!("</g>\n"));
             string
@@ -744,9 +740,9 @@ enum Content {
         marker: Option<String>,
         /// the desired area of the SVG in square millimeters
         marker_size: Option<f64>,
-        /// whether to duplicate each shape in this thing
+        /// whether to duplicate each shape in this thing (defaults to false)
         double: Option<bool>,
-        /// whether to make this shape's strokes be confined within its shape
+        /// whether to make this shape's strokes be confined within its shape (defaults to false)
         self_clip: Option<bool>,
         /// key-[value] pairs used to show only a subset of the shapes in the file
         filters: Option<Vec<Filter>>,
@@ -818,7 +814,9 @@ enum Content {
         /// the geographical region to include. shapes wholly outside this region will be discarded,
         /// and the contents will be scaled to fit this region to the bounding box.
         region: Option<Box>,
-        /// whether to add a rect for a background and frame
+        /// whether to crop the contents to the bounding box (defaults to true)
+        clip: Option<bool>,
+        /// whether to add a rect for a background and frame (defaults to false)
         frame: Option<bool>,
     },
 }
