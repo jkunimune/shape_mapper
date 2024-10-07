@@ -2,7 +2,7 @@
 
 use core::f64;
 use regex::Regex;
-use std::{env, fs, iter};
+use std::{env, fs, iter, marker};
 use serde::Deserialize;
 use shapefile::dbase::{FieldValue, Record};
 use shapefile::record::EsriShape;
@@ -44,7 +44,8 @@ fn main() -> Result<(), String> {
     for content in configuration.contents {
         let content = load_content(content, &configuration.region)?;
         let content = transform_content(content, &map_bounding_box, &configuration.region)?;
-        let content = transcribe_content_as_svg(content, &map_bounding_box, &configuration.region, 1, element_index)?;
+        let content = transcribe_content_as_svg(content, &map_bounding_box, &configuration.region, element_index)?;
+        let content = prepend_to_each_line(&content, "  ");
         svg_code.push_str(&content);
     }
 
@@ -450,7 +451,7 @@ fn transform_content(content: Content, outer_bounding_box: &Box, outer_region: &
 }
 
 
-fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &Option<Box>, indent_level: usize, element_count: &mut u32) -> Result<String, String> {
+fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &Option<Box>, element_count: &mut u32) -> Result<String, String> {
     let class = content.get_class().clone();
 
     let string = match content {
@@ -479,7 +480,7 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
             string.push_str(&format!("</clipPath>\n"));
             string.push_str(&format!("<g clip-path=\"url(#clip_path_{})\">\n", group_index));
             for sub_content in sub_contents {
-                string.push_str(&transcribe_content_as_svg(sub_content, bounding_box, region, indent_level + 1, element_count)?);
+                string.push_str(&transcribe_content_as_svg(sub_content, bounding_box, region, element_count)?);
             }
             string.push_str(&format!("</g>\n"));
             string
@@ -564,8 +565,7 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
         None => string,
     };
     // add the proper indentation
-    let indentation: String = iter::repeat("  ").take(indent_level).collect();
-    let string = prepend_to_each_line(&string, &indentation);
+    let string = prepend_to_each_line(&string, "  ");
 
     *element_count += 1;
     return Ok(string);
@@ -573,9 +573,22 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
 
 
 fn load_SVG(marker_filename: &String) -> Result<String, String> {
-    let marker_svg = fs::read_to_string(format!("markers/{}.svg", marker_filename)).or(Err(format!("couldn't read `markers/{}.svg`", marker_filename)))?;
-    let regex_match = Regex::new(r"<svg[^>]*>\s*(<[^>]+/>\n)\s*</svg>").unwrap().captures(&marker_svg);
-    let marker_string = regex_match.ok_or(format!("markers/{}.svg was malformed", marker_filename))?.get(1).ok_or(String::from("bruh"))?.as_str();
+    let marker_string = fs::read_to_string(format!("markers/{}.svg", marker_filename)).or(Err(format!("couldn't read `markers/{}.svg`", marker_filename)))?;
+    // extract the content from between the <svg> and </svg>
+    let svg_captures = Regex::new(r"(?s)<svg[^>]*>\n(.*\n)\s*</svg>").unwrap().captures(&marker_string);
+    let marker_string = match svg_captures {
+        Some(svg_captures) => svg_captures.get(1).unwrap().as_str(),
+        None => return Err(format!("markers/{}.svg was malformed somehow.", marker_filename)),
+    };
+    // extract the top-level indentation so that you can remove it
+    let indentation_captures = Regex::new(r"^([ \t]*)<").unwrap().captures(&marker_string);
+    let indentation = match indentation_captures {
+        Some(indentation_captures) => indentation_captures.get(1).unwrap().as_str(),
+        None => return Err(format!("markers/{}.svg didn't seem to start with a tag.", marker_filename)),
+    };
+    // remove that indentation and return
+    let indentation_pattern = Regex::new(&format!("(?m)^{}", indentation)).unwrap();
+    let marker_string = indentation_pattern.replace_all(marker_string, "");
     return Ok(String::from(marker_string));
 }
 
@@ -628,38 +641,50 @@ fn bounds_of(shape: &Shape) -> Result<[[f64; 2]; 2], ()> {
 }
 
 
-/// take an SVG string and insert the given attribute key and value to the last top-level
+/// take an SVG string and insert the given attribute key and value to every top-level
 /// tag in it.  if the key is already there, append to the existing value
 fn insert_attribute(element: &str, key: &str, value: &str) -> Result<String, String> {
-    // find the index of the last top-level tag in the string
-    let tag_pattern = Regex::new(r"(?m)^<[a-z]+([^>]*)>").unwrap();
-    let mut last_tag_index: Option<(usize, usize)> = None;
-    for captures in tag_pattern.captures_iter(element) {
-        let capture = captures.get(1).unwrap();
-        last_tag_index = Some((capture.start(), capture.end()));
-    };
-    match last_tag_index {
-        Some((attributes_start, attributes_end)) => {
-            // check if the desired attribute key is already present
-            let key_value_pattern = Regex::new(&format!("{}=\"([^\"]*)\"", key)).unwrap();
-            match key_value_pattern.captures_at(&element[..attributes_end], attributes_start) {
-                Some(captures) => {
-                    // if it is, append this value to what's already there
-                    let key_index = captures.get(1).unwrap().end();
-                    return Ok(format!(
-                        "{} {}{}", &element[..key_index], value, &element[key_index..]))
-                }
-                None => {
-                    // if it's not, you have to add the whole key-value expression
-                    return Ok(format!(
-                        "{} {}=\"{}\"{}",
-                        &element[..attributes_start], key, value, &element[attributes_start..]))
-                }
+    let mut modified_element = element.to_owned();
+    let mut offset = 0;
+
+    // find the index of every top-level tag in the string
+    let tag_pattern = Regex::new(r"(?m)^<[a-zA-Z]+([^>]*)>").unwrap();
+    for captures in tag_pattern.captures_iter(&element) {
+        let attribute_list = captures.get(1).unwrap();
+
+        // check if the desired attribute key is already present in this tag
+        let key_value_pattern = Regex::new(&format!("{}=\"([^\"]*)\"", key)).unwrap();
+        // this will determine what you insert and where
+        let infix = match key_value_pattern.captures_at(&element[..attribute_list.end()], attribute_list.start()) {
+            // if it is present, append this value to what's already there
+            Some(captures) => {
+                let tag = captures.get(1).unwrap();
+                Infix {content: format!(" {}", value), position: tag.end()}
             }
-        }
-        None => {
-            return Err(format!("I couldn't find any tags in the string '{}'", element))
-        }
+            // if it's not present, you have to add the whole key-value expression
+            None => {
+                Infix {content: format!(" {}=\"{}\"", key, value), position: attribute_list.start()}
+            }
+        };
+        let infix = Infix { content: infix.content, position: infix.position + offset}; // don't forget that we parsed the unmodified element, but we're inserting to the modified element, and they have different lengths now
+        modified_element = format!(
+            "{}{}{}",
+            &modified_element[..infix.position],
+            infix.content,
+            &modified_element[infix.position..],
+        );
+        offset += infix.content.len();
+    }
+    if offset == 0 {
+        return Err(format!("I couldn't find any tags in the string '{}'", element));
+    }
+    else {
+        return Ok(modified_element);
+    }
+
+    struct Infix {
+        content: String,
+        position: usize,
     }
 }
 
@@ -668,7 +693,7 @@ fn insert_attribute(element: &str, key: &str, value: &str) -> Result<String, Str
 fn prepend_to_each_line(string: &str, prefix: &str) -> String {
     let newline = Regex::new("\n").unwrap();
     let parts = newline.split(string);
-    let new_parts: Vec<String> = parts.map(|part| format!("{}{}", prefix, part)).collect();
+    let new_parts: Vec<String> = parts.map(|part| if part.len() > 0 { format!("{}{}", prefix, part) } else { String::new() }).collect();
     return new_parts.join("\n");
 }
 
@@ -897,7 +922,10 @@ impl Filter {
                 }
             }
             Filter::Not { filter } => {
-                return filter.matches(record);
+                return match filter.matches(record) {
+                    Ok(value) => Ok(!value),
+                    Err(message) => Err(message),
+                }
             }
         }
     }

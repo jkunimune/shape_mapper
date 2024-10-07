@@ -154,23 +154,35 @@ style: |
     stroke-linejoin: round;
     stroke-dasharray: 0.6 0.6;
   }
+  .station {
+    fill: #ffffff;
+    stroke: #000000;
+  }
+  .station .label {
+    stroke: none;
+    fill: #000000;
+    font-size: 3.0px;
+    font-weight: bold;
+    text-anchor: start;
+    alignment-baseline: baseline;
+  }
   .park_label {
     fill: #2d4e1f;
-    font-size: 3.5px;
-    font-style: italic;
+    font-size: 3.0px;
+    font-weight: bold;
     text-anchor: middle;
     alignment-baseline: baseline;
   }
   .pond_label {
     fill: #125588;
-    font-size: 3.5px;
+    font-size: 3.0px;
     font-style: italic;
     text-anchor: middle;
     alignment-baseline: baseline;
   }
   .airport_label {
     fill: #3b3b3b;
-    font-size: 3.5px;
+    font-size: 4.0px;
     text-anchor: middle;
     alignment-baseline: baseline;
   }
@@ -184,7 +196,7 @@ style: |
   }
   .minimap .town_label {
     font-size: 5px;
-    text-anchor: left;
+    text-anchor: start;
     alignment-baseline: baseline;
   }
   .district_label {
@@ -277,6 +289,18 @@ contents:
       - !Layer
         class: "town"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+      - !Layer
+        class: "station"
+        filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
+        marker: "mbta"
+        marker_size: 3
+        class_column: "LINE"
+        label_column: "STATION"
+        filters:
+          - !Not
+            filter: !OneOf {key: "LINE", valid_values: ["SILVER"]}
+          - !Not
+            filter: !OneOf {key: "ROUTE", valid_values: ["B - Boston College", "C - Cleveland Circle", "E - Health Street", "Mattapan Trolley"]}
       - !Layer
         class: "park_label"
         filename: "MassGIS/openspace/OPENSPACE_POLY"
