@@ -260,13 +260,11 @@ contents:
       - !Layer
         class: "pond"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
-        class_column: "POLY_CODE"
         filters:
           - !OneOf {key: "POLY_CODE", valid_values: [1, 6]}
       - !Layer
         class: "stream"
         filename: "MassGIS/hydro25k/HYDRO25K_ARC"
-        class_column: "ARC_CODE"
         filters:
           - !OneOf {key: "ARC_CODE", valid_values: [1, 8, 10]}
       - !Layer
@@ -288,7 +286,9 @@ contents:
         filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
       - !Layer
         class: "town"
-        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [17]}
       - !Layer
         class: "station"
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
@@ -296,6 +296,14 @@ contents:
         marker_size: 3
         class_column: "LINE"
         label_column: "STATION"
+        label_abbr:
+          - {from: "Street", to: "St"}
+          - {from: "Avenue", to: "Ave"}
+          - {from: "Square", to: "Sq"}
+          - {from: "Centre", to: "Ctr"}
+          - {from: "Center", to: "Ctr"}
+          - {from: "Station", to: "Sta"}
+          - {from: "Massachusetts", to: "Mass"}
         filters:
           - !Not
             filter: !OneOf {key: "LINE", valid_values: ["SILVER"]}

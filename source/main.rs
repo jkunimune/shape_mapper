@@ -100,7 +100,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
         }
 
         // resolve a Layer by loading geographic data from disc and making a bunch of Paths or Markers
-        Content::Layer { filename, class, class_column, label_column, label_case, marker, marker_size, double, self_clip, filters } => {
+        Content::Layer { filename, class, class_column, label_column, label_case, label_abbr, marker, marker_size, double, self_clip, filters } => {
             let region = outer_region.as_ref().ok_or(String::from(
                 "every layer must have a region defined somewhere in its hierarchy."))?;
             // check for incompatible options
@@ -275,6 +275,16 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                             Some(Case::Lower) => text.to_lowercase(),
                             Some(Case::Sentence) => text[..1].to_uppercase() + &text[1..].to_lowercase(),
                             None => text.to_owned(),
+                        };
+                        let text = match &label_abbr {
+                            Some(replacements) => {
+                                let mut new_text = text;
+                                for Replacement {from, to} in replacements.iter() {
+                                    new_text = new_text.replace(from, &to);
+                                }
+                                new_text
+                            }
+                            None => text,
                         };
                         // add necessary escape sequences (make sure you do this after setting the case)
                         let text = sanitize_XML(&text);
@@ -783,6 +793,8 @@ enum Content {
         label_column: Option<String>,
         /// how to set the case of the label before adding it to the image, if any such modification is desired
         label_case: Option<Case>,
+        /// a set of replacements to make in each label text, if any
+        label_abbr: Option<Vec<Replacement>>,
         /// the name of the SVG (without the 'markers/' or '.svg') to put at the center of this thing
         marker: Option<String>,
         /// the desired area of the SVG in square millimeters
@@ -903,6 +915,13 @@ enum Case {
     Upper,
     Lower,
     Sentence,
+}
+
+
+#[derive(Deserialize, Clone)]
+struct Replacement {
+    from: String,
+    to: String,
 }
 
 

@@ -1,0 +1,195 @@
+title: "Congressional districts in and around Boston"
+description: "
+  A map of the Boston area, with a greater Massachusetts map inset, that shows the borders of the
+  nine Massachusetts Congressional voting districts in relation to municipality borders and streets.
+  All geographic data is taken from the
+  <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
+    Massachusetts Bureau of Geographic Information
+  </a>."
+bounding_box: { left: 0, right: 416, top: 0, bottom: 300 }
+style: |
+  text {
+    font-family: Cadman, sans-serif;
+  }
+  .legend .background {
+    fill: #ffffff;
+    stroke: none;
+  }
+  .pond, .main_map .background {
+    fill: #e5f3f4;
+    stroke: #125588;
+    stroke-width: 0.6;
+    stroke-linejoin: round;
+  }
+  .stream {
+    fill: none;
+    stroke: #125588;
+    stroke-width: 0.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .frame {
+    fill: none;
+    stroke: black;
+    stroke-width: 3.0;
+    stroke-linejoin: miter;
+  }
+  .state_border, .town {
+    fill: none;
+    stroke: black;
+    stroke-width: 1.0;
+    stroke-linejoin: miter;
+    stroke-miterlimit: 2;
+  }
+  .town_label line {
+    stroke: black;
+    stroke-width: 0.7;
+  }
+  .city {
+    fill: none;
+    stroke: black;
+    stroke-width: 1.0;
+    stroke-linejoin: miter;
+    stroke-miterlimit: 2;
+  }
+  .road {
+    fill: none;
+    stroke: #6f6f6f;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .road .class_1, .road .class_2, .road .class_3 {
+    stroke-width: 0.8;
+  }
+  .road .class_4, .road.class_4 {
+    stroke-width: 0.4;
+  }
+  .district {
+    stroke-width: 7.0;
+    stroke-linejoin: round;
+  }
+  .dist_num_1, .dist_num_6 { /* orange */
+    fill: #f5e4db;
+    stroke: #e79d79;
+  }
+  .main_map .district_label_6 {
+    fill: #e79d79;
+  }
+  .dist_num_2, .dist_num_9 { /* purple */
+    fill: #e4dfee;
+    stroke: #b39fe8;
+  }
+  .dist_num_3 { /* pink */
+    fill: #fae9f4;
+    stroke: #ee9bd5;
+  }
+  .dist_num_4 { /* green */
+    fill: #d1dace;
+    stroke: #80ac75;
+  }
+  .main_map .district_label_4 {
+    fill: #80ac75;
+  }
+  .dist_num_5 { /* dark blue */
+    fill: #d3dce8;
+    stroke: #71aae2;
+  }
+  .main_map .district_label_5 {
+    fill: #71aae2;
+  }
+  .dist_num_7 { /* yellow */
+    fill: #f5f0e2;
+    stroke: #c9b874;
+  }
+  .main_map .district_label_7 {
+    fill: #c9b874;
+  }
+  .dist_num_8 { /* red */
+    fill: #eed8da;
+    stroke: #ed8897;
+  }
+  .main_map .district_label_8 {
+    fill: #ed8897;
+  }
+  .district_border {
+    fill: none;
+    stroke: black;
+    stroke-width: 0.4;
+    stroke-linejoin: round;
+    stroke-dasharray: 0.6 0.6;
+  }
+  .town_label {
+    font-weight: bold;
+  }
+  .main_map .town_label {
+    font-size: 5px;
+    text-anchor: middle;
+    alignment-baseline: middle;
+  }
+  .district_label {
+    font-weight: bold;
+  }
+  .main_map .district_label {
+    font-size: 50px;
+  }
+contents:
+  - !Group
+    class: "main_map"
+    frame: true
+    bounding_box: { left: 5, right: 411, top: 5, bottom: 295 }
+    region: { left: 213000, right: 248000, bottom: 888000, top: 913000 }
+    contents:
+      - !Layer
+        class: "district"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_POLY"
+        class_column: "DIST_NUM"
+        self_clip: true
+      - !Group
+        class: "district_label"
+        contents:
+          - !Label
+            class: "district_label_4"
+            text: "4"
+            location: { x: 230000, y: 888000}
+          - !Label
+            class: "district_label_5"
+            text: "5"
+            location: { x: 230000, y: 888000}
+          - !Label
+            class: "district_label_6"
+            text: "6"
+            location: { x: 230000, y: 888000}
+          - !Label
+            class: "district_label_7"
+            text: "7"
+            location: { x: 230000, y: 888000}
+          - !Label
+            class: "district_label_8"
+            text: "8"
+            location: { x: 230000, y: 888000}
+      - !Layer
+        class: "pond"
+        filename: "MassGIS/majorhydro/MAJPOND_POLY"
+      - !Layer
+        class: "stream"
+        filename: "MassGIS/majorhydro/MAJSTRM_ARC"
+      - !Layer
+        class: "road"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+        class_column: "CLASS"
+        filters:
+          - !OneOf {key: "RDTYPE", valid_values: [1, 2, 3, 4, 5]}
+      - !Layer
+        class: "district_border"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+      - !Layer
+        class: "town"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [17]}
+      - !Layer
+        class: "town_label"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+        marker: none
+        label_column: "TOWN"
+        label_case: !Upper
