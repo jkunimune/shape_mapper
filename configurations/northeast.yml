@@ -7,33 +7,47 @@ description: "
     Natural Earth
   </a>."
 style: |
+  .background {
+    fill: cyan;
+  }
+  .frame {
+    fill: none;
+    stroke: black;
+    stroke-width: 2.0;
+  }
   .graticule {
     fill: none;
     stroke: blue;
-    stroke-width: 0.2;
+    stroke-width: 0.4;
   }
   .state {
-    fill: none;
+    fill: white;
     stroke: none;
   }
   .river {
+    fill: none;
+    stroke: blue;
+    stroke-width: 0.8;
+  }
+  .coastline {
     fill: none;
     stroke: blue;
     stroke-width: 0.4;
   }
   .lake {
     fill: cyan;
-    storke: none;
+    stroke: blue;
+    stroke-width: 0.8;
   }
   .railroad {
     fill: none;
     stroke: darkgrey;
-    stroke-width: 0.4;
+    stroke-width: 0.8;
   }
   .state_border {
     fill: none;
     stroke: black;
-    stroke-width: 0.2;
+    stroke-width: 0.4;
   }
   .state {
     stroke: none;
@@ -46,21 +60,23 @@ style: |
     font-family: "Frutiger LT Pro",sans-serif;
     font-weight: 500;
     font-width: expanded;
-    font-size: 10.0px;
+    font-size: 6.0px;
     text-anchor: middle;
+    font-stretch: expanded;
   }
-  .water .label {
+  .sea .label, .gulf .label, .bay .label, .strait .label, .river .label, .channel .label {
     fill: blue;
-    font-family: "Noto Serif","Times New Roman",serif;
+    font-family: "Noto Serif",serif;
     font-weight: 500
     font-style: italic;
     text-anchor: middle;
+    font-stretch: expanded;
   }
   .sea .label, .gulf .label, .bay .label, .strait .label {
-    font-size: 8.0px;
+    font-size: 6.0px;
   }
   .river .label, .channel .label {
-    font-size: 6.0px;
+    font-size: 4.0px;
   }
   .small_city .label, .big_city .label {
     fill: black;
@@ -73,29 +89,29 @@ style: |
     font-size: 4.0px;
   }
   .big_city .label {
-    font-size: 6.0px;
+    font-size: 5.5px;
   }
-bounding_box: { left: -80, right: -68, top: -45, bottom: -35 }
+bounding_box: { left: -323, right: 323, top: -53, bottom: 133 }
 contents:
   # - !RasterLayer
   #   filename: "Natural Earth/ne_shaded_relief"
   - !Group
-    frame: false
-    # projection:
-    #   !Oblique
-    #   projection:
-    #     !Mercator
-    #     central_meridian: 150
-    #     equatorial_scale: 1000000
-    #   pole_latitude: 32.4
-    #   pole_longitude: 162.9
-    bounding_box: { left: -79, right: -69, top: -44, bottom: -36 }
-    region: { left: -79, right: -69, bottom: 37, top: 44 }
+    frame: true
+    transform:
+      !Oblique
+      projection:
+        !Mercator
+        central_meridian: 140.6
+        equatorial_scale: 1500000
+      pole_latitude: 32.4
+      pole_longitude: 162.9
+    bounding_box: { left: -320, right: 320, top: -50, bottom: 130 }
+    region: { left: -80, right: -68, bottom: 36, top: 45 }
     contents:
       - !Graticule
         class: "graticule"
-        parallel_spacing: 2
-        meridian_spacing: 2
+        parallel_spacing: 1
+        meridian_spacing: 1
       - !Layer
         class: "state"
         filename: "Natural Earth/ne_10m_admin_1_states_provinces"
@@ -105,6 +121,7 @@ contents:
       - !Layer
         class: "river"
         filename: "Natural Earth/ne_10m_rivers_lake_centerlines"
+        label_column: "name_en"
       - !Layer
         class: "lake"
         filename: "Natural Earth/ne_10m_lakes"
@@ -112,7 +129,7 @@ contents:
         class: "state_border"
         filename: "Natural Earth/ne_10m_admin_1_states_provinces"
       - !Layer
-        class: "river"
+        class: "coastline"
         filename: "Natural Earth/ne_10m_coastline"
       - !Layer
         class: "railroad"
@@ -127,10 +144,10 @@ contents:
         filename: "Natural Earth/ne_10m_populated_places_simple"
         label_column: "name"
         marker: "circle"
-        marker_size: 1
+        marker_size: 3
         filters:
           - !Not
-            filter: !GreaterThan {key: "scalerank", cutoff: 2}
+            filter: !GreaterThan {key: "scalerank", cutoff: 10}
           - !Not
             filter: !GreaterThan {key: "pop_max", cutoff: 1000000}
       - !Layer
@@ -138,10 +155,10 @@ contents:
         filename: "Natural Earth/ne_10m_populated_places_simple"
         label_column: "name"
         marker: "circle"
-        marker_size: 2
+        marker_size: 6
         filters:
           - !Not
-            filter: !GreaterThan {key: "scalerank", cutoff: 2}
+            filter: !GreaterThan {key: "scalerank", cutoff: 10}
           - !GreaterThan {key: "pop_max", cutoff: 1000000}
       # - !CompassRose
       #   filename: "cross_arrow"

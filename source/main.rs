@@ -10,6 +10,11 @@ use shapefile::Shape;
 
 
 
+const EARTH_RADIUS: f64 = 6.371e9; // mm (TODO: infer this from the .prj file?)
+const CURVE_PRECISION: f64 = 1.0; // mm
+
+
+
 fn main() -> Result<(), String> {
     let args: Vec<String> = env::args().collect();
     if args.len() > 2 {
@@ -27,6 +32,13 @@ fn main() -> Result<(), String> {
     println!("generating a map of '{}' based on `configurations/{}.yml`.", configuration.title, filename);
 
     let map_bounding_box = configuration.bounding_box.ok_or("the top level must have a bounding box")?;
+    let top_level_transform = match configuration.transform {
+        Some(..) => configuration.transform,
+        None => match &configuration.region {
+            Some(region) => Some(Transform::between(region, &map_bounding_box)),
+            None => None,
+        }
+    };
     let map_width = f64::abs(map_bounding_box.right - map_bounding_box.left);
     let map_height = f64::abs(map_bounding_box.bottom - map_bounding_box.top);
     let mut svg_code = format!(
@@ -46,7 +58,7 @@ fn main() -> Result<(), String> {
     let element_index: &mut u32 = &mut 0;
     for content in configuration.contents {
         let content = load_content(content, &configuration.region)?;
-        let content = transform_content(content, &map_bounding_box, &configuration.region)?;
+        let content = transform_content(content, &top_level_transform)?;
         let content = transcribe_content_as_svg(content, &map_bounding_box, &configuration.region, element_index)?;
         let content = prepend_to_each_line(&content, "  ");
         svg_code.push_str(&content);
@@ -70,7 +82,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
     match content {
 
         // for a Group, load its children recursively
-        Content::Group { contents: sub_contents, bounding_box, region: sub_region, clip, frame, class } => {
+        Content::Group { contents: sub_contents, bounding_box, region: sub_region, transform, clip, frame, class } => {
             let region: &Option<Box> = match &sub_region {
                 Some(..) => &sub_region,
                 None => outer_region,
@@ -82,9 +94,8 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
             return Ok(Content::Group {
                 contents: loaded_sub_contents,
                 region: sub_region,
-                bounding_box, class,
-                clip: clip,
-                frame: frame,
+                bounding_box, transform,
+                class, clip, frame,
             });
         }
 
@@ -285,6 +296,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                 class: class,
                 bounding_box: None,
                 region: None,
+                transform: None,
                 clip: Some(false),
                 frame: Some(false),
             });
@@ -331,6 +343,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                 class: class,
                 bounding_box: None,
                 region: None,
+                transform: None,
                 clip: Some(false),
                 frame: Some(false),
             });
@@ -344,58 +357,57 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
 
 /// apply all necessary coordinate transforms to the points in this box.
 /// all geographic data should come out in SVG coordinates rather than in shapefile coordinates.
-fn transform_content(content: Content, outer_bounding_box: &Box, outer_region: &Option<Box>) -> Result<Content, String> {
+fn transform_content(content: Content, outer_transform: &Option<Transform>) -> Result<Content, String> {
     match content {
-        Content::Group { contents: sub_contents, bounding_box: sub_bounding_box, region: sub_region, clip, frame, class } => {
-            let bounding_box = match &sub_bounding_box {
-                Some(sub_bounding_box) => sub_bounding_box,
-                None => outer_bounding_box,
-            };
-            let region = match &sub_region {
-                Some(..) => &sub_region,
-                None => outer_region,
+        Content::Group { contents: sub_contents, bounding_box, region, transform, clip, frame, class } => {
+            // establish the transform
+            let transform = match transform {
+                // either from it being stated explicitly
+                Some(..) => &transform,
+                None => match (&bounding_box, &region) {
+                    // or by inferring it from bounding_box and region
+                    (Some(bounding_box), Some(region)) => &Some(Transform::between(region, bounding_box)),
+                    // or by inheriting it from an upper level
+                    _ => outer_transform,
+                }
             };
             let mut transformed_contents = Vec::with_capacity(sub_contents.len());
             for sub_content in sub_contents {
-                transformed_contents.push(transform_content(sub_content, bounding_box, region)?);
+                transformed_contents.push(transform_content(sub_content, transform)?);
             }
             return Ok(Content::Group {
                 contents: transformed_contents,
-                bounding_box: sub_bounding_box,
-                region: sub_region,
+                bounding_box, region,
                 clip, frame, class,
+                transform: None,
             });
         },
         Content::Line { start, end, class } => {
-            let region = outer_region.as_ref().ok_or(String::from(
-                "every layer must have a region defined somewhere in its hierarchy."))?;
-            let transform = Transform::between(region, outer_bounding_box);
+            let transform = outer_transform.as_ref().ok_or(String::from(
+                "every layer must have a region defined somewhere in its hierarchy."
+            ))?;
             return Ok(Content::Line {
-                start: Transform::apply(&transform, start),
-                end: Transform::apply(&transform, end),
+                start: Transform::apply(&transform, &start),
+                end: Transform::apply(&transform, &end),
                 class: class,
             });
         },
         Content::Rectangle { coordinates, class } => {
-            let region = outer_region.as_ref().ok_or(String::from(
-                "every layer must have a region defined somewhere in its hierarchy."))?;
-            let transform = Transform::between(region, outer_bounding_box);
+            let transform = outer_transform.as_ref().ok_or(String::from(
+                "every layer must have a region defined somewhere in its hierarchy."
+            ))?;
             return Ok(Content::Rectangle {
-                coordinates: Transform::apply_to_box(&transform, coordinates),
+                coordinates: Transform::apply_to_box(&transform, &coordinates)?,
                 class: class,
             });
         },
         Content::Path { parts, closed, self_clip, class } => {
-            let region = outer_region.as_ref().ok_or(String::from(
-                "every layer must have a region defined somewhere in its hierarchy."))?;
-            let transform = Transform::between(region, outer_bounding_box);
+            let transform = outer_transform.as_ref().ok_or(String::from(
+                "every layer must have a region defined somewhere in its hierarchy."
+            ))?;
             let mut transformed_parts = Vec::with_capacity(parts.len());
             for part in parts {
-                let mut transformed_part = Vec::with_capacity(part.len());
-                for point in part {
-                    transformed_part.push(Transform::apply(&transform, point));
-                }
-                transformed_parts.push(transformed_part);
+                transformed_parts.push(Transform::apply_to_curve(&transform, &part, CURVE_PRECISION));
             }
             return Ok(Content::Path {
                 parts: transformed_parts,
@@ -405,23 +417,23 @@ fn transform_content(content: Content, outer_bounding_box: &Box, outer_region: &
             });
         },
         Content::Marker { detail, location, size, class } => {
-            let region = outer_region.as_ref().ok_or(String::from(
-                "every layer must have a region defined somewhere in its hierarchy."))?;
-            let transform = Transform::between(region, outer_bounding_box);
+            let transform = outer_transform.as_ref().ok_or(String::from(
+                "every layer must have a region defined somewhere in its hierarchy."
+            ))?;
             return Ok(Content::Marker {
                 detail: detail,
-                location: Transform::apply(&transform, location),
+                location: Transform::apply(&transform, &location),
                 size: size,
                 class: class,
             });
         },
         Content::Label { text, location: coordinates, class } => {
-            let region = outer_region.as_ref().ok_or(String::from(
-                "every layer must have a region defined somewhere in its hierarchy."))?;
-            let transform = Transform::between(region, outer_bounding_box);
+            let transform = outer_transform.as_ref().ok_or(String::from(
+                "every layer must have a region defined somewhere in its hierarchy."
+            ))?;
             return Ok(Content::Label {
                 text: text,
-                location: Transform::apply(&transform, coordinates),
+                location: Transform::apply(&transform, &coordinates),
                 class: class,
             });
         },
@@ -510,7 +522,7 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
             insert_attribute(
                 &detail, "transform",
                 &format!(
-                    "translate({}, {}) scale({})",
+                    "translate({:.2}, {:.2}) scale({:.4})",
                     location.x, location.y, f64::sqrt(size),
                 ),
             )?,
@@ -725,6 +737,26 @@ fn sanitize_XML(string: &str) -> String {
 }
 
 
+/// calculate the distance between a line segment and a point
+fn line_point_distance(start: &SerializablePoint, end: &SerializablePoint, point: &SerializablePoint) -> f64 {
+    let length2 = (end.x - start.x).powi(2) + (end.y - start.y).powi(2);
+    if length2 <= 0. {
+        return f64::hypot(point.x - start.x, point.y - start.y);
+    }
+    let t = ((point.x - start.x)*(end.x - start.x) + (point.y - start.y)*(end.y - start.y))/length2;
+    let s = ((point.x - start.x)*(end.y - start.y) - (point.y - start.y)*(end.x - start.x))/length2;
+    if t <= 0. {
+        return f64::hypot(point.x - start.x, point.y - start.y);
+    }
+    else if t >= 1. {
+        return f64::hypot(point.x - end.x, point.y - end.y);
+    }
+    else {
+        return f64::abs(s)*f64::sqrt(length2);
+    }
+}
+
+
 #[derive(Deserialize)]
 struct Configuration {
     title: String,
@@ -732,6 +764,7 @@ struct Configuration {
     style: String,
     bounding_box: Option<Box>,
     region: Option<Box>,
+    transform: Option<Transform>,
     contents: Vec<Content>,
 }
 
@@ -823,11 +856,13 @@ enum Content {
         contents: Vec<Content>,
         /// the SVG class to add to the elements in this group, if any
         class: Option<String>,
-        /// the box to which to fit this group's contents
+        /// the box to which to crop this group's contents
         bounding_box: Option<Box>,
-        /// the geographical region to include. shapes wholly outside this region will be discarded,
-        /// and the contents will be scaled to fit this region to the bounding box.
+        /// the geographical region to include. shapes wholly outside this region will be discarded.
         region: Option<Box>,
+        /// the coordinate transformation to use to map contained points from geographical coordinates
+        /// to print coordinates.  defaults to an affine transform that fits the region to the bounding_box.
+        transform: Option<Transform>,
         /// whether to crop the contents to the bounding box (defaults to true)
         clip: Option<bool>,
         /// whether to add a rect for a background and frame (defaults to false)
@@ -871,7 +906,7 @@ enum Case {
 }
 
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, PartialEq, Debug)]
 struct SerializablePoint {
     x: f64,
     y: f64,
@@ -944,11 +979,35 @@ impl Filter {
 }
 
 
-struct Transform {
-    x_scale: f64,
-    x_shift: f64,
-    y_scale: f64,
-    y_shift: f64,
+#[derive(Deserialize, Clone)]
+enum Transform {
+    /// a linear scaling and translation from map to map
+    Affine {
+        /// the scale in the horizontal direction (mm per shapefile units)
+        x_scale: f64,
+        /// the x-coordinate of the shapefile origin (mm)
+        x_shift: f64,
+        /// the scale in the vertical direction (mm per shapefile units, should be negative)
+        y_scale: f64,
+        /// the y-coordinate of the shapefile origin (mm)
+        y_shift: f64,
+    },
+    /// a cylindrical conformal mapping from spherical coordinates in degrees to a plane
+    Mercator {
+        /// the central meridian (°)
+        central_meridian: f64,
+        /// the one divided by map scale at the equator (mm/mm)
+        equatorial_scale: f64,
+    },
+    /// a 3D rotation that gets applied before some other transformation
+    Oblique {
+        /// the latitude of the point that will appear at the top of the map (°)
+        pole_latitude: f64,
+        /// the longitude of the point that will appear at the top of the map (°)
+        pole_longitude: f64,
+        /// the transform to apply after rotating
+        projection: std::boxed::Box<Transform>,
+    },
 }
 
 impl Transform {
@@ -957,22 +1016,118 @@ impl Transform {
         let x_shift = output.left - input.left*x_scale;
         let y_scale = (output.bottom - output.top)/(input.bottom - input.top);
         let y_shift = output.top - input.top*y_scale;
-        return Transform { x_scale: x_scale, x_shift: x_shift, y_scale: y_scale, y_shift: y_shift };
+        return Transform::Affine { x_scale: x_scale, x_shift: x_shift, y_scale: y_scale, y_shift: y_shift };
     }
 
-    fn apply(self: &Transform, input: SerializablePoint) -> SerializablePoint {
-        return SerializablePoint {
-            x: input.x*self.x_scale + self.x_shift,
-            y: input.y*self.y_scale + self.y_shift,
+    fn apply(self: &Transform, input: &SerializablePoint) -> SerializablePoint {
+        return match self {
+            Transform::Affine { x_scale, x_shift, y_scale, y_shift } => {
+                SerializablePoint {
+                    x: input.x*x_scale + x_shift,
+                    y: input.y*y_scale + y_shift,
+                }
+            },
+            Transform::Mercator { central_meridian, equatorial_scale } => {
+                SerializablePoint {
+                    x: 1./equatorial_scale*EARTH_RADIUS*f64::to_radians(input.x - central_meridian),
+                    y: -1./equatorial_scale*EARTH_RADIUS*f64::atanh(f64::sin(f64::to_radians(input.y))),
+                }
+            },
+            Transform::Oblique { pole_latitude, pole_longitude, projection } => {
+                let φ_pole = f64::to_radians(*pole_latitude);
+                let λ_pole = f64::to_radians(*pole_longitude);
+                let φ_point = f64::to_radians(input.y);
+                let λ_point = f64::to_radians(input.x);
+                let y_pole = -φ_pole.cos();
+                let z_pole = φ_pole.sin();
+                let x_point = φ_point.cos()*(λ_point - λ_pole).sin();
+                let y_point = -φ_point.cos()*(λ_point - λ_pole).cos();
+                let z_point = φ_point.sin();
+                let φ_relative = (y_pole*y_point + z_pole*z_point).asin();
+                let λ_relative = f64::atan2(x_point, y_pole*z_point - z_pole*y_point);
+                Transform::apply(projection, &SerializablePoint {
+                    x: f64::to_degrees(λ_relative),
+                    y: f64::to_degrees(φ_relative),
+                })
+            },
         };
     }
 
-    fn apply_to_box(self: &Transform, input: Box) -> Box {
-        return Box {
-            left: input.left*self.x_scale + self.x_shift,
-            right: input.right*self.x_scale + self.x_shift,
-            top: input.top*self.y_scale + self.y_shift,
-            bottom: input.bottom*self.y_scale + self.y_shift,
+    fn apply_to_box(self: &Transform, input: &Box) -> Result<Box, String> {
+        return match self {
+            Transform::Affine { x_scale, x_shift, y_scale, y_shift } => Ok(Box {
+                left: input.left*x_scale + x_shift,
+                right: input.right*x_scale + x_shift,
+                bottom: input.bottom*y_scale + y_shift,
+                top: input.top*y_scale + y_shift,
+            }),
+            Transform::Mercator { central_meridian, equatorial_scale } => Ok(Box {
+                left: 1./equatorial_scale*EARTH_RADIUS*f64::to_radians(input.left - central_meridian),
+                right: 1./equatorial_scale*EARTH_RADIUS*f64::to_radians(input.right - central_meridian),
+                bottom: -1./equatorial_scale*EARTH_RADIUS*f64::atanh(f64::sin(f64::to_radians(input.bottom))),
+                top: -1./equatorial_scale*EARTH_RADIUS*f64::atanh(f64::sin(f64::to_radians(input.top))),
+            }),
+            Transform::Oblique { .. } => Err(format!(
+                "oblique map projections are not generally cylindrical and so I don't support projecting rectangles in them."
+            )),
+        };
+    }
+
+    fn apply_to_curve(self: &Transform, input: &Vec<SerializablePoint>, tolerance: f64) -> Vec<SerializablePoint> {
+        // first, do the transform to all the points in the input
+        let mut pending_points: Vec<(SerializablePoint, SerializablePoint)> = Vec::with_capacity(input.len());
+        for raw_point in input {
+            let transformed_point = self.apply(raw_point);
+            pending_points.push((raw_point.clone(), transformed_point));
+        }
+        pending_points.reverse();
+        // then inspect them and put them in the finished list one at a time
+        let mut finished_points: Vec<(SerializablePoint, SerializablePoint)> = Vec::with_capacity(input.len());
+        // the first one is a freebie
+        match pending_points.pop() {
+            Some(initial_point) => finished_points.push(initial_point),
+            None => {},
+        }
+
+        // go thru until there are no more points pending
+        while pending_points.len() > 0 {
+            let (last_raw, last_transformed) = finished_points.get(finished_points.len() - 1).unwrap();
+            let (next_raw, next_transformed) = pending_points.pop().unwrap();
+            // look at the point between the last finished point and the next pending point
+            let tween_raw = SerializablePoint { x: (last_raw.x + next_raw.x)/2., y: (last_raw.y + next_raw.y)/2. };
+            let tween_transformed = self.apply(&tween_raw);
+            // see how far it is from the line segment between its neibors
+            let distance = if self.is_affine() {0.} else {
+                line_point_distance(last_transformed, &next_transformed, &tween_transformed)
+            };
+            // if it's pretty close, discard the midpoint and save the pending point
+            if distance < tolerance {
+                finished_points.push((next_raw, next_transformed));
+            }
+            // if it's significantly off, put it back on the queue along with the midpoint
+            else {
+                pending_points.push((next_raw, next_transformed));
+                pending_points.push((tween_raw, tween_transformed));
+            }
+        }
+
+        // finally, remove all the raw points so only transformed points are left
+        let mut output = Vec::with_capacity(finished_points.len());
+        for (_, transformed_point) in finished_points {
+            output.push(transformed_point);
+        }
+        return output;
+    }
+
+    fn is_affine(self: &Transform) -> bool {
+        return match self {
+            Transform::Affine {..} => true,
+            Transform::Mercator {..} => false,
+            Transform::Oblique {..} => false,
         }
     }
 }
+
+
+#[cfg(test)]
+mod test;
