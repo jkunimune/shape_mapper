@@ -100,31 +100,37 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
         }
 
         // resolve a Layer by loading geographic data from disc and making a bunch of Paths or Markers
-        Content::Layer { filename, class, class_column, label_column, label_case, label_abbr, marker, marker_size, double, self_clip, filters } => {
+        Content::Layer { filename, class, class_column, label_column, case, abbr, marker_name, size, double, self_clip, filters } => {
             let region = outer_region.as_ref().ok_or(String::from(
                 "every layer must have a region defined somewhere in its hierarchy."))?;
             // check for incompatible options
-            if marker.is_none() && marker_size.is_some() {
-                return Err(String::from("you may not use the `marker_size` option without the `marker` option."));
+            if label_column.is_some() && marker_name.is_some() {
+                return Err(String::from("you may not use both `label_column` and `marker_name` in a single Layer."))
             }
-            if marker.as_ref().is_some_and(|value| value != "none") && self_clip == Some(true) {
-                return Err(String::from("the `self_clip` option is incompatible with the `marker` option."));
+            if label_column.is_none() && case.is_some() {
+                return Err(String::from("you may not use the `case` option without the `label_column` option."))
+            }
+            if label_column.is_none() && abbr.is_some() {
+                return Err(String::from("you may not use the `abbr` option without the `label_column` option."))
+            }
+            if marker_name.is_none() && size.is_some() {
+                return Err(String::from("you may not use the `size` option without the `marker_name` option."));
+            }
+            if marker_name.is_some() && self_clip == Some(true) {
+                return Err(String::from("the `self_clip` option is incompatible with the `marker_name` option."));
             }
 
             let mut contents = Vec::new();
-            let mut labels = Vec::new();
             let mut reader = shapefile::Reader::from_path(
                 format!("data/{}.shp", filename)).or(Err(format!("could not find `data/{}.dbf`", &filename)))?;
 
-            let marker_data = match &marker {
+            let marker_data = match &marker_name {
                 // if marker was unspecified, don't load anything
                 None => None,
-                // if marker was explicitly "none", don't load anything
-                Some(marker) if marker == "none" => None,
                 // if marker was specified, load its content from disc and unwrap marker_size
                 Some(marker_filename) => {
                     // make sure we have a marker size
-                    let marker_size = match marker_size {
+                    let marker_size = match size {
                         Some(number) => number,
                         None => {
                             return Err(format!("the `{}.shp` layer has a marker, but no marker size is given.", filename));
@@ -183,53 +189,90 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
 
                 let location = center_of(&shape)?;
 
-                // convert the shape to a Path or a Marker
-                let shape = if marker.is_none() {
-                    // if no marker was specified, try to make a Content::Path
-                    // unwrap self_clip
-                    let self_clip = self_clip.unwrap_or(false);
-                    // draw it however you draw this shape
-                    let (parts, closed) = match shape {
-                        Shape::Polygon(polygon) => {
-                            // combine the rings of the polygon into a Vec<Vec<Point>>
-                            let mut rings_as_nested_vec: Vec<Vec<shapefile::Point>> = Vec::with_capacity(polygon.rings().len());
-                            for i in 0..polygon.rings().len() {
-                                rings_as_nested_vec.push(polygon.rings()[i].points().to_vec());
-                            }
-                            (SerializablePoint::deep_convert(&rings_as_nested_vec), true)
-                        }
-                        Shape::Polyline(polyline) => {
-                            (SerializablePoint::deep_convert(polyline.parts()), false)
-                        }
-                        Shape::Point(_) => {
-                            return Err(format!("data/{}.shp is a POINT shapefile.  POINT layers must always have a `marker`.", filename))
-                        }
-                        _ => {
-                            return Err(format!("we don't support {} shapefiles right now.", shape.shapetype().to_string()));
-                        }
-                    };
-                    // pull it all together as a Content::Path
-                    Some(Content::Path {
-                        parts, closed, self_clip,
-                        class: shape_class,
-                    })
-                }
-                else {
-                    match &marker_data {
-                        // if marker was specified, make a Content::Marker
-                        Some((marker_detail, marker_size)) => {
-                            let marker_location = center_of(&shape)?;
-                            Some(Content::Marker {
-                                detail: marker_detail.clone(),
-                                location: marker_location,
-                                size: *marker_size,
+                // convert the shape to a Path or a Marker or a Label
+                let shape = match &marker_data {
+                    None => match &label_column {
+                        None => {
+                            // if no marker or label was specified, try to make a Content::Path
+                            // unwrap self_clip
+                            let self_clip = self_clip.unwrap_or(false);
+                            // draw it however you draw this shape
+                            let (parts, closed) = match shape {
+                                Shape::Polygon(polygon) => {
+                                    // combine the rings of the polygon into a Vec<Vec<Point>>
+                                    let mut rings_as_nested_vec: Vec<Vec<shapefile::Point>> = Vec::with_capacity(polygon.rings().len());
+                                    for i in 0..polygon.rings().len() {
+                                        rings_as_nested_vec.push(polygon.rings()[i].points().to_vec());
+                                    }
+                                    (SerializablePoint::deep_convert(&rings_as_nested_vec), true)
+                                }
+                                Shape::Polyline(polyline) => {
+                                    (SerializablePoint::deep_convert(polyline.parts()), false)
+                                }
+                                Shape::Point(_) => {
+                                    return Err(format!("data/{}.shp is a POINT shapefile.  POINT layers must always have a `marker`.", filename))
+                                }
+                                _ => {
+                                    return Err(format!("we don't support {} shapefiles right now.", shape.shapetype().to_string()));
+                                }
+                            };
+                            // pull it all together as a Content::Path
+                            Some(Content::Path {
+                                parts, closed, self_clip,
                                 class: shape_class,
                             })
                         }
-                        // if marker was specified as "none", don't do anything
-                        None => {
-                            None
+                        Some(label_column) => {
+                            // if a label was specified
+                            // decide what the label should say
+                            let text = match record.get(label_column) {
+                                Some(FieldValue::Character(characters)) => match characters {
+                                    Some(characters) => characters,
+                                    None => continue,
+                                },
+                                Some(value) => {
+                                    return Err(format!("you can only label by string columns, but '{}' is a {} column.", label_column, value.field_type().to_string()));
+                                }
+                                None => {
+                                    return Err(format!("you can't label by the column '{}' because it doesn't seem to exist.", label_column));
+                                }
+                            };
+                            // modify the case if desired
+                            let text = match case {
+                                Some(Case::Upper) => text.to_uppercase(),
+                                Some(Case::Lower) => text.to_lowercase(),
+                                Some(Case::Sentence) => text[..1].to_uppercase() + &text[1..].to_lowercase(),
+                                None => text.to_owned(),
+                            };
+                            let text = match &abbr {
+                                Some(replacements) => {
+                                    let mut new_text = text;
+                                    for Replacement {from, to} in replacements.iter() {
+                                        new_text = new_text.replace(from, &to);
+                                    }
+                                    new_text
+                                }
+                                None => text,
+                            };
+                            // add necessary escape sequences (make sure you do this after setting the case)
+                            let text = sanitize_XML(&text);
+                            // decide where to put the label
+                            let location = coerce_in_box(&location, region);
+                            Some(Content::Label {
+                                text, location,
+                                class: shape_class,
+                            })
                         }
+                    }
+                    Some((marker_detail, marker_size)) => {
+                        // if marker was specified, make a Content::Marker
+                        let marker_location = center_of(&shape)?;
+                        Some(Content::Marker {
+                            detail: marker_detail.clone(),
+                            location: marker_location,
+                            size: *marker_size,
+                            class: shape_class,
+                        })
                     }
                 };
 
@@ -252,54 +295,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                     }
                     None => {}
                 }
-
-                // add the corresponding label, if desired
-                match &label_column {
-                    Some(label_column) => {
-                        // decide what the label should say
-                        let text = match record.get(label_column) {
-                            Some(FieldValue::Character(characters)) => match characters {
-                                Some(characters) => characters,
-                                None => continue,
-                            },
-                            Some(value) => {
-                                return Err(format!("you can only label by string columns, but '{}' is a {} column.", label_column, value.field_type().to_string()));
-                            }
-                            None => {
-                                return Err(format!("you can't label by the column '{}' because it doesn't seem to exist.", label_column));
-                            }
-                        };
-                        // modify the case if desired
-                        let text = match label_case {
-                            Some(Case::Upper) => text.to_uppercase(),
-                            Some(Case::Lower) => text.to_lowercase(),
-                            Some(Case::Sentence) => text[..1].to_uppercase() + &text[1..].to_lowercase(),
-                            None => text.to_owned(),
-                        };
-                        let text = match &label_abbr {
-                            Some(replacements) => {
-                                let mut new_text = text;
-                                for Replacement {from, to} in replacements.iter() {
-                                    new_text = new_text.replace(from, &to);
-                                }
-                                new_text
-                            }
-                            None => text,
-                        };
-                        // add necessary escape sequences (make sure you do this after setting the case)
-                        let text = sanitize_XML(&text);
-                        // decide where to put the label
-                        let location = coerce_in_box(&location, region);
-                        labels.push(Content::Label {
-                            text, location,
-                            class: Some(String::from("label")),
-                        });
-                    }
-                    _ => {}
-                }
             }
-
-            contents.append(&mut labels);
 
             return Ok(Content::Group {
                 contents,
@@ -792,13 +788,13 @@ enum Content {
         /// the record field key to put in the label that gets added to each shape, if such labels are desired.
         label_column: Option<String>,
         /// how to set the case of the label before adding it to the image, if any such modification is desired
-        label_case: Option<Case>,
+        case: Option<Case>,
         /// a set of replacements to make in each label text, if any
-        label_abbr: Option<Vec<Replacement>>,
+        abbr: Option<Vec<Replacement>>,
         /// the name of the SVG (without the 'markers/' or '.svg') to put at the center of this thing
-        marker: Option<String>,
-        /// the desired area of the SVG in square millimeters
-        marker_size: Option<f64>,
+        marker_name: Option<String>,
+        /// the desired area of the marker in square millimeters
+        size: Option<f64>,
         /// whether to duplicate each shape in this thing (defaults to false)
         double: Option<bool>,
         /// whether to make this shape's strokes be confined within its shape (defaults to false)
@@ -898,11 +894,14 @@ impl Content {
 
     fn set_class(self: Content, class: Option<String>) -> Content {
         return match self {
-            Content::Path { parts, closed, self_clip, .. } => Content::Path {
-                class, parts: parts, closed: closed, self_clip: self_clip,
+            Content::Path { parts, closed, self_clip, class: _ } => Content::Path {
+                class, parts, closed, self_clip,
             },
-            Content::Marker { detail, location, size, .. } => Content::Marker {
-                class, detail: detail, location: location, size: size,
+            Content::Label { text, location, class: _ } => Content::Label {
+                class, text, location,
+            },
+            Content::Marker { detail, location, size, class: _ } => Content::Marker {
+                class, detail, location, size,
             },
             _ => panic!("this function should only be used on Paths and Markers"),
         }
@@ -952,17 +951,24 @@ struct Box {
 
 #[derive(Deserialize, Clone)]
 enum Filter {
+    /// check that a record value is one of the values in the given list
     OneOf {
         key: String,
         valid_values: Vec<String>,
     },
+    /// check that a record value is greater than a threshold
     GreaterThan {
         key: String,
         cutoff: f64,
     },
+    /// the inverse of some other given Filter
     Not {
         filter: std::boxed::Box<Filter>,
-    }
+    },
+    /// the 
+    Either {
+        filters: Vec<Filter>,
+    },
 }
 
 impl Filter {
@@ -992,6 +998,14 @@ impl Filter {
                     Ok(value) => Ok(!value),
                     Err(message) => Err(message),
                 }
+            }
+            Filter::Either { filters } => {
+                for filter in filters {
+                    if filter.matches(record)? {
+                        return Ok(true);
+                    }
+                }
+                return Ok(false);
             }
         }
     }

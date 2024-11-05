@@ -183,13 +183,17 @@ contents:
         class: "district_border"
         filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
       - !Layer
+        class: "stream"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [2]}
+      - !Layer
         class: "town"
-        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
         filters:
           - !OneOf {key: "OUTLINE", valid_values: [17]}
       - !Layer
         class: "town_label"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
-        marker: none
         label_column: "TOWN"
-        label_case: !Upper
+        case: !Upper

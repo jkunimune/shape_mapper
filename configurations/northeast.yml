@@ -55,7 +55,7 @@ style: |
   .city {
     fill: black;
   }
-  .state .label {
+  .state_label {
     fill: black;
     font-family: "Frutiger LT Pro",sans-serif;
     font-weight: 500;
@@ -64,7 +64,7 @@ style: |
     text-anchor: middle;
     font-stretch: expanded;
   }
-  .sea .label, .gulf .label, .bay .label, .strait .label, .river .label, .channel .label {
+  .sea_label, .river_label {
     fill: blue;
     font-family: "Noto Serif",serif;
     font-weight: 500
@@ -72,24 +72,19 @@ style: |
     text-anchor: middle;
     font-stretch: expanded;
   }
-  .sea .label, .gulf .label, .bay .label, .strait .label {
+  .sea_label {
     font-size: 6.0px;
   }
-  .river .label, .channel .label {
+  .river_label {
     font-size: 4.0px;
   }
-  .small_city .label, .big_city .label {
+  .city_label {
     fill: black;
     font-family: "Frutiger LT Pro",sans-serif;
     font-weight: 900;
     font-width: condensed;
+    font-size: 4.5px;
     text-anchor: start;
-  }
-  .small_city .label {
-    font-size: 4.0px;
-  }
-  .big_city .label {
-    font-size: 5.5px;
   }
 bounding_box: { left: -323, right: 323, top: -53, bottom: 133 }
 contents:
@@ -116,12 +111,9 @@ contents:
         class: "state"
         filename: "Natural Earth/ne_10m_admin_1_states_provinces"
         class_column: "name"
-        label_column: "name"
-        label_case: !Upper
       - !Layer
         class: "river"
         filename: "Natural Earth/ne_10m_rivers_lake_centerlines"
-        label_column: "name_en"
       - !Layer
         class: "lake"
         filename: "Natural Earth/ne_10m_lakes"
@@ -135,16 +127,22 @@ contents:
         class: "railroad"
         filename: "Natural Earth/ne_10m_railroads"
       - !Layer
-        class: "sea"
+        class: "state_label"
+        filename: "Natural Earth/ne_10m_admin_1_states_provinces"
+        label_column: "name"
+      - !Layer
+        class: "river_label"
+        filename: "Natural Earth/ne_10m_rivers_lake_centerlines"
+        label_column: "name_en"
+      - !Layer
+        class: "sea_label"
         filename: "Natural Earth/ne_10m_geography_marine_polys"
         label_column: "name_en"
-        marker: none
       - !Layer
         class: "small_city"
         filename: "Natural Earth/ne_10m_populated_places_simple"
-        label_column: "name"
-        marker: "circle"
-        marker_size: 3
+        marker_name: "circle"
+        size: 3
         filters:
           - !Not
             filter: !GreaterThan {key: "scalerank", cutoff: 10}
@@ -153,13 +151,19 @@ contents:
       - !Layer
         class: "big_city"
         filename: "Natural Earth/ne_10m_populated_places_simple"
-        label_column: "name"
-        marker: "circle"
-        marker_size: 6
+        marker_name: "circle"
+        size: 6
         filters:
           - !Not
             filter: !GreaterThan {key: "scalerank", cutoff: 10}
           - !GreaterThan {key: "pop_max", cutoff: 1000000}
+      - !Layer
+        class: "city_label"
+        filename: "Natural Earth/ne_10m_populated_places_simple"
+        label_column: "name"
+        filters:
+          - !Not
+            filter: !GreaterThan {key: "scalerank", cutoff: 10}
       # - !CompassRose
       #   filename: "cross_arrow"
       #   label: "N"

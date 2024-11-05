@@ -83,17 +83,17 @@ style: |
   .town_hall path {
     fill: black;
   }
-  .label {
+  text {
     fill: black;
     font-family: Helvetic, Helv, sans-serif;
     font-weight: normal;
   }
-  .town_hall .label {
+  .town_hall_label {
     font-size: 4.5px;
     text-anchor: start;
     alignment-baseline: baseline;
   }
-  .neighborhood .label {
+  .neighborhood_label {
     font-size: 3.5px;
     text-anchor: middle;
     alignment-baseline: baseline;
@@ -159,17 +159,19 @@ contents:
         double: true
       - !Layer
         class: "town_hall"
-        marker: "star"
-        marker_size: 12
+        filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
+        marker_name: "star"
+        size: 12
+      - !Layer
+        class: "town_hall_label"
         filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
         label_column: "CITY"
-        label_case: !Sentence
+        case: !Sentence
       - !Layer
-        class: "neighborhood"
-        marker: "none"
+        class: "neighborhood_label"
         filename: "MassGIS/geonames_shp/GEONAMES_PT_PLACES"
         label_column: "LABELTEXT"
-        label_case: !Sentence
+        case: !Sentence
         filters:
           - !OneOf
             key: "LABELTEXT"
@@ -177,6 +179,7 @@ contents:
               - "EAST BOSTON"
               - "SOUTH BOSTON"
               - "CHARLESTOWN"
+              - "FENWAY"
               - "DORCHESTER"
               - "ALLSTON"
               - "BRIGHTON"

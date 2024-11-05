@@ -154,37 +154,37 @@ style: |
     stroke-linejoin: round;
     stroke-dasharray: 0.6 0.6;
   }
-  .station {
+  .station_marker {
     fill: #ffffff;
     stroke: #000000;
   }
-  .station .label {
+  text.bottom {
+    stroke: #ffffff;
+    stroke-width: 0.4;
+  }
+  text.top {
     stroke: none;
+  }
+  .station_label {
     fill: #000000;
     font-size: 3.0px;
-    font-weight: bold;
     text-anchor: start;
-    alignment-baseline: baseline;
   }
   .park_label {
     fill: #2d4e1f;
     font-size: 3.0px;
-    font-weight: bold;
     text-anchor: middle;
-    alignment-baseline: baseline;
   }
   .pond_label {
     fill: #125588;
     font-size: 3.0px;
     font-style: italic;
     text-anchor: middle;
-    alignment-baseline: baseline;
   }
   .airport_label {
     fill: #3b3b3b;
     font-size: 4.0px;
     text-anchor: middle;
-    alignment-baseline: baseline;
   }
   .town_label {
     font-weight: bold;
@@ -192,7 +192,6 @@ style: |
   .main_map .town_label {
     font-size: 6px; /* note: 6px is actually 6 millimeters (about 17pt) */
     text-anchor: middle;
-    alignment-baseline: middle;
   }
   .minimap .town_label {
     font-size: 5px;
@@ -281,6 +280,7 @@ contents:
         class_column: "CLASS"
         filters:
           - !OneOf {key: "RDTYPE", valid_values: [1, 2, 3, 4, 5]}
+          - !OneOf {key: "ROUTE_SYST", valid_values: ["I", "US", "SR", "L", "N", "R"]}
       - !Layer
         class: "district_border"
         filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
@@ -290,13 +290,27 @@ contents:
         filters:
           - !OneOf {key: "OUTLINE", valid_values: [17]}
       - !Layer
-        class: "station"
+        class: "station_marker"
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
-        marker: "mbta"
-        marker_size: 3
+        marker_name: "mbta"
+        size: 2.8
         class_column: "LINE"
+        filters:
+          - !Either
+            filters:
+            - !OneOf {key: "STATION", valid_values: ["Boston College", "Health Street", "Mattapan"]}
+            - !Not {filter: !OneOf {key: "ROUTE", valid_values: ["B - Boston College", "C - Cleveland Circle", "E - Health Street", "Mattapan Trolley", "SL1", "SL2", "SL3", "SL1 SL2 SL3", "SL4", "SL5", "SL4 SL5"]}}
+      - !Layer
+        class: "station_label"
+        filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
         label_column: "STATION"
-        label_abbr:
+        double: true
+        filters:
+          - !Either
+            filters:
+            - !OneOf {key: "STATION", valid_values: ["Boston College", "Health Street", "Mattapan"]}
+            - !Not {filter: !OneOf {key: "ROUTE", valid_values: ["B - Boston College", "C - Cleveland Circle", "E - Health Street", "Mattapan Trolley", "SL1", "SL2", "SL3", "SL1 SL2 SL3", "SL4", "SL5", "SL4 SL5"]}}
+        abbr:
           - {from: "Street", to: "St"}
           - {from: "Avenue", to: "Ave"}
           - {from: "Square", to: "Sq"}
@@ -304,48 +318,34 @@ contents:
           - {from: "Center", to: "Ctr"}
           - {from: "Station", to: "Sta"}
           - {from: "Massachusetts", to: "Mass"}
-        filters:
-          - !Not
-            filter: !OneOf {key: "LINE", valid_values: ["SILVER"]}
-          - !Not
-            filter: !OneOf {key: "ROUTE", valid_values: ["B - Boston College", "C - Cleveland Circle", "E - Health Street", "Mattapan Trolley"]}
-      - !Layer
-        class: "station"
-        filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
-        marker: "mbta"
-        marker_size: 3
-        class_column: "LINE"
-        label_column: "STATION"
-        filters:
-          - !OneOf {key: "STATION", valid_values: ["Boston College", "Health Street", "Mattapan"]}
       - !Layer
         class: "park_label"
         filename: "MassGIS/openspace/OPENSPACE_POLY"
-        marker: none
         label_column: "SITE_NAME"
-        label_case: !Upper
+        case: !Upper
+        double: true
         filters:
           - !GreaterThan {key: "SHAPE_AREA", cutoff: 540000}
       - !Layer
         class: "pond_label"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
-        marker: none
         label_column: "NAME"
-        label_case: !Upper
+        case: !Upper
+        double: true
         filters:
           - !GreaterThan {key: "SHAPE_AREA", cutoff: 270000}
       - !Layer
         class: "airport_label"
         filename: "MassDOT/Airports"
-        marker: none
         label_column: "AIRPORT_NA"
-        label_case: !Upper
+        case: !Upper
+        double: true
       - !Layer
         class: "town_label"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
-        marker: none
         label_column: "TOWN"
-        label_case: !Upper
+        case: !Upper
+        double: true
   - !Group
     class: "minimap"
     frame: true
@@ -409,48 +409,14 @@ contents:
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
         filters:
           - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}
-      - !Group
-        class: "town_label"
-        contents:
-          - !Label
-            text: "Pittsfield"
-            location: { x: 59000, y: 918000 }
-          - !Label
-            text: "Greenfield"
-            location: { x: 115000, y: 930000 }
-          - !Label
-            text: "Holyoke"
-            location: { x: 110000, y: 885000 }
-          - !Label
-            text: "Springfield"
-            location: { x: 120000, y: 869000 }
-          - !Label
-            text: "Fitchburg"
-            location: { x: 179000, y: 925000 }
-          - !Label
-            text: "Worcester"
-            location: { x: 142000, y: 903000 }
-          - !Line
-            start: { x: 170000, y: 902000 }
-            end: { x: 173000, y: 896000 }
-          - !Label
-            text: "Framingham"
-            location: { x: 179000, y: 902000 }
-          - !Label
-            text: "Lowell"
-            location: { x: 190000, y: 932000 }
-          - !Label
-            text: "Haverhill"
-            location: { x: 202000, y: 953000 }
-          - !Label
-            text: "Brockton"
-            location: { x: 244000, y: 869000 }
-          - !Label
-            text: "Fall River"
-            location: { x: 219000, y: 836000 }
-          - !Label
-            text: "New Bedf."
-            location: { x: 245000, y: 811000 }
+      - !Layer
+        class: "city_label"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+        label_column: "TOWN"
+        case: !Sentence
+        double: true
+        filters:
+          - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}
   - !Group
     class: "legend legend_label"
     frame: true
