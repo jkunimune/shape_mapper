@@ -46,10 +46,6 @@ style: |
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
-  .town_label line {
-    stroke: black;
-    stroke-width: 0.7;
-  }
   .city {
     fill: none;
     stroke: black;
@@ -167,17 +163,17 @@ style: |
   }
   .station_label {
     fill: #000000;
-    font-size: 3.0px;
+    font-size: 3.5px;
     text-anchor: start;
   }
   .park_label {
     fill: #2d4e1f;
-    font-size: 3.0px;
+    font-size: 3.5px;
     text-anchor: middle;
   }
   .pond_label {
     fill: #125588;
-    font-size: 3.0px;
+    font-size: 3.5px;
     font-style: italic;
     text-anchor: middle;
   }
@@ -410,7 +406,7 @@ contents:
         filters:
           - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}
       - !Layer
-        class: "city_label"
+        class: "town_label"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
         label_column: "TOWN"
         case: !Sentence

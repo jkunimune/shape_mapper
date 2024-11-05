@@ -280,14 +280,15 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                 match shape {
                     Some(shape) => match double {
                         Some(true) => {
-                            for position in ["bottom", "top"] {
-                                let compound_class = match shape.get_class() {
-                                    Some(class) => Some(String::from(class) + " " + position),
-                                    None => Some(String::from(position)),
-                                };
-                                let shape = shape.clone().set_class(compound_class);
-                                contents.push(shape);
-                            }
+                            contents.push(Content::Group {
+                                bounding_box: None, region: None, transform: None,
+                                clip: Some(false), frame: Some(false),
+                                class: shape.get_class().clone(),
+                                contents: vec![
+                                    shape.clone().set_class(Some("bottom".to_string())),
+                                    shape.clone().set_class(Some("top".to_string())),
+                                ],
+                            });
                         }
                         _ => {
                             contents.push(shape);
