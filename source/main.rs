@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 
 use core::f64;
+use std::f64::consts::PI;
 use regex::Regex;
 use std::{env, fs};
 use serde::Deserialize;
@@ -11,7 +12,7 @@ use shapefile::Shape;
 
 
 const EARTH_RADIUS: f64 = 6.371e9; // mm (TODO: infer this from the .prj file?)
-const CURVE_PRECISION: f64 = 1.0; // mm
+const CURVE_PRECISION: f64 = 0.1; // mm
 
 
 
@@ -268,9 +269,11 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                         // if marker was specified, make a Content::Marker
                         let marker_location = center_of(&shape)?;
                         Some(Content::Marker {
-                            detail: marker_detail.clone(),
+                            detail: Some(marker_detail.clone()),
+                            filename: None,
                             location: marker_location,
                             size: *marker_size,
+                            bearing: None,
                             class: shape_class,
                         })
                     }
@@ -356,6 +359,24 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
             });
         }
 
+        // for markers, if a filename is given, load the file from disc
+        Content::Marker { detail, filename, location, size, bearing, class } => {
+            let detail = match detail {
+                Some(detail) => match filename {
+                    Some(_) => return Err(String::from("you shouldn't specify both a detail and a filename for a Marker.")),
+                    None => detail,
+                },
+                None => match filename {
+                    Some(filename) => load_SVG(&filename)?,
+                    None => return Err(String::from("you should specify one of a detail or a filename for a Marker."))
+                },
+            };
+            return Ok(Content::Marker {
+                detail: Some(detail), filename: None,
+                location, size, bearing, class
+            })
+        }
+
         // any other form of content can just continue on as it is
         other => Ok(other),
     }
@@ -423,15 +444,20 @@ fn transform_content(content: Content, outer_transform: &Option<Transform>) -> R
                 class: class,
             });
         },
-        Content::Marker { detail, location, size, class } => {
+        Content::Marker { detail, filename, location, size, bearing, class } => {
             let transform = outer_transform.as_ref().ok_or(String::from(
                 "every layer must have a region defined somewhere in its hierarchy."
             ))?;
             return Ok(Content::Marker {
-                detail: detail,
+                detail, filename, size, class,
                 location: Transform::apply(&transform, &location),
-                size: size,
-                class: class,
+                bearing: match bearing {
+                    Some(bearing) => {
+                        let north_vector = Transform::north_direction_at(&transform, &location);
+                        Some(bearing + f64::atan2(north_vector.x, -north_vector.y).to_degrees())
+                    },
+                    None => None,
+                },
             });
         },
         Content::Label { text, location: coordinates, class } => {
@@ -525,14 +551,18 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
                 coordinates.x, coordinates.y, &text,
             ),
 
-        Content::Marker { detail, location, size, .. } =>
-            insert_attribute(
-                &detail, "transform",
-                &format!(
-                    "translate({:.2}, {:.2}) scale({:.4})",
-                    location.x, location.y, f64::sqrt(size),
-                ),
-            )?,
+        Content::Marker { detail, location, size, bearing, .. } =>
+            match detail {
+                Some(detail) =>
+                    insert_attribute(
+                    &detail, "transform",
+                    &format!(
+                        "translate({:.2}, {:.2}) scale({:.4}) rotate({:.1})",
+                        location.x, location.y, f64::sqrt(size), bearing.unwrap_or(0.),
+                    ),
+                )?,
+                None => return Err(String::from("this marker should have had its detail filled in by now.")),
+            },
 
         Content::Path { parts, closed, self_clip, .. } => {
             // convert it to a d string and make it a path
@@ -842,11 +872,15 @@ enum Content {
     /// a little shape that represents a point on the map
     Marker {
         /// the SVG string that will be used verbatim to define the shape of the marker
-        detail: String,
+        detail: Option<String>,
+        /// the name of the SVG (without the 'markers/' or '.svg') to put at the center of this thing
+        filename: Option<String>,
         /// the coordinates in geographical space to which the marker detail's origin will be shifted
         location: SerializablePoint,
         /// a multiplier that will be applied to the shape's area
         size: f64,
+        /// a rotation about its center to apply, in degrees, clockwise, if any
+        bearing: Option<f64>,
         /// the SVG class to add to the element, if any
         class: Option<String>,
     },
@@ -901,8 +935,8 @@ impl Content {
             Content::Label { text, location, class: _ } => Content::Label {
                 class, text, location,
             },
-            Content::Marker { detail, location, size, class: _ } => Content::Marker {
-                class, detail, location, size,
+            Content::Marker { detail, filename, location, size, bearing, class: _ } => Content::Marker {
+                class, detail, filename, location, size, bearing,
             },
             _ => panic!("this function should only be used on Paths and Markers"),
         }
@@ -925,6 +959,7 @@ struct Replacement {
 }
 
 
+/// a pair of Cartesian coordinates
 #[derive(Deserialize, Clone, PartialEq, Debug)]
 struct SerializablePoint {
     x: f64,
@@ -941,12 +976,33 @@ impl SerializablePoint {
 }
 
 
+/// a set of four coordinates that defines a Cartesian rectangle
 #[derive(Deserialize, Clone)]
 struct Box {
     left: f64,
     right: f64,
     top: f64,
     bottom: f64,
+}
+
+
+/// a gradient of a Point -> Point function
+#[derive(Debug)]
+struct Jacobian {
+    dx_dx: f64, dx_dy: f64,
+    dy_dx: f64, dy_dy: f64,
+}
+
+impl Jacobian {
+    /// do matrix multiplication to chain two Jacobians together
+    fn times(self: Jacobian, inner: &Jacobian) -> Jacobian {
+        return Jacobian {
+            dx_dx: self.dx_dx*inner.dx_dx + self.dx_dy*inner.dy_dx,
+            dx_dy: self.dx_dx*inner.dx_dy + self.dx_dy*inner.dy_dy,
+            dy_dx: self.dy_dx*inner.dx_dx + self.dy_dy*inner.dy_dx,
+            dy_dy: self.dy_dx*inner.dx_dy + self.dy_dy*inner.dy_dy,
+        }
+    }
 }
 
 
@@ -1087,6 +1143,42 @@ impl Transform {
         };
     }
 
+    fn jacobian(self: &Transform, location: &SerializablePoint) -> Jacobian {
+        return match self {
+            Transform::Affine { x_scale, x_shift: _, y_scale, y_shift: _ } => Jacobian {
+                dx_dx: *x_scale, dx_dy: 0., dy_dx: 0., dy_dy: *y_scale,
+            },
+            Transform::Mercator { equatorial_scale, central_meridian: _ } => Jacobian {
+                dx_dx: 1./equatorial_scale*EARTH_RADIUS*PI/180., dx_dy: 0.,
+                dy_dx: 0., dy_dy: -1./equatorial_scale*EARTH_RADIUS*PI/180./f64::cos(location.y.to_radians()),
+            },
+            Transform::Oblique { pole_latitude, pole_longitude, projection } => {
+                let φ_pole = f64::to_radians(*pole_latitude);
+                let λ_pole = f64::to_radians(*pole_longitude);
+                let φ_point = f64::to_radians(location.y);
+                let λ_point = f64::to_radians(location.x);
+                let y_pole = -φ_pole.cos();
+                let z_pole = φ_pole.sin();
+                let ρ_point = φ_point.cos();
+                let x_point = ρ_point*(λ_point - λ_pole).sin();
+                let y_point = -ρ_point*(λ_point - λ_pole).cos();
+                let z_point = φ_point.sin();
+                let ζ_relative = y_pole*y_point + z_pole*z_point;
+                let ρ_relative = f64::sqrt(1. - ζ_relative.powi(2));
+                let relative_location = SerializablePoint {
+                    x: f64::to_degrees(f64::atan2(x_point, y_pole*z_point - z_pole*y_point)),
+                    y: f64::to_degrees(ζ_relative.asin()),
+                };
+                return projection.jacobian(&relative_location).times(&Jacobian {
+                    dx_dx: (z_pole*ρ_point.powi(2) - y_pole*z_point*y_point)/ρ_relative.powi(2),
+                    dx_dy: (z_point*x_point*(λ_point - λ_pole).cos()*(z_point - z_pole) - y_pole*(ρ_point*x_point + z_point.powi(2)))/ρ_relative.powi(2),
+                    dy_dx: y_pole*x_point/ρ_relative,
+                    dy_dy: (y_pole*z_point*(λ_point - λ_pole).cos() + z_pole*ρ_point)/ρ_relative,
+                });
+            },
+        }
+    }
+
     fn apply_to_box(self: &Transform, input: &Box) -> Result<Box, String> {
         return match self {
             Transform::Affine { x_scale, x_shift, y_scale, y_shift } => Ok(Box {
@@ -1151,6 +1243,12 @@ impl Transform {
             output.push(transformed_point);
         }
         return output;
+    }
+
+    /// a vector that points northward at this location
+    fn north_direction_at(self: &Transform, location: &SerializablePoint) -> SerializablePoint {
+        let jacobian = self.jacobian(location);
+        return SerializablePoint { x: jacobian.dx_dy, y: jacobian.dy_dy };
     }
 
     fn is_affine(self: &Transform) -> bool {

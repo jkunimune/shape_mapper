@@ -1,7 +1,7 @@
 use core::f64;
 use std::fmt::Debug;
 
-use crate::{line_point_distance, SerializablePoint, Transform};
+use crate::{line_point_distance, Jacobian, SerializablePoint, Transform};
 
 
 #[test]
@@ -39,6 +39,11 @@ fn test_transverse_transform() {
         &SerializablePoint { x: 135., y: 90. - f64::sqrt(2.) },
         1e-2,
     );
+    assert_approx_eq(
+        &transform.jacobian(&SerializablePoint { x: 90., y: 0. }),
+        &Jacobian { dx_dx: 0., dy_dx: -1., dx_dy: 1., dy_dy: 0. },
+        1e-14,
+    );
 }
 
 
@@ -66,6 +71,11 @@ fn test_oblique_transform() {
         &SerializablePoint { x: 135., y: 90. - f64::sqrt(0.0002) },
         1e-1,
     );
+    assert_approx_eq(
+        &transform.jacobian(&SerializablePoint { x: 90., y: 0. }),
+        &Jacobian { dx_dx: 2./f64::sqrt(3.), dy_dx: 0., dx_dy: 0., dy_dy: 1. },
+        1e-14,
+    );
 }
 
 
@@ -91,5 +101,14 @@ impl ApproxEq for f64 {
 impl ApproxEq for SerializablePoint {
     fn approx_eq(self: &Self, other: &Self, abs_tolerance: f64) -> bool {
         return self.x.approx_eq(&other.x, abs_tolerance) && self.y.approx_eq(&other.y, abs_tolerance);
+    }
+}
+
+impl ApproxEq for Jacobian {
+    fn approx_eq(self: &Self, other: &Self, abs_tolerance: f64) -> bool {
+        return self.dx_dx.approx_eq(&other.dx_dx, abs_tolerance) &&
+               self.dx_dy.approx_eq(&other.dx_dy, abs_tolerance) &&
+               self.dy_dx.approx_eq(&other.dy_dx, abs_tolerance) &&
+               self.dy_dy.approx_eq(&other.dy_dy, abs_tolerance);
     }
 }

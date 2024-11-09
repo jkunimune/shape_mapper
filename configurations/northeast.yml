@@ -86,7 +86,10 @@ style: |
     font-size: 4.5px;
     text-anchor: start;
   }
-bounding_box: { left: -323, right: 323, top: -53, bottom: 133 }
+  .compass {
+    stroke: black;
+  }
+bounding_box: { left: -293, right: 263, top: -53, bottom: 133 }
 contents:
   # - !RasterLayer
   #   filename: "Natural Earth/ne_shaded_relief"
@@ -100,7 +103,7 @@ contents:
         equatorial_scale: 1500000
       pole_latitude: 32.4
       pole_longitude: 162.9
-    bounding_box: { left: -320, right: 320, top: -50, bottom: 130 }
+    bounding_box: { left: -290, right: 260, top: -50, bottom: 130 }
     region: { left: -80, right: -68, bottom: 36, top: 45 }
     contents:
       - !Graticule
@@ -130,6 +133,7 @@ contents:
         class: "state_label"
         filename: "Natural Earth/ne_10m_admin_1_states_provinces"
         label_column: "name"
+        case: !Upper
       - !Layer
         class: "river_label"
         filename: "Natural Earth/ne_10m_rivers_lake_centerlines"
@@ -164,7 +168,9 @@ contents:
         filters:
           - !Not
             filter: !GreaterThan {key: "scalerank", cutoff: 10}
-      # - !CompassRose
-      #   filename: "cross_arrow"
-      #   label: "N"
-      #   location: { x: -60, y: 40 }
+      - !Marker
+        class: "compass"
+        filename: "cross_arrow"
+        location: { x: -73, y: 40 }
+        size: 200
+        bearing: 0
