@@ -79,6 +79,41 @@ fn test_oblique_transform() {
 }
 
 
+#[test]
+fn test_transform_jacobian() {
+    let transform = Transform::Oblique {
+        pole_longitude: 162.9, pole_latitude: 32.4,
+        projection: std::boxed::Box::new(Transform::Affine {
+            x_scale: 1., x_shift: 0.,
+            y_scale: 1., y_shift: 0.,
+        }),
+    };
+    let N = 10;
+    let h = 1e-6;
+    for i in 1..N {
+        let φ = -90. + 180.*(i as f64)/(N as f64);
+        for j in 0..N {
+            let λ = -180. + 360.*(j as f64)/(N as f64);
+            let center_point = transform.apply(&SerializablePoint { x: λ, y: φ });
+            let east_point = transform.apply(&SerializablePoint { x: λ + h, y: φ });
+            let north_point = transform.apply(&SerializablePoint { x: λ, y: φ + h });
+            let approximate_jacobian = Jacobian {
+                dx_dx: (east_point.x - center_point.x)/h,
+                dy_dx: (east_point.y - center_point.y)/h,
+                dx_dy: (north_point.x - center_point.x)/h,
+                dy_dy: (north_point.y - center_point.y)/h,
+            };
+            let true_jacobian = transform.jacobian(&SerializablePoint { x: λ, y: φ });
+            assert_approx_eq(
+                &approximate_jacobian,
+                &true_jacobian,
+                1e-5,
+            );
+        }
+    }
+}
+
+
 fn assert_approx_eq<T: ApproxEq + Debug>(a: &T, b: &T, abs_tolerance: f64) {
     if !a.approx_eq(b, abs_tolerance) {
         panic!(

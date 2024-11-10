@@ -1171,7 +1171,7 @@ impl Transform {
                 };
                 return projection.jacobian(&relative_location).times(&Jacobian {
                     dx_dx: (z_pole*ρ_point.powi(2) - y_pole*z_point*y_point)/ρ_relative.powi(2),
-                    dx_dy: (z_point*x_point*(λ_point - λ_pole).cos()*(z_point - z_pole) - y_pole*(ρ_point*x_point + z_point.powi(2)))/ρ_relative.powi(2),
+                    dx_dy: -y_pole*(λ_point - λ_pole).sin()/ρ_relative.powi(2),
                     dy_dx: y_pole*x_point/ρ_relative,
                     dy_dy: (y_pole*z_point*(λ_point - λ_pole).cos() + z_pole*ρ_point)/ρ_relative,
                 });
