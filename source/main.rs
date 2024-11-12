@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 
+use anyhow::{anyhow, Result};
 use core::f64;
 use std::f64::consts::PI;
 use regex::Regex;
@@ -16,23 +17,23 @@ const CURVE_PRECISION: f64 = 0.1; // mm
 
 
 
-fn main() -> Result<(), String> {
+fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
     if args.len() > 2 {
-        return Err(String::from("you must pass only one argument, representing the filename of the configuration file without the 'yml'"));
+        return Err(anyhow!("you must pass only one argument, representing the filename of the configuration file without the 'yml'"));
     }
-    let filename = args.get(1).ok_or(String::from("Please pass the filename of the configuration file minus the 'yml' as a command line argument."))?;
+    let filename = args.get(1).ok_or(anyhow!("Please pass the filename of the configuration file minus the 'yml' as a command line argument."))?;
 
     let file = fs::read_to_string(format!("configurations/{}.yml", filename));
     let yaml = match file {
         Ok(yaml) => yaml,
-        Err(message) => return Err(format!("I could not read 'configurations/{}.yml' because {}", filename, message)),
+        Err(message) => return Err(anyhow!("I could not read 'configurations/{}.yml' because {}", filename, message)),
     };
-    let configuration: Configuration = serde_yaml::from_str(&yaml).map_err(|err| err.to_string())?;
+    let configuration: Configuration = serde_yaml::from_str(&yaml)?;
 
     println!("generating a map of '{}' based on `configurations/{}.yml`.", configuration.title, filename);
 
-    let map_bounding_box = configuration.bounding_box.ok_or("the top level must have a bounding box")?;
+    let map_bounding_box = configuration.bounding_box.ok_or(anyhow!("the top level must have a bounding box"))?;
     let top_level_transform = match configuration.transform {
         Some(..) => configuration.transform,
         None => match &configuration.region {
@@ -69,8 +70,8 @@ fn main() -> Result<(), String> {
 
     println!("saving `maps/{}.svg.`", filename);
 
-    fs::create_dir_all("maps/").map_err(|err| err.to_string())?;
-    fs::write(format!("maps/{}.svg", filename), svg_code).map_err(|err| err.to_string())?;
+    fs::create_dir_all("maps/")?;
+    fs::write(format!("maps/{}.svg", filename), svg_code)?;
 
     println!("done!");
     return Ok(());
@@ -79,7 +80,7 @@ fn main() -> Result<(), String> {
 
 /// return a copy of this content that is the same except that any Layers and Graticules
 /// are resolved into groups of Paths
-fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content, String> {
+fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content> {
     match content {
 
         // for a Group, load its children recursively
@@ -102,28 +103,28 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
 
         // resolve a Layer by loading geographic data from disc and making a bunch of Paths or Markers
         Content::Layer { filename, class, class_column, label_column, case, abbr, marker_name, size, double, self_clip, filters } => {
-            let region = outer_region.as_ref().ok_or(String::from(
+            let region = outer_region.as_ref().ok_or(anyhow!(
                 "every layer must have a region defined somewhere in its hierarchy."))?;
             // check for incompatible options
             if label_column.is_some() && marker_name.is_some() {
-                return Err(String::from("you may not use both `label_column` and `marker_name` in a single Layer."))
+                return Err(anyhow!("you may not use both `label_column` and `marker_name` in a single Layer."))
             }
             if label_column.is_none() && case.is_some() {
-                return Err(String::from("you may not use the `case` option without the `label_column` option."))
+                return Err(anyhow!("you may not use the `case` option without the `label_column` option."))
             }
             if label_column.is_none() && abbr.is_some() {
-                return Err(String::from("you may not use the `abbr` option without the `label_column` option."))
+                return Err(anyhow!("you may not use the `abbr` option without the `label_column` option."))
             }
             if marker_name.is_none() && size.is_some() {
-                return Err(String::from("you may not use the `size` option without the `marker_name` option."));
+                return Err(anyhow!("you may not use the `size` option without the `marker_name` option."));
             }
             if marker_name.is_some() && self_clip == Some(true) {
-                return Err(String::from("the `self_clip` option is incompatible with the `marker_name` option."));
+                return Err(anyhow!("the `self_clip` option is incompatible with the `marker_name` option."));
             }
 
             let mut contents = Vec::new();
             let mut reader = shapefile::Reader::from_path(
-                format!("data/{}.shp", filename)).or(Err(format!("could not find `data/{}.dbf`", &filename)))?;
+                format!("data/{}.shp", filename)).or(Err(anyhow!("could not find `data/{}.dbf`", &filename)))?;
 
             let marker_data = match &marker_name {
                 // if marker was unspecified, don't load anything
@@ -134,13 +135,13 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                     let marker_size = match size {
                         Some(number) => number,
                         None => {
-                            return Err(format!("the `{}.shp` layer has a marker, but no marker size is given.", filename));
+                            return Err(anyhow!("the `{}.shp` layer has a marker, but no marker size is given.", filename));
                         }
                     };
                     // check for any incompatible options
                     match self_clip {
                         Some(true) => {
-                            return Err(String::from("the `self_clip` option is incompatible with the `marker` option."));
+                            return Err(anyhow!("the `self_clip` option is incompatible with the `marker` option."));
                         }
                         _ => {}
                     }
@@ -181,9 +182,9 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                                 Some(number) => Some(format!("{}_{}", sanitize_CSS(class_column), number)),
                                 None => None,
                             },
-                            _ => return Err(String::from("I don't know how to print this field type.")),
+                            _ => return Err(anyhow!("I don't know how to print this field type.")),
                         },
-                        None => return Err(format!("there doesn't seem to be a '{}' collum in '{}.shp'.", class_column, &filename)),
+                        None => return Err(anyhow!("there doesn't seem to be a '{}' collum in '{}.shp'.", class_column, &filename)),
                     }
                     None => None,
                 };
@@ -211,12 +212,13 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                                     (SerializablePoint::deep_convert(polyline.parts()), false)
                                 }
                                 Shape::Point(_) => {
-                                    return Err(format!("data/{}.shp is a POINT shapefile.  POINT layers must always have a `marker`.", filename))
+                                    return Err(anyhow!("data/{}.shp is a POINT shapefile.  POINT layers must always have a `marker`.", filename))
                                 }
                                 _ => {
-                                    return Err(format!("we don't support {} shapefiles right now.", shape.shapetype().to_string()));
+                                    return Err(anyhow!("we don't support {} shapefiles right now.", shape.shapetype().to_string()));
                                 }
                             };
+
                             // pull it all together as a Content::Path
                             Some(Content::Path {
                                 parts, closed, self_clip,
@@ -232,10 +234,10 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
                                     None => continue,
                                 },
                                 Some(value) => {
-                                    return Err(format!("you can only label by string columns, but '{}' is a {} column.", label_column, value.field_type().to_string()));
+                                    return Err(anyhow!("you can only label by string columns, but '{}' is a {} column.", label_column, value.field_type().to_string()));
                                 }
                                 None => {
-                                    return Err(format!("you can't label by the column '{}' because it doesn't seem to exist.", label_column));
+                                    return Err(anyhow!("you can't label by the column '{}' because it doesn't seem to exist.", label_column));
                                 }
                             };
                             // modify the case if desired
@@ -316,7 +318,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
         Content::Graticule { parallel_spacing, meridian_spacing, class } => {
             let region = match outer_region {
                 Some(region) => region,
-                None => return Err(String::from(
+                None => return Err(anyhow!(
                     "every layer must have a region defined somewhere in its hierarchy.")),
             };
             let mut shapes = Vec::new();
@@ -363,12 +365,12 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
         Content::Marker { detail, filename, location, size, bearing, class } => {
             let detail = match detail {
                 Some(detail) => match filename {
-                    Some(_) => return Err(String::from("you shouldn't specify both a detail and a filename for a Marker.")),
+                    Some(_) => return Err(anyhow!("you shouldn't specify both a detail and a filename for a Marker.")),
                     None => detail,
                 },
                 None => match filename {
                     Some(filename) => load_SVG(&filename)?,
-                    None => return Err(String::from("you should specify one of a detail or a filename for a Marker."))
+                    None => return Err(anyhow!("you should specify one of a detail or a filename for a Marker."))
                 },
             };
             return Ok(Content::Marker {
@@ -385,7 +387,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content,
 
 /// apply all necessary coordinate transforms to the points in this box.
 /// all geographic data should come out in SVG coordinates rather than in shapefile coordinates.
-fn transform_content(content: Content, outer_transform: &Option<Transform>) -> Result<Content, String> {
+fn transform_content(content: Content, outer_transform: &Option<Transform>) -> Result<Content> {
     match content {
         Content::Group { contents: sub_contents, bounding_box, region, transform, clip, frame, class } => {
             // establish the transform
@@ -411,7 +413,7 @@ fn transform_content(content: Content, outer_transform: &Option<Transform>) -> R
             });
         },
         Content::Line { start, end, class } => {
-            let transform = outer_transform.as_ref().ok_or(String::from(
+            let transform = outer_transform.as_ref().ok_or(anyhow!(
                 "every layer must have a region defined somewhere in its hierarchy."
             ))?;
             return Ok(Content::Line {
@@ -421,7 +423,7 @@ fn transform_content(content: Content, outer_transform: &Option<Transform>) -> R
             });
         },
         Content::Rectangle { coordinates, class } => {
-            let transform = outer_transform.as_ref().ok_or(String::from(
+            let transform = outer_transform.as_ref().ok_or(anyhow!(
                 "every layer must have a region defined somewhere in its hierarchy."
             ))?;
             return Ok(Content::Rectangle {
@@ -430,7 +432,7 @@ fn transform_content(content: Content, outer_transform: &Option<Transform>) -> R
             });
         },
         Content::Path { parts, closed, self_clip, class } => {
-            let transform = outer_transform.as_ref().ok_or(String::from(
+            let transform = outer_transform.as_ref().ok_or(anyhow!(
                 "every layer must have a region defined somewhere in its hierarchy."
             ))?;
             let mut transformed_parts = Vec::with_capacity(parts.len());
@@ -445,7 +447,7 @@ fn transform_content(content: Content, outer_transform: &Option<Transform>) -> R
             });
         },
         Content::Marker { detail, filename, location, size, bearing, class } => {
-            let transform = outer_transform.as_ref().ok_or(String::from(
+            let transform = outer_transform.as_ref().ok_or(anyhow!(
                 "every layer must have a region defined somewhere in its hierarchy."
             ))?;
             return Ok(Content::Marker {
@@ -461,7 +463,7 @@ fn transform_content(content: Content, outer_transform: &Option<Transform>) -> R
             });
         },
         Content::Label { text, location: coordinates, class } => {
-            let transform = outer_transform.as_ref().ok_or(String::from(
+            let transform = outer_transform.as_ref().ok_or(anyhow!(
                 "every layer must have a region defined somewhere in its hierarchy."
             ))?;
             return Ok(Content::Label {
@@ -471,16 +473,16 @@ fn transform_content(content: Content, outer_transform: &Option<Transform>) -> R
             });
         },
         Content::Layer { .. } => {
-            return Err(String::from("Layers should have been purged by now"));
+            return Err(anyhow!("Layers should have been purged by now"));
         },
         Content::Graticule { .. } => {
-            return Err(String::from("Graticules should have been purged by now"));
+            return Err(anyhow!("Graticules should have been purged by now"));
         },
     }
 }
 
 
-fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &Option<Box>, element_count: &mut u32) -> Result<String, String> {
+fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_region: &Option<Box>, element_count: &mut u32) -> Result<String> {
     let class = content.get_class().clone();
 
     let string = match content {
@@ -561,7 +563,7 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
                         location.x, location.y, f64::sqrt(size), bearing.unwrap_or(0.),
                     ),
                 )?,
-                None => return Err(String::from("this marker should have had its detail filled in by now.")),
+                None => return Err(anyhow!("this marker should have had its detail filled in by now.")),
             },
 
         Content::Path { parts, closed, self_clip, .. } => {
@@ -598,10 +600,10 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
         }
 
         Content::Graticule { .. } => {
-            return Err(String::from("the graticules should have all been purged by now."));    
+            return Err(anyhow!("the graticules should have all been purged by now."));    
         }
         Content::Layer{ .. } => {
-            return Err(String::from("the Layers should have all been purged by now."));
+            return Err(anyhow!("the Layers should have all been purged by now."));
         }
     };
 
@@ -618,19 +620,19 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
 }
 
 
-fn load_SVG(marker_filename: &String) -> Result<String, String> {
-    let marker_string = fs::read_to_string(format!("markers/{}.svg", marker_filename)).or(Err(format!("couldn't read `markers/{}.svg`", marker_filename)))?;
+fn load_SVG(marker_filename: &String) -> Result<String> {
+    let marker_string = fs::read_to_string(format!("markers/{}.svg", marker_filename)).or(Err(anyhow!("couldn't read `markers/{}.svg`", marker_filename)))?;
     // extract the content from between the <svg> and </svg>
     let svg_captures = Regex::new(r"(?s)<svg[^>]*>\n(.*\n)\s*</svg>").unwrap().captures(&marker_string);
     let marker_string = match svg_captures {
         Some(svg_captures) => svg_captures.get(1).unwrap().as_str(),
-        None => return Err(format!("markers/{}.svg was malformed somehow.", marker_filename)),
+        None => return Err(anyhow!("markers/{}.svg was malformed somehow.", marker_filename)),
     };
     // extract the top-level indentation so that you can remove it
     let indentation_captures = Regex::new(r"^([ \t]*)<").unwrap().captures(&marker_string);
     let indentation = match indentation_captures {
         Some(indentation_captures) => indentation_captures.get(1).unwrap().as_str(),
-        None => return Err(format!("markers/{}.svg didn't seem to start with a tag.", marker_filename)),
+        None => return Err(anyhow!("markers/{}.svg didn't seem to start with a tag.", marker_filename)),
     };
     // remove that indentation and return
     let indentation_pattern = Regex::new(&format!("(?m)^{}", indentation)).unwrap();
@@ -639,13 +641,13 @@ fn load_SVG(marker_filename: &String) -> Result<String, String> {
 }
 
 
-fn center_of(shape: &Shape) -> Result<SerializablePoint, String> {
+fn center_of(shape: &Shape) -> Result<SerializablePoint> {
     return match bounds_of(shape) {
         Ok([x_range, y_range]) => {
             Ok(SerializablePoint { x: (x_range[0] + x_range[1])/2., y: (y_range[0] + y_range[1])/2. })
         }
         Err(_) => {
-            Err(String::from("I cannot calculate the center of this shape because it has no geometry."))
+            Err(anyhow!("I cannot calculate the center of this shape because it has no geometry."))
         }
     }
 }
@@ -702,7 +704,7 @@ fn bounds_of(shape: &Shape) -> Result<[[f64; 2]; 2], ()> {
 
 /// take an SVG string and insert the given attribute key and value to every top-level
 /// tag in it.  if the key is already there, append to the existing value
-fn insert_attribute(element: &str, key: &str, value: &str) -> Result<String, String> {
+fn insert_attribute(element: &str, key: &str, value: &str) -> Result<String> {
     let mut modified_element = element.to_owned();
     let mut offset = 0;
 
@@ -735,7 +737,7 @@ fn insert_attribute(element: &str, key: &str, value: &str) -> Result<String, Str
         offset += infix.content.len();
     }
     if offset == 0 {
-        return Err(format!("I couldn't find any tags in the string '{}'", element));
+        return Err(anyhow!("I couldn't find any tags in the string '{}'", element));
     }
     else {
         return Ok(modified_element);
@@ -1029,25 +1031,25 @@ enum Filter {
 }
 
 impl Filter {
-    fn matches(self: &Filter, record: &Record) -> Result<bool, String> {
+    fn matches(self: &Filter, record: &Record) -> Result<bool> {
         match self {
             Filter::OneOf { key, valid_values } => {
-                let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
+                let value = record.get(&key).ok_or(anyhow!("you can't filter on the field '{}' because it doesn't exist.", key))?;
                 match value {
                     FieldValue::Numeric(Some(number)) => Ok(valid_values.contains(&f64::to_string(number))),
                     FieldValue::Numeric(None) => Ok(false),
                     FieldValue::Character(Some(characters)) => Ok(valid_values.contains(characters)),
                     FieldValue::Character(None) => Ok(false),
-                    _ => return Err(String::from("you can only filter on numerical and character fields right now.")),
+                    _ => return Err(anyhow!("you can only filter on numerical and character fields right now.")),
                 }
             }
             Filter::GreaterThan { key, cutoff } => {
-                let value = record.get(&key).ok_or(format!("you can't filter on the field '{}' because it doesn't exist.", key))?;
+                let value = record.get(&key).ok_or(anyhow!("you can't filter on the field '{}' because it doesn't exist.", key))?;
                 match value {
                     FieldValue::Numeric(Some(number)) => Ok(number > cutoff),
                     FieldValue::Float(Some(number)) => Ok(&f64::from(*number) > cutoff),
                     FieldValue::Float(None) => Ok(false),
-                    other => return Err(format!("GreaterThan filters must act on numeric or float32 fields, but '{}' is a {}.", key, other.field_type().to_string())),
+                    other => return Err(anyhow!("GreaterThan filters must act on numeric or float32 fields, but '{}' is a {}.", key, other.field_type().to_string())),
                 }
             }
             Filter::Not { filter } => {
@@ -1179,7 +1181,7 @@ impl Transform {
         }
     }
 
-    fn apply_to_box(self: &Transform, input: &Box) -> Result<Box, String> {
+    fn apply_to_box(self: &Transform, input: &Box) -> Result<Box> {
         return match self {
             Transform::Affine { x_scale, x_shift, y_scale, y_shift } => Ok(Box {
                 left: input.left*x_scale + x_shift,
@@ -1193,7 +1195,7 @@ impl Transform {
                 bottom: -scale*EARTH_RADIUS*f64::atanh(f64::sin(f64::to_radians(input.bottom))),
                 top: -scale*EARTH_RADIUS*f64::atanh(f64::sin(f64::to_radians(input.top))),
             }),
-            Transform::Oblique { .. } => Err(format!(
+            Transform::Oblique { .. } => Err(anyhow!(
                 "oblique map projections are not generally cylindrical and so I don't support projecting rectangles in them."
             )),
         };
