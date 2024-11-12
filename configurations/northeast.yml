@@ -100,7 +100,7 @@ contents:
       projection:
         !Mercator
         central_meridian: 140.6
-        equatorial_scale: 1500000
+        scale: 6.7e-7
       pole_latitude: 32.4
       pole_longitude: 162.9
     bounding_box: { left: -290, right: 260, top: -50, bottom: 130 }

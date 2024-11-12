@@ -1086,8 +1086,8 @@ enum Transform {
     Mercator {
         /// the central meridian (°)
         central_meridian: f64,
-        /// the one divided by map scale at the equator (mm/mm)
-        equatorial_scale: f64,
+        /// the scale of the map at the equator
+        scale: f64,
     },
     /// a 3D rotation that gets applied before some other transformation
     Oblique {
@@ -1117,10 +1117,10 @@ impl Transform {
                     y: input.y*y_scale + y_shift,
                 }
             },
-            Transform::Mercator { central_meridian, equatorial_scale } => {
+            Transform::Mercator { central_meridian, scale } => {
                 SerializablePoint {
-                    x: 1./equatorial_scale*EARTH_RADIUS*f64::to_radians(input.x - central_meridian),
-                    y: -1./equatorial_scale*EARTH_RADIUS*f64::atanh(f64::sin(f64::to_radians(input.y))),
+                    x: scale*EARTH_RADIUS*f64::to_radians(input.x - central_meridian),
+                    y: -scale*EARTH_RADIUS*f64::atanh(f64::sin(f64::to_radians(input.y))),
                 }
             },
             Transform::Oblique { pole_latitude, pole_longitude, projection } => {
@@ -1148,9 +1148,9 @@ impl Transform {
             Transform::Affine { x_scale, x_shift: _, y_scale, y_shift: _ } => Jacobian {
                 dx_dx: *x_scale, dx_dy: 0., dy_dx: 0., dy_dy: *y_scale,
             },
-            Transform::Mercator { equatorial_scale, central_meridian: _ } => Jacobian {
-                dx_dx: 1./equatorial_scale*EARTH_RADIUS*PI/180., dx_dy: 0.,
-                dy_dx: 0., dy_dy: -1./equatorial_scale*EARTH_RADIUS*PI/180./f64::cos(location.y.to_radians()),
+            Transform::Mercator { scale, central_meridian: _ } => Jacobian {
+                dx_dx: scale*EARTH_RADIUS*PI/180., dx_dy: 0.,
+                dy_dx: 0., dy_dy: -scale*EARTH_RADIUS*PI/180./f64::cos(location.y.to_radians()),
             },
             Transform::Oblique { pole_latitude, pole_longitude, projection } => {
                 let φ_pole = f64::to_radians(*pole_latitude);
@@ -1187,11 +1187,11 @@ impl Transform {
                 bottom: input.bottom*y_scale + y_shift,
                 top: input.top*y_scale + y_shift,
             }),
-            Transform::Mercator { central_meridian, equatorial_scale } => Ok(Box {
-                left: 1./equatorial_scale*EARTH_RADIUS*f64::to_radians(input.left - central_meridian),
-                right: 1./equatorial_scale*EARTH_RADIUS*f64::to_radians(input.right - central_meridian),
-                bottom: -1./equatorial_scale*EARTH_RADIUS*f64::atanh(f64::sin(f64::to_radians(input.bottom))),
-                top: -1./equatorial_scale*EARTH_RADIUS*f64::atanh(f64::sin(f64::to_radians(input.top))),
+            Transform::Mercator { central_meridian, scale } => Ok(Box {
+                left: scale*EARTH_RADIUS*f64::to_radians(input.left - central_meridian),
+                right: scale*EARTH_RADIUS*f64::to_radians(input.right - central_meridian),
+                bottom: -scale*EARTH_RADIUS*f64::atanh(f64::sin(f64::to_radians(input.bottom))),
+                top: -scale*EARTH_RADIUS*f64::atanh(f64::sin(f64::to_radians(input.top))),
             }),
             Transform::Oblique { .. } => Err(format!(
                 "oblique map projections are not generally cylindrical and so I don't support projecting rectangles in them."
