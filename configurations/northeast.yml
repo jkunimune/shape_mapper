@@ -8,7 +8,7 @@ description: "
   </a>."
 style: |
   .background {
-    fill: cyan;
+    fill: #98dff3;
   }
   .frame {
     fill: none;
@@ -17,41 +17,67 @@ style: |
   }
   .graticule {
     fill: none;
-    stroke: blue;
+    stroke: #354d9c;
     stroke-width: 0.4;
   }
   .state {
-    fill: white;
-    stroke: none;
+    fill: none;
+    stroke-width: 4.0;
+    stroke-linejoin: round;
+  }
+  .state .ma, .state, .md {
+    stroke: #927ADC88; /* purple */
+  }
+  .state .me, .state .nj {
+    stroke: #E370C488; /* pink */
+  }
+  .state .ri, .state .va {
+    stroke: #DC517088; /* red */
+  }
+  .state .ny, .state .de {
+    stroke: #D5764588; /* orange */
+  }
+  .state .nh, .state .dc {
+    stroke: #B19D3D88; /* yellow */
+  }
+  .state .vt, .state .ct, .state .pa {
+    stroke: #4B893E88; /* green */
+  }
+  .rural_area {
+    fill: #ebfeb2;
+  }
+  .urban_area {
+    fill: #e0d7d0;
   }
   .river {
     fill: none;
-    stroke: blue;
-    stroke-width: 0.5;
+    stroke: #00748b;
+    stroke-width: 0.6;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
   .coastline {
     fill: none;
-    stroke: blue;
+    stroke: #00748b;
     stroke-width: 0.3;
     stroke-linejoin: round;
   }
   .lake {
-    fill: cyan;
-    stroke: blue;
+    fill: #98dff3;
+    stroke: #00748b;
     stroke-width: 0.3;
     stroke-linejoin: round;
   }
   .railroad {
     fill: none;
-    stroke: darkgrey;
-    stroke-width: 0.8;
+    stroke: #525252;
+    stroke-width: 0.9;
+    stroke-linejoin: round;
   }
   .state_border {
     fill: none;
     stroke: black;
-    stroke-width: 0.3;
+    stroke-width: 0.2;
     stroke-linejoin: round;
   }
   .state {
@@ -61,38 +87,61 @@ style: |
     fill: black;
   }
   .state_label {
-    fill: black;
+    fill: #00000099;
     font-family: "Frutiger LT Pro",sans-serif;
-    font-weight: 500;
-    font-width: expanded;
-    font-size: 6.0px;
+    font-weight: 100;
+    font-size: 8.0px;
     text-anchor: middle;
-    font-stretch: expanded;
+    letter-spacing: 0.8px;
   }
-  .sea_label, .river_label {
-    fill: blue;
+  .sea_label, .river_label, .land_label {
     font-family: "Noto Serif",serif;
+    font-style: italic;
     font-weight: 500
     font-style: italic;
     text-anchor: middle;
-    font-stretch: expanded;
   }
   .sea_label {
-    font-size: 6.0px;
+    fill: #354d9c;
+    font-size: 5.5px;
+    letter-spacing: 0.55px;
   }
   .river_label {
+    fill: #354d9c;
     font-size: 4.0px;
   }
-  .city_label {
+  .land_label {
+    fill: #404040;
+    font-size: 5.5px;
+  }
+  .graticule_label {
+    fill: #354d9c;
+    font-family: "Frutiger LT Pro",sans-serif;
+    font-weight: 100;
+    font-size: 5.5px;
+    text-anchor: middle;
+  }
+  .big_city_label, .small_city_label {
     fill: black;
     font-family: "Frutiger LT Pro",sans-serif;
-    font-weight: 900;
+    font-weight: 500;
     font-width: condensed;
-    font-size: 4.5px;
     text-anchor: start;
+  }
+  .big_city_label {
+    font-size: 5.5px;
+  }
+  .small_city_label {
+    font-size: 4.0px;
   }
   .compass {
     stroke: black;
+  }
+  .compass_label {
+    fill: black;
+    font-family: "Frutiger LT Pro",sans-serif;
+    font-size: 8.0px;
+    text-anchor: middle;
   }
 bounding_box: { left: -423, right: 383, top: -103, bottom: 203 }
 contents:
@@ -116,26 +165,28 @@ contents:
         parallel_spacing: 1
         meridian_spacing: 1
       - !Layer
+        class: "rural_area"
+        filename: "USGS/statesp010g/statesp010g"
+      - !Layer
+        class: "urban_area"
+        filename: "Natural Earth/ne_10m_urban_areas"
+      - !Layer
         class: "state"
         filename: "USGS/statesp010g/statesp010g"
-        class_column: "NAME"
-      - !Layer
-        class: "river"
-        filename: "CECAtlas/NA_Lakes_and_Rivers/data/rivers_l/northamerica_rivers_cec_2023_GCS"
-      # - !Layer
-      #   class: "lake"
-      #   filename: "CECAtlas/NA_Lakes_and_Rivers/data/lakes_p/northamerica_lakes_cec_2023_GCS"
-      #   filters:
-      #   - !Not {filter: !GreaterThan {key: "AreaSqKm", cutoff: 10000}} # the great lakes are too detailed for SVG in this dataset, but that's okay because we don't need them
+        class_column: "STATE_ABBR"
+        self_clip: true
       - !Layer
         class: "state_border"
         filename: "USGS/statesp010g/statesp010g"
       - !Layer
-       class: "coastline"
-       filename: "USGS/coastll010g/coastll010g"
+        class: "river"
+        filename: "CECAtlas/NA_Lakes_and_Rivers/data/rivers_l/northamerica_rivers_cec_2023_GCS"
+      - !Layer
+        class: "coastline"
+        filename: "USGS/coastll010g/coastll010g"
       - !Layer
         class: "railroad"
-        filename: "Natural Earth/ne_10m_railroads"
+        filename: "USDOT/Amtrak_Routes"
       - !Layer
         class: "state_label"
         filename: "USGS/statesp010g/statesp010g"
@@ -145,10 +196,8 @@ contents:
         class: "river_label"
         filename: "CECAtlas/NA_Lakes_and_Rivers/data/rivers_l/northamerica_rivers_cec_2023_GCS"
         label_column: "NameEn"
-      - !Layer
-        class: "sea_label"
-        filename: "Natural Earth/ne_10m_geography_marine_polys"
-        label_column: "name_en"
+        filters:
+          - !GreaterThan {key: "LengthKm", cutoff: 80}
       - !Layer
         class: "small_city"
         filename: "Natural Earth/ne_10m_populated_places_simple"
@@ -161,16 +210,134 @@ contents:
         class: "big_city"
         filename: "Natural Earth/ne_10m_populated_places_simple"
         marker_name: "circle"
-        size: 6
+        size: 9
         filters:
           - !GreaterThan {key: "pop_max", cutoff: 1000000}
       - !Layer
-        class: "city_label"
+        class: "small_city_label"
         filename: "Natural Earth/ne_10m_populated_places_simple"
         label_column: "name"
+        filters:
+          - !Not
+            filter: !GreaterThan {key: "pop_max", cutoff: 1000000}
+      - !Layer
+        class: "big_city_label"
+        filename: "Natural Earth/ne_10m_populated_places_simple"
+        label_column: "name"
+        filters:
+          - !GreaterThan {key: "pop_max", cutoff: 1000000}
       - !Marker
         class: "compass"
         filename: "cross_arrow"
-        location: { x: -73, y: 40 }
+        location: { x: -71.5, y: 40.5 }
         size: 200
         bearing: 0
+      - !Label
+        class: "compass_label"
+        text: "N"
+        location: { x: -71.5, y: 40.7 }
+      - !Group
+        class: "graticule_label"
+        contents:
+          - !Label
+            location: {x: -70.6, y: 43}
+            text: "43°N"
+          - !Label
+            location: {x: -69.5, y: 42}
+            text: "42°N"
+          - !Label
+            location: {x: -70.2, y: 41}
+            text: "41°N"
+          - !Label
+            location: {x: -71.8, y: 40}
+            text: "40°N"
+          - !Label
+            location: {x: -73.1, y: 39}
+            text: "39°N"
+          - !Label
+            location: {x: -74.3, y: 38}
+            text: "38°N"
+          - !Label
+            location: {x: -75.6, y: 37}
+            text: "37°N"
+          - !Label
+            location: {x: -76, y: 37.1}
+            text: "76°E"
+          - !Label
+            location: {x: -75, y: 37.5}
+            text: "75°E"
+          - !Label
+            location: {x: -74, y: 38.2}
+            text: "74°E"
+          - !Label
+            location: {x: -73, y: 39.1}
+            text: "73°E"
+          - !Label
+            location: {x: -72, y: 39.8}
+            text: "72°E"
+          - !Label
+            location: {x: -71, y: 40.5}
+            text: "71°E"
+          - !Label
+            location: {x: -70, y: 41.2}
+            text: "70°E"
+      - !Group
+        class: "land_label"
+        contents:
+          - !Label
+            location: {x: -70.5, y: 42.5}
+            text: "Cape Anne"
+          - !Label
+            location: {x: -70, y: 42}
+            text: "Cape Cod"
+          - !Label
+            location: {x: -70, y: 41.3}
+            text: "Nantucket"
+          - !Label
+            location: {x: -70.5, y: 41.5}
+            text: "Martha's Vinyard"
+          - !Label
+            location: {x: -73, y: 40.8}
+            text: "Long Island"
+          - !Label
+            location: {x: -72, y: 41}
+            text: "Montauk Point"
+          - !Label
+            location: {x: -75, y: 39}
+            text: "Cape May"
+          - !Label
+            location: {x: -75.5, y: 38}
+            text: "Delmarva Peninsula"
+          - !Label
+            location: {x: -76.5, y: 38}
+            text: "Northern Neck Peninsula"
+      - !Group
+        class: "sea_label"
+        contents:
+          - !Label
+            location: {x: -71, y: 42.3}
+            text: "Massachusetts Bay"
+          - !Label
+            location: {x: -70.5, y: 42}
+            text: "Cape Cod Bay"
+          - !Label
+            location: {x: -70.2, y: 41.5}
+            text: "Nantucket Sound"
+          - !Label
+            location: {x: -70.8, y: 41.5}
+            text: "Buzzards Bay"
+          - !Label
+            location: {x: -72, y: 41.2}
+            text: "Block Island Sound"
+          - !Label
+            location: {x: -73, y: 41}
+            text: "Long Island Sound"
+          - !Label
+            location: {x: -74, y: 40.5}
+            text: "New York Bay"
+          - !Label
+            location: {x: -75.1, y: 39.1}
+            text: "Delaware Bay"
+          - !Label
+            location: {x: -76, y: 38}
+            text: "Chesapeake Bay"
