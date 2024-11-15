@@ -60,7 +60,7 @@ fn main() -> Result<()> {
     let element_index: &mut u32 = &mut 0;
     for content in configuration.contents {
         let content = load_content(content, &configuration.region)?;
-        let content = transform_content(content, &top_level_transform)?;
+        let content = transform_content(content, &top_level_transform, &Some(map_bounding_box.clone()))?;
         let content = transcribe_content_as_svg(content, &map_bounding_box, &configuration.region, element_index)?;
         let content = prepend_to_each_line(&content, "  ");
         svg_code.push_str(&content);
@@ -259,8 +259,6 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
                             };
                             // add necessary escape sequences (make sure you do this after setting the case)
                             let text = sanitize_XML(&text);
-                            // decide where to put the label
-                            let location = coerce_in_box(&location, region);
                             Some(Content::Label {
                                 text, location,
                                 class: shape_class,
@@ -387,7 +385,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
 
 /// apply all necessary coordinate transforms to the points in this box.
 /// all geographic data should come out in SVG coordinates rather than in shapefile coordinates.
-fn transform_content(content: Content, outer_transform: &Option<Transform>) -> Result<Content> {
+fn transform_content(content: Content, outer_transform: &Option<Transform>, outer_bounding_box: &Option<Box>) -> Result<Content> {
     match content {
         Content::Group { contents: sub_contents, bounding_box, region, transform, clip, frame, class } => {
             // establish the transform
@@ -401,9 +399,13 @@ fn transform_content(content: Content, outer_transform: &Option<Transform>) -> R
                     _ => outer_transform,
                 }
             };
+            let innermost_bounding_box = match bounding_box {
+                Some(..) => &bounding_box,
+                None => outer_bounding_box,
+            };
             let mut transformed_contents = Vec::with_capacity(sub_contents.len());
             for sub_content in sub_contents {
-                transformed_contents.push(transform_content(sub_content, transform)?);
+                transformed_contents.push(transform_content(sub_content, transform, innermost_bounding_box)?);
             }
             return Ok(Content::Group {
                 contents: transformed_contents,
@@ -466,11 +468,12 @@ fn transform_content(content: Content, outer_transform: &Option<Transform>) -> R
             let transform = outer_transform.as_ref().ok_or(anyhow!(
                 "every layer must have a region defined somewhere in its hierarchy."
             ))?;
-            return Ok(Content::Label {
-                text: text,
-                location: Transform::apply(&transform, &coordinates),
-                class: class,
-            });
+            let location = Transform::apply(&transform, &coordinates);
+            let location = match outer_bounding_box {
+                Some(outer_bounding_box) => coerce_in_box(&location, outer_bounding_box, 2.),
+                None => location,
+            };
+            return Ok(Content::Label { text, location, class, });
         },
         Content::Layer { .. } => {
             return Err(anyhow!("Layers should have been purged by now"));
@@ -668,15 +671,15 @@ fn any_of_shape_is_in_box(shape: &Shape, boks: &Box) -> bool {
 }
 
 
-fn coerce_in_box(point: &SerializablePoint, boks: &Box) -> SerializablePoint {
+fn coerce_in_box(point: &SerializablePoint, boks: &Box, buffer: f64) -> SerializablePoint {
     if boks.bottom > boks.top {
         return coerce_in_box(point, &Box {
             left: boks.left, right: boks.right, bottom: boks.top, top: boks.bottom,
-        });
+        }, buffer);
     }
     return SerializablePoint {
-        x: f64::max(boks.left, f64::min(boks.right, point.x)),
-        y: f64::max(boks.bottom, f64::min(boks.top, point.y)),
+        x: f64::max(boks.left + buffer, f64::min(boks.right - buffer, point.x)),
+        y: f64::max(boks.bottom + buffer, f64::min(boks.top - buffer, point.y)),
     }
 }
 
