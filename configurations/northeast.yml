@@ -44,7 +44,7 @@ style: |
     stroke: #4B893E88; /* green */
   }
   .rural_area {
-    fill: #ebfeb2;
+    fill: #ceeca3;
   }
   .urban_area {
     clip-path: url(#land_polygon);
@@ -66,7 +66,7 @@ style: |
   }
   .railroad {
     fill: none;
-    stroke: #525252;
+    stroke: #5f5f5f;
     stroke-width: 0.9;
     stroke-linejoin: round;
   }
@@ -79,8 +79,15 @@ style: |
   .state {
     stroke: none;
   }
-  .city {
+  .small_city {
     fill: black;
+    stroke: #f7efe3;
+    stroke-width: 0.15;
+  }
+  .big_city {
+    fill: black;
+    stroke: #f7efe3;
+    stroke-width: 0.1;
   }
   .state_label {
     fill: #00000099;
@@ -90,12 +97,23 @@ style: |
     text-anchor: middle;
     letter-spacing: 0.8px;
   }
-  .sea_label, .river_label, .land_label {
+  .graticule_label {
+    fill: #354d9c;
+    font-family: "Frutiger LT Pro",sans-serif;
+    font-weight: 500;
+    font-size: 5.5px;
+    text-anchor: middle;
+  }
+  .ocean_label, .sea_label, .river_label, .land_label {
     font-family: "Noto Serif",serif;
     font-style: italic;
-    font-weight: 500
-    font-style: italic;
+    font-weight: 500;
     text-anchor: middle;
+  }
+  .ocean_label {
+    fill: #354d9c;
+    font-size: 8.0px;
+    letter-spacing: 0.8px;
   }
   .sea_label {
     fill: #354d9c;
@@ -103,25 +121,24 @@ style: |
     letter-spacing: 0.55px;
   }
   .river_label {
-    fill: #354d9c;
+    fill: #00748b;
     font-size: 4.0px;
   }
   .land_label {
     fill: #404040;
     font-size: 5.5px;
   }
-  .graticule_label {
-    fill: #354d9c;
+  .railroad_label {
+    fill: #404040;
     font-family: "Frutiger LT Pro",sans-serif;
-    font-weight: 100;
-    font-size: 5.5px;
+    font-weight: 500;
+    font-size: 4.0px;
     text-anchor: middle;
   }
   .big_city_label, .small_city_label {
     fill: black;
     font-family: "Frutiger LT Pro",sans-serif;
     font-weight: 500;
-    font-width: condensed;
     text-anchor: start;
   }
   .big_city_label {
@@ -136,7 +153,7 @@ style: |
   .compass_label {
     fill: black;
     font-family: "Frutiger LT Pro",sans-serif;
-    font-size: 8.0px;
+    font-size: 12.0px;
     text-anchor: middle;
   }
 bounding_box: { left: -423, right: 383, top: -103, bottom: 203 }
@@ -154,7 +171,7 @@ contents:
       pole_latitude: 32.4
       pole_longitude: 162.9
     bounding_box: { left: -420, right: 380, top: -100, bottom: 200 }
-    region: { left: -80, right: -68, bottom: 36, top: 45 }
+    region: { left: -78.0, right: -69.0, bottom: 36.8, top: 43.8 }
     contents:
       - !Graticule
         class: "graticule"
@@ -193,6 +210,8 @@ contents:
         filename: "USGS/statesp010g/statesp010g"
         label_column: "NAME"
         case: !Upper
+        abbr: 
+          - {from: "DISTRICT OF COLUMBIA", to: "D.C."}
       - !Layer
         class: "river_label"
         filename: "CECAtlas/NA_Lakes_and_Rivers/data/rivers_l/northamerica_rivers_cec_2023_GCS"
@@ -203,7 +222,7 @@ contents:
         class: "small_city"
         filename: "Natural Earth/ne_10m_populated_places_simple"
         marker_name: "circle"
-        size: 3
+        size: 4
         filters:
           - !Not
             filter: !GreaterThan {key: "pop_max", cutoff: 1000000}
@@ -227,6 +246,8 @@ contents:
         label_column: "name"
         filters:
           - !GreaterThan {key: "pop_max", cutoff: 1000000}
+        abbr:
+          - {from: ",  D.C.", to: ""}
       - !Marker
         class: "compass"
         filename: "cross_arrow"
@@ -312,6 +333,10 @@ contents:
           - !Label
             location: {x: -76.5, y: 38}
             text: "Northern Neck Peninsula"
+      - !Label
+        class: "ocean_label"
+        location: {x: -73, y: 40}
+        text: "ATLANTIC OCEAN"
       - !Group
         class: "sea_label"
         contents:
@@ -342,3 +367,30 @@ contents:
           - !Label
             location: {x: -76, y: 38}
             text: "Chesapeake Bay"
+      - !Group
+        class: "railroad_label"
+        contents:
+          - !Label
+            location: {x: -70.9, y: 43.1}
+            text: "To Portland →"
+          - !Label
+            location: {x: -72.5, y: 43.0}
+            text: "To St. Albans →"
+          - !Label
+            location: {x: -73.3, y: 42.4}
+            text: "← To Albany"
+          - !Label
+            location: {x: -73.8, y: 42.0}
+            text: "To Albany →"
+          - !Label
+            location: {x: -76.3, y: 40.1}
+            text: "↑ To Pittsburgh"
+          - !Label
+            location: {x: -77.4, y: 39.2}
+            text: "← To Pittsburgh"
+          - !Label
+            location: {x: -77.9, y: 38.5}
+            text: "← To Charlottesville"
+          - !Label
+            location: {x: -77.2, y: 38.0}
+            text: "← To Richmond"        
