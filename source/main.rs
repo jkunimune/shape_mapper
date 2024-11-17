@@ -4,7 +4,7 @@ use anyhow::{anyhow, Result};
 use core::f64;
 use std::f64::consts::PI;
 use regex::Regex;
-use std::{env, fs};
+use std::{boxed, env, fs};
 use serde::Deserialize;
 use shapefile::dbase::{FieldValue, Record};
 use shapefile::record::EsriShape;
@@ -101,6 +101,13 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
             });
         }
 
+        // for a ClipPath, similarly just load its child
+        Content::ClipPath { content, id } => {
+            return Ok(Content::ClipPath {
+                id, content: boxed::Box::new(load_content(*content, outer_region)?),
+            });
+        }
+
         // resolve a Layer by loading geographic data from disc and making a bunch of Paths or Markers
         Content::Layer { filename, class, class_column, label_column, case, abbr, marker_name, size, double, self_clip, filters } => {
             let region = outer_region.as_ref().ok_or(anyhow!(
@@ -118,7 +125,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
             if marker_name.is_none() && size.is_some() {
                 return Err(anyhow!("you may not use the `size` option without the `marker_name` option."));
             }
-            if marker_name.is_some() && self_clip == Some(true) {
+            if marker_name.is_some() && self_clip.is_some() {
                 return Err(anyhow!("the `self_clip` option is incompatible with the `marker_name` option."));
             }
 
@@ -414,6 +421,13 @@ fn transform_content(content: Content, outer_transform: &Option<Transform>, oute
                 transform: None,
             });
         },
+        Content::ClipPath { content, id } => {
+            return Ok(Content::ClipPath {
+                content: boxed::Box::new(transform_content(
+                    *content, outer_transform, outer_bounding_box)?
+                ),
+                id });
+        },
         Content::Line { start, end, class } => {
             let transform = outer_transform.as_ref().ok_or(anyhow!(
                 "every layer must have a region defined somewhere in its hierarchy."
@@ -531,6 +545,19 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
             }
             string.push_str(&format!("</g>\n"));
             string
+        }
+
+        // for a clipPath, transcribe its child wrapped in a <clipPath> tag
+        Content::ClipPath { content, id } => {
+            let content = transcribe_content_as_svg(*content, outer_bounding_box, outer_region, element_count)?;
+            // remove all <clipPath>s inside the content because we don't currently support nested clip paths
+            let internal_clip_pattern = Regex::new("(?s)<clipPath[^>]*>.*</clipPath>\n?").unwrap();
+            let content = internal_clip_pattern.replace_all(&content, "");
+            // remove all <g> tags because <clipPath>s can't have hierarchy
+            let hierarchical_tag_pattern = Regex::new("(?m)^.*[^/]>\n").unwrap();
+            let content = hierarchical_tag_pattern.replace_all(&content, "");
+            // wrap it in a new <clipPath>
+            format!("<clipPath id=\"{}\">\n{}</clipPath>\n", id, content)
         }
 
         // for a line, you just need a single <line>
@@ -740,7 +767,7 @@ fn insert_attribute(element: &str, key: &str, value: &str) -> Result<String> {
         offset += infix.content.len();
     }
     if offset == 0 {
-        return Err(anyhow!("I couldn't find any tags in the string '{}'", element));
+        return Err(anyhow!("I couldn't find any top-level tags in the string '{}'", element));
     }
     else {
         return Ok(modified_element);
@@ -916,6 +943,13 @@ enum Content {
         /// whether to add a rect for a background and frame (defaults to false)
         frame: Option<bool>,
     },
+    /// a <clipPath/> tag that wraps some other element
+    ClipPath {
+        /// the content being wraped
+        content: boxed::Box<Content>,
+        /// the id to assign to the clipPath
+        id: String,
+    }
 }
 
 impl Content {
@@ -929,6 +963,7 @@ impl Content {
             Content::Path { class, .. } => class,
             Content::Marker { class, .. } => class,
             Content::Group { class, .. } => class,
+            Content::ClipPath { .. } => &None,
         };
     }
 
@@ -1025,7 +1060,7 @@ enum Filter {
     },
     /// the inverse of some other given Filter
     Not {
-        filter: std::boxed::Box<Filter>,
+        filter: boxed::Box<Filter>,
     },
     /// the 
     Either {
@@ -1101,7 +1136,7 @@ enum Transform {
         /// the longitude of the point that will appear at the top of the map (°)
         pole_longitude: f64,
         /// the transform to apply after rotating
-        projection: std::boxed::Box<Transform>,
+        projection: boxed::Box<Transform>,
     },
 }
 

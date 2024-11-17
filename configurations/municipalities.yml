@@ -98,6 +98,9 @@ style: |
     text-anchor: middle;
     alignment-baseline: baseline;
   }
+  .patches_for_water_issues {
+    clip-path: url(#water_issue_spots)
+  }
 contents:
   - !Group
     frame: true
@@ -115,25 +118,6 @@ contents:
           - !OneOf {key: "OUTLINE", valid_values: [17]}
       - !Layer
         class: "pond"
-        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
-        filters:
-          - !OneOf {key: "NAME", valid_values: ["Mystic River"]}
-          - !Not {filter: !GreaterThan {key: "SHAPE_AREA", cutoff: 100000}}
-      - !Layer
-        class: "pond"
-        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
-        filters:
-          - !OneOf {key: "NAME", valid_values: ["Charles River"]}
-          - !GreaterThan {key: "SHAPE_AREA", cutoff: 80000}
-          - !Not {filter: !GreaterThan {key: "SHAPE_AREA", cutoff: 100000}}
-      - !Layer
-        class: "pond"
-        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
-        filters:
-          - !OneOf {key: "NAME", valid_values: ["Neponset River"]}
-          - !GreaterThan {key: "SHAPE_AREA", cutoff: 300000}
-      - !Layer
-        class: "pond"
         filename: "MassGIS/majorhydro/MAJPOND_POLY"
       - !Layer
         class: "stream"
@@ -143,6 +127,22 @@ contents:
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC_GENCOAST"
         filters:
           - !OneOf {key: "OUTLINE", valid_values: [4]}
+      - !ClipPath
+        id: "water_issue_spots"
+        content:
+          !Group
+          contents:
+            - !Rectangle
+              coordinates: { left: 232600, right: 233450, bottom: 905850, top: 907300 }
+            - !Rectangle
+              coordinates: { left: 235300, right: 236200, bottom: 901800, top: 902300 }
+            - !Rectangle
+              coordinates: { left: 235800, right: 237740, bottom: 890700, top: 892200 }
+      - !Layer
+        class: "pond patches_for_water_issues"
+        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+        filters:
+          - !OneOf {key: "NAME", valid_values: ["Mystic River", "Charles River", "Neponset River"]}
       - !Layer
         class: "rail"
         filename: "MassGIS/mbta_rapid_transit/MBTA_ARC"

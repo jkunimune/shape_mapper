@@ -47,9 +47,11 @@ style: |
     fill: #ebfeb2;
   }
   .urban_area {
-    fill: #e0d7d0;
+    clip-path: url(#land_polygon);
+    fill: #f7efe3;
   }
   .river {
+    clip-path: url(#land_polygon);
     fill: none;
     stroke: #00748b;
     stroke-width: 0.6;
@@ -58,12 +60,6 @@ style: |
   }
   .coastline {
     fill: none;
-    stroke: #00748b;
-    stroke-width: 0.3;
-    stroke-linejoin: round;
-  }
-  .lake {
-    fill: #98dff3;
     stroke: #00748b;
     stroke-width: 0.3;
     stroke-linejoin: round;
@@ -164,6 +160,11 @@ contents:
         class: "graticule"
         parallel_spacing: 1
         meridian_spacing: 1
+      - !ClipPath
+        id: "land_polygon"
+        content:
+          !Layer
+          filename: "USGS/statesp010g/statesp010g"
       - !Layer
         class: "rural_area"
         filename: "USGS/statesp010g/statesp010g"
