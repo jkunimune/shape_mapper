@@ -1,0 +1,169 @@
+title: "Congressional districts in and around Boston"
+description: "
+  A map of the Boston area, with a greater Massachusetts map inset, that shows the borders of the
+  nine Massachusetts Congressional voting districts in relation to municipality borders and streets.
+  All geographic data is taken from the
+  <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
+    Massachusetts Bureau of Geographic Information
+  </a>."
+bounding_box: { left: -3, right: 213, top: -3, bottom: 233 }
+style: |
+  text {
+    font-family: Cadman, sans-serif;
+  }
+  .legend .background {
+    fill: #ffffff;
+    stroke: none;
+  }
+  .pond, .main_map .background {
+    fill: #E3F7F2;
+    stroke: #125588;
+    stroke-width: 0.4;
+    stroke-linejoin: round;
+  }
+  .stream {
+    fill: none;
+    stroke: #125588;
+    stroke-width: 0.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .frame {
+    fill: none;
+    stroke: black;
+    stroke-width: 2.0;
+    stroke-linejoin: miter;
+  }
+  .state_border, .town {
+    fill: none;
+    stroke: black;
+    stroke-width: 0.4;
+    stroke-linejoin: miter;
+    stroke-miterlimit: 2;
+  }
+  .road {
+    fill: none;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .road .top {
+    stroke: #f4dd80;
+    stroke-width: 0.4;
+  }
+  .road .bottom {
+    stroke: #222222;
+    stroke-width: 0.8;
+  }
+  .district {
+    stroke-width: 5.0;
+    stroke-linejoin: round;
+  }
+  .dist_num_6 { /* orange */
+    fill: #e5d6cd;
+    stroke: #bc9b87;
+  }
+  .dist_num_9 { /* purple */
+    fill: #d4d1e0;
+    stroke: #9d99bb;
+  }
+  .dist_num_4 { /* green */
+    fill: #c2cdc0;
+    stroke: #809b7e;
+  }
+  .dist_num_5 { /* dark blue */
+    fill: #c3ced9;
+    stroke: #7c9bb5;
+  }
+  .dist_num_7 { /* yellow */
+    fill: #e5e3d4;
+    stroke: #b0ac8a;
+  }
+  .dist_num_8 { /* red */
+    fill: #fac1c6;
+    stroke: #f26d83;
+  }
+  .district_border {
+    fill: none;
+    stroke: black;
+    stroke-width: 0.2;
+    stroke-linejoin: round;
+    stroke-dasharray: 0.8 0.4;
+  }
+  .town_label {
+    font-size: 4.5px;
+  }
+  .neighborhood_label {
+    font-size: 3.0px;
+  }
+  .town_label, .neighborhood_label {
+    fill: black;
+    font-weight: bold;
+    text-anchor: middle;
+    alignment-baseline: middle;
+  }
+  .town_label .bottom, .neighborhood_label .bottom {
+    stroke: white;
+    stroke-width: 0.6px;
+  }
+  .district_label {
+    font-weight: bold;
+  }
+  .main_map .district_label {
+    font-size: 50px;
+  }
+contents:
+  - !Group
+    class: "main_map"
+    frame: true
+    bounding_box: { left: 0, right: 210, top: 0, bottom: 230 }
+    region: { left: 215000, right: 257000, bottom: 858000, top: 904000 }
+    contents:
+      - !Layer
+        class: "district"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_POLY"
+        class_column: "DIST_NUM"
+        self_clip: true
+      - !Layer
+        class: "town"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [17]}
+      - !Layer
+        class: "stream"
+        filename: "MassGIS/majorhydro/MAJSTRM_ARC"
+      - !Layer
+        class: "pond"
+        filename: "MassGIS/majorhydro/MAJPOND_POLY"
+      - !Layer
+        class: "road"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_RTE_MAJOR"
+        double: true
+      - !Layer
+        class: "district_border"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+      - !Layer
+        class: "stream"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [2]}
+      - !Layer
+        class: "town_label"
+        filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
+        label_column: "CITY"
+        double: true
+      - !Layer
+        class: "neighborhood_label"
+        filename: "MassGIS/geonames_shp/GEONAMES_PT_PLACES"
+        label_column: "LABELTEXT"
+        double: true
+        filters:
+          - !OneOf
+            key: "LABELTEXT"
+            valid_values:
+              - "SOUTH BOSTON"
+              - "DORCHESTER"
+              - "WEST ROXBURY"
+              - "ROSLINDALE"
+              - "JAMAICA PLAIN"
+              - "MATTAPAN"
+

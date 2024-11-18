@@ -85,7 +85,7 @@ style: |
   }
   text {
     fill: black;
-    font-family: Helvetic, Helv, sans-serif;
+    font-family: Helvetica, Neue Haas Grotesk, Neue Haas Grotesk Text, sans-serif;
     font-weight: normal;
   }
   .town_hall_label {

@@ -222,7 +222,7 @@ contents:
     class: "main_map"
     frame: true
     bounding_box: { left: 5, right: 595, top: 5, bottom: 595 }
-    region: { left: 216000, right: 245000, bottom: 887000, top: 915000 }
+    region: { left: 217000, right: 245000, bottom: 887000, top: 915000 }
     contents:
       - !Layer
         class: "district"
