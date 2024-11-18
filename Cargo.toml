@@ -1,11 +1,16 @@
 [package]
 name = "shape_mapper"
+default-run = "shape_mapper"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
 name = "shape_mapper"
 path = "source/main.rs"
+
+[[bin]]
+name = "choose_cities"
+path = "source/choose_cities.rs"
 
 [dependencies]
 approx = "0.3"

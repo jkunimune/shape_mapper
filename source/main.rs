@@ -129,10 +129,6 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
                 return Err(anyhow!("the `self_clip` option is incompatible with the `marker_name` option."));
             }
 
-            let mut contents = Vec::new();
-            let mut reader = shapefile::Reader::from_path(
-                format!("data/{}.shp", filename)).or(Err(anyhow!("could not find `data/{}.dbf`", &filename)))?;
-
             let marker_data = match &marker_name {
                 // if marker was unspecified, don't load anything
                 None => None,
@@ -155,6 +151,10 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
                     Some((load_SVG(&marker_filename)?, marker_size))
                 }
             };
+
+            let mut contents = Vec::new();
+            let mut reader = shapefile::Reader::from_path(
+                format!("data/{}.shp", filename)).or(Err(anyhow!("could not find `data/{}.dbf`", &filename)))?;
 
             'shape_loop:
             for shape_record in reader.iter_shapes_and_records() {
@@ -791,7 +791,7 @@ fn prepend_to_each_line(string: &str, prefix: &str) -> String {
 
 /// replace problematic characters like , to _ and make it all lowercase
 fn sanitize_CSS(string: &str) -> String {
-    return Regex::new(r"[{},.:;]").unwrap().replace_all(&string.to_lowercase(), "_").into_owned();
+    return Regex::new(r"[{},.:; ]").unwrap().replace_all(&string.to_lowercase(), "_").into_owned();
 }
 
 
