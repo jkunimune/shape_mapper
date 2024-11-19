@@ -1,0 +1,116 @@
+title: "A practical map to Cambridge and Somerville"
+description: "
+  A map of the paths, streets, roads, and squares of Cambridge and Somerville, Massachusetts.
+  All geographic data is taken from the
+  <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
+    Massachusetts Bureau of Geographic Information
+  </a>."
+bounding_box: { left: 0, right: 500, top: 0, bottom: 500 }
+style: |
+  .background {
+    fill: silver;
+    stroke: none;
+  }
+  .frame {
+    fill: none;
+    stroke: black;
+    stroke-width: 2.0;
+  }
+  .path, .street, .road, .rail {
+    fill: none;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .path.bottom {
+    stroke: #444400;
+    stroke-width: 0.6;
+  }
+  .path.top {
+    stroke: #ffff44;
+    stroke-width: 0.2;
+  }
+  .street.bottom {
+    stroke: #994400;
+    stroke-width: 0.8;
+  }
+  .street.top {
+    stroke: #ff9944;
+    stroke-width: 0.4;
+  }
+  .road .bottom {
+    stroke: #440000;
+    stroke-width: 1.0;
+  }
+  .road .top {
+    stroke: #ff4444;
+    stroke-width: 0.6;
+  }
+  .rail .bottom {
+    stroke: purple;
+    stroke-width: 0.8;
+  }
+  .rail .top {
+    stroke: white;
+    stroke-width: 0.6;
+    stroke-dasharray: 0.8, 0.8;
+    stroke-linecap: butt;
+  }
+  .station {
+    fill: white;
+    stroke: black;
+  }
+  .land {
+    fill: lightgray;
+    stroke: none;
+  }
+  .park {
+    fill: lime;
+    stroke: none;
+  }
+  .water {
+    fill: cyan;
+    stroke: none;
+  }
+contents:
+  - !Group
+    frame: true
+    bounding_box: { left: 3, right: 497, top: 3, bottom: 497 }
+    region: { left: 227000, right: 238000, bottom: 900000, top: 908000 }
+    contents:
+      - !Layer
+        class: "water"
+        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+      - !Layer
+        class: "park"
+        filename: "MassGIS/openspace/OPENSPACE_POLY"
+        filters:
+          - !GreaterThan {key: "SHAPE_AREA", cutoff: 10000}
+      - !Layer
+        class: "rail"
+        filename: "MassGIS/mbta_rapid_transit/MBTA_ARC"
+        double: true
+      - !Layer
+        class: "rail"
+        filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
+        double: true
+      # - !Layer
+      #   class: "path top"
+      #   filename: "MassGIS/Bicycle_Trails/BICYCLE_TRAILS_ARC"
+      #   filter: 
+      #     - !OneOf {key: "Facility_Type", valid_values: ["path"]}
+      #   double: false
+      - !Layer
+        class: "street bottom"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+      - !Layer
+        class: "street top"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+      - !Layer
+        class: "road"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_RTE_MAJOR"
+        double: true
+      - !Layer
+        class: "station"
+        filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
+        marker_name: "mbta"
+        size: 5

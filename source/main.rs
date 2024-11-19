@@ -792,7 +792,7 @@ fn prepend_to_each_line(string: &str, prefix: &str) -> String {
 /// replace problematic characters like , to _ and make it all lowercase
 fn sanitize_CSS(string: &str) -> String {
     let string = string.to_lowercase();
-    let string = Regex::new(r"[{},.:; ]").unwrap().replace_all(&string, "_").into_owned();
+    let string = Regex::new(r"[{},.:;]").unwrap().replace_all(&string, "_").into_owned();
     let string = Regex::new(r"^([0-9])").unwrap().replace(&string, "_$1").into_owned();
     return string;
 }
