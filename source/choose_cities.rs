@@ -8,6 +8,7 @@ static FILENAME: &str = "data/USA_Major_Cities.shp";
 static NAME_KEY: &str = "NAME";
 static STATE_NAME_KEY: &str = "STATE_ABBR";
 static POPULATION_KEY: &str = "POPULATION";
+static CAPITAL_KEY: &str = "CAPITAL";
 static ID_KEY: &str = "PLACE_FIPS";
 
 
@@ -36,6 +37,12 @@ fn main() -> Result<()> {
             Some(other) => return Err(anyhow!("the {} column must be numeric, but I found {}", POPULATION_KEY, other.field_type())),
             None => return Err(anyhow!("I couldn't find the {} column.", POPULATION_KEY)),
         };
+        let is_capital = match record.get(CAPITAL_KEY) {
+            Some(FieldValue::Character(Some(_))) => true,
+            Some(FieldValue::Character(None)) => false,
+            Some(other) => return Err(anyhow!("I expected the {} column to be strings, but I found {}", CAPITAL_KEY, other.field_type())),
+            None => return Err(anyhow!("I couldn't find the {} column.", CAPITAL_KEY)),
+        };
         let id = match record.get(ID_KEY) {
             Some(FieldValue::Character(Some(string))) => string,
             Some(FieldValue::Character(None)) => continue,
@@ -51,7 +58,7 @@ fn main() -> Result<()> {
             cities.push(City {
                 name: name.to_string(),
                 state_name: state_name.to_string(),
-                population,
+                population, is_capital,
                 id: id.to_string(),
                 latitude: location.y,
                 longitude: location.x,
@@ -91,8 +98,12 @@ fn main() -> Result<()> {
     // finally, double-check that it's sorted right
     chosen_cities.sort_by(|a: &City, b: &City| u32::cmp(&a.population, &b.population).reverse());
 
+    for city in &chosen_cities[..100] {
+        println!("{}: {}, {}", city.id, city.name, city.state_name);
+    }
+
     let mut city_id_list = Vec::new();
-    for city in chosen_cities {
+    for city in &chosen_cities {
         city_id_list.push(format!("\"{}\"", city.id));
     }
     println!("[{}]", city_id_list.join(", "));
@@ -102,20 +113,29 @@ fn main() -> Result<()> {
 
 
 fn characterize_relationship(metropole: &City, satellite: &City) -> Relationship {
-    if metropole.state_name.ne(&satellite.state_name) {
+    if satellite.is_capital {
         return Relationship::ShowBoth;
     }
     let distance = 6371.*f64::hypot(
         (metropole.latitude - satellite.latitude).to_radians(),
         (metropole.longitude - satellite.longitude).to_radians()*f64::cos(((metropole.latitude + satellite.latitude)/2.).to_radians()));
-    if satellite.population as f64 > 50_000./(distance/20.) {
-        return Relationship::ShowBoth;
-    }
-    else if distance < 20. {
-        return Relationship::Merge;
+    let z_metropole = metropole.population as f64;
+    let z_metropole = if metropole.state_name.ne(&satellite.state_name) {
+        z_metropole/10.
     }
     else {
+        z_metropole
+    };
+    let z_satellite = satellite.population as f64;
+    let prominence = z_satellite - z_metropole*f64::exp(-(distance/10.).powi(2)/2.);
+    if prominence < 0. {
+        return Relationship::Merge;
+    }
+    else if prominence < 20_000. {
         return Relationship::ShowOne;
+    }
+    else {
+        return Relationship::ShowBoth;
     }
 }
 
@@ -126,6 +146,7 @@ struct City {
     name: String,
     state_name: String,
     population: u32,
+    is_capital: bool,
     latitude: f64,
     longitude: f64,
 }

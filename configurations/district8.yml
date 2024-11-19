@@ -135,17 +135,19 @@ contents:
         class: "pond"
         filename: "MassGIS/majorhydro/MAJPOND_POLY"
       - !Layer
+        class: "stream"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [2]}
+      - !Layer
         class: "road"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_RTE_MAJOR"
         double: true
       - !Layer
         class: "district_border"
         filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
-      - !Layer
-        class: "stream"
-        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
         filters:
-          - !OneOf {key: "OUTLINE", valid_values: [2]}
+          - !OneOf {key: "OUTLINE", valid_values: [0]}
       - !Layer
         class: "town_label"
         filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
