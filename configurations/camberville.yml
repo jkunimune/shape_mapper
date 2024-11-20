@@ -5,7 +5,6 @@ description: "
   <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
     Massachusetts Bureau of Geographic Information
   </a>."
-bounding_box: { left: 0, right: 500, top: 0, bottom: 500 }
 style: |
   .background {
     fill: silver;
@@ -16,6 +15,12 @@ style: |
     stroke: black;
     stroke-width: 2.0;
   }
+  .municipality {
+    fill: none;
+    stroke: black;
+    stroke-width: 0.6;
+    stroke-dasharray: 1.2 .6 .6 .6;
+  }
   .path, .street, .road, .rail {
     fill: none;
     stroke-linejoin: round;
@@ -23,35 +28,35 @@ style: |
   }
   .path.bottom {
     stroke: #444400;
-    stroke-width: 0.6;
+    stroke-width: 0.9;
   }
   .path.top {
     stroke: #ffff44;
-    stroke-width: 0.2;
+    stroke-width: 0.3;
   }
   .street.bottom {
     stroke: #994400;
-    stroke-width: 0.8;
+    stroke-width: 1.2;
   }
   .street.top {
     stroke: #ff9944;
-    stroke-width: 0.4;
+    stroke-width: 0.6;
   }
   .road .bottom {
     stroke: #440000;
-    stroke-width: 1.0;
+    stroke-width: 1.5;
   }
   .road .top {
     stroke: #ff4444;
-    stroke-width: 0.6;
+    stroke-width: 0.9;
   }
   .rail .bottom {
     stroke: purple;
-    stroke-width: 0.8;
+    stroke-width: 1.2;
   }
   .rail .top {
     stroke: white;
-    stroke-width: 0.6;
+    stroke-width: 0.9;
     stroke-dasharray: 0.8, 0.8;
     stroke-linecap: butt;
   }
@@ -71,12 +76,22 @@ style: |
     fill: cyan;
     stroke: none;
   }
+bounding_box: { left: -153, right: 153, top: -123, bottom: 123 }
 contents:
   - !Group
     frame: true
-    bounding_box: { left: 3, right: 497, top: 3, bottom: 497 }
+    bounding_box: { left: -150, right: 150, top: -120, bottom: 120 }
     region: { left: 227000, right: 238000, bottom: 900000, top: 908000 }
+    transform:
+      !Affine
+      longitudinal_scale: 0.4e-4
+      latitudinal_scale: -0.4e-4
+      false_easting: -232100
+      false_northing: -903800
+      rotation: 42
     contents:
+      # - !RasterLayer
+      #   filename: "Natural Earth/ne_shaded_relief"
       - !Layer
         class: "water"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
@@ -93,12 +108,16 @@ contents:
         class: "rail"
         filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
         double: true
-      # - !Layer
-      #   class: "path top"
-      #   filename: "MassGIS/Bicycle_Trails/BICYCLE_TRAILS_ARC"
-      #   filter: 
-      #     - !OneOf {key: "Facility_Type", valid_values: ["path"]}
-      #   double: false
+      - !Layer
+        class: "path bottom"
+        filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
+        filters:
+          - !OneOf {key: "FAC_TYPE_N", valid_values: ["Shared Use Path", "Bi/Ped Priority Roadway"]}
+      - !Layer
+        class: "path top"
+        filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
+        filters:
+          - !OneOf {key: "FAC_TYPE_N", valid_values: ["Shared Use Path", "Bi/Ped Priority Roadway"]}
       - !Layer
         class: "street bottom"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
@@ -114,3 +133,6 @@ contents:
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
         marker_name: "mbta"
         size: 5
+      # - !Layer
+      #   class: "municipality"
+      #   filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"

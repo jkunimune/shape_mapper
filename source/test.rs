@@ -20,8 +20,9 @@ fn test_transverse_transform() {
     let transform = Transform::Oblique {
         pole_longitude: 0., pole_latitude: 0.,
         projection: std::boxed::Box::new(Transform::Affine {
-            x_scale: 1., x_shift: 0.,
-            y_scale: 1., y_shift: 0.,
+            longitudinal_scale: 1e-3, false_easting: 0., // NOTE: Affine currently assumes units of m so this combo is a little sketchy right now
+            latitudinal_scale: 1e-3, false_northing: 0.,
+            rotation: 0.,
         }),
     };
     assert_approx_eq(
@@ -52,8 +53,9 @@ fn test_oblique_transform() {
     let transform = Transform::Oblique {
         pole_longitude: 90., pole_latitude: 60.,
         projection: std::boxed::Box::new(Transform::Affine {
-            x_scale: 1., x_shift: 0.,
-            y_scale: 1., y_shift: 0.,
+            longitudinal_scale: 1e-3, false_easting: 0.,
+            latitudinal_scale: 1e-3, false_northing: 0.,
+            rotation: 0.,
         }),
     };
     assert_approx_eq(
@@ -84,8 +86,9 @@ fn test_transform_jacobian() {
     let transform = Transform::Oblique {
         pole_longitude: 162.9, pole_latitude: 32.4,
         projection: std::boxed::Box::new(Transform::Affine {
-            x_scale: 1., x_shift: 0.,
-            y_scale: 1., y_shift: 0.,
+            longitudinal_scale: 1e-3, false_easting: 0.,
+            latitudinal_scale: 1e-3, false_northing: 0.,
+            rotation: 0.,
         }),
     };
     let N = 10;

@@ -218,6 +218,9 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
                                 Shape::Polyline(polyline) => {
                                     (SerializablePoint::deep_convert(polyline.parts()), false)
                                 }
+                                Shape::PolylineM(polyline) => {
+                                    (SerializablePoint::deep_convert_M(polyline.parts()), false)
+                                }
                                 Shape::Point(_) => {
                                     return Err(anyhow!("data/{}.shp is a POINT shapefile.  POINT layers must always have a `marker`.", filename))
                                 }
@@ -1013,8 +1016,14 @@ impl SerializablePoint {
     fn from(point: &shapefile::Point) -> SerializablePoint {
         return SerializablePoint { x: point.x, y: point.y };
     }
+    fn from_M(point: &shapefile::PointM) -> SerializablePoint {
+        return SerializablePoint { x: point.x, y: point.y };
+    }
     fn deep_convert(points: &Vec<Vec<shapefile::Point>>) -> Vec<Vec<SerializablePoint>> {
         return points.iter().map(|ring| ring.iter().map(SerializablePoint::from).collect()).collect();
+    }
+    fn deep_convert_M(points: &Vec<Vec<shapefile::PointM>>) -> Vec<Vec<SerializablePoint>> {
+        return points.iter().map(|ring| ring.iter().map(SerializablePoint::from_M).collect()).collect();
     }
 }
 
@@ -1114,22 +1123,24 @@ impl Filter {
 
 #[derive(Deserialize, Clone)]
 enum Transform {
-    /// a linear scaling and translation from map to map
+    /// a linear translation, scaling, and rotation from map to map
     Affine {
-        /// the scale in the horizontal direction (mm per shapefile units)
-        x_scale: f64,
-        /// the x-coordinate of the shapefile origin (mm)
-        x_shift: f64,
-        /// the scale in the vertical direction (mm per shapefile units, should be negative)
-        y_scale: f64,
-        /// the y-coordinate of the shapefile origin (mm)
-        y_shift: f64,
+        /// the scale in the x-direction (m per shapefile units)
+        longitudinal_scale: f64,
+        /// the x-coordinate of the point to put at the map origin (shapefile units)
+        false_easting: f64,
+        /// the scale in the y-direction (m per shapefile units, should be negative)
+        latitudinal_scale: f64,
+        /// the y-coordinate of the point to put at the map origin (shapefile units)
+        false_northing: f64,
+        /// the amount to rotate the data widdershins about the map origin (degrees)
+        rotation: f64,
     },
     /// a cylindrical conformal mapping from spherical coordinates in degrees to a plane
     Mercator {
         /// the central meridian (°)
         central_meridian: f64,
-        /// the scale of the map at the equator
+        /// the scale of the map at the equator (mm per real-life mm)
         scale: f64,
     },
     /// a 3D rotation that gets applied before some other transformation
@@ -1145,19 +1156,31 @@ enum Transform {
 
 impl Transform {
     fn between(input: &Box, output: &Box) -> Transform {
-        let x_scale = (output.right - output.left)/(input.right - input.left);
-        let x_shift = output.left - input.left*x_scale;
-        let y_scale = (output.bottom - output.top)/(input.bottom - input.top);
-        let y_shift = output.top - input.top*y_scale;
-        return Transform::Affine { x_scale: x_scale, x_shift: x_shift, y_scale: y_scale, y_shift: y_shift };
+        let longitudinal_scale = (output.right - output.left)/(input.right - input.left)/1000.;
+        let false_easting = output.left/(1000.*longitudinal_scale) - input.left;
+        let latitudinal_scale = (output.bottom - output.top)/(input.bottom - input.top)/1000.;
+        let false_northing = output.top/(1000.*latitudinal_scale) - input.top;
+        let rotation = 0.;
+        return Transform::Affine {
+            longitudinal_scale, false_easting,
+            latitudinal_scale, false_northing,
+            rotation };
     }
 
     fn apply(self: &Transform, input: &SerializablePoint) -> SerializablePoint {
         return match self {
-            Transform::Affine { x_scale, x_shift, y_scale, y_shift } => {
-                SerializablePoint {
-                    x: input.x*x_scale + x_shift,
-                    y: input.y*y_scale + y_shift,
+            Transform::Affine { longitudinal_scale, false_easting, latitudinal_scale, false_northing, rotation } => {
+                let x = (input.x + false_easting)*1000.*longitudinal_scale;
+                let y = (input.y + false_northing)*1000.*latitudinal_scale;
+                if *rotation == 0. {
+                    SerializablePoint {x, y}
+                }
+                else {
+                    let (sinθ, cosθ) = rotation.to_radians().sin_cos();
+                    SerializablePoint {
+                        x: cosθ*x + sinθ*y,
+                        y: -sinθ*x + cosθ*y,
+                    }
                 }
             },
             Transform::Mercator { central_meridian, scale } => {
@@ -1188,8 +1211,11 @@ impl Transform {
 
     fn jacobian(self: &Transform, location: &SerializablePoint) -> Jacobian {
         return match self {
-            Transform::Affine { x_scale, x_shift: _, y_scale, y_shift: _ } => Jacobian {
-                dx_dx: *x_scale, dx_dy: 0., dy_dx: 0., dy_dy: *y_scale,
+            Transform::Affine { longitudinal_scale, false_easting: _, latitudinal_scale, false_northing: _, rotation } => Jacobian {
+                dx_dx: 1000.*longitudinal_scale*rotation.to_radians().cos(),
+                dx_dy: 1000.*latitudinal_scale*rotation.to_radians().sin(),
+                dy_dx: -1000.*longitudinal_scale*rotation.to_radians().sin(),
+                dy_dy: 1000.*latitudinal_scale*rotation.to_radians().cos(),
             },
             Transform::Mercator { scale, central_meridian: _ } => Jacobian {
                 dx_dx: scale*EARTH_RADIUS*PI/180., dx_dy: 0.,
@@ -1224,21 +1250,29 @@ impl Transform {
 
     fn apply_to_box(self: &Transform, input: &Box) -> Result<Box> {
         return match self {
-            Transform::Affine { x_scale, x_shift, y_scale, y_shift } => Ok(Box {
-                left: input.left*x_scale + x_shift,
-                right: input.right*x_scale + x_shift,
-                bottom: input.bottom*y_scale + y_shift,
-                top: input.top*y_scale + y_shift,
-            }),
-            Transform::Mercator { central_meridian, scale } => Ok(Box {
-                left: scale*EARTH_RADIUS*f64::to_radians(input.left - central_meridian),
-                right: scale*EARTH_RADIUS*f64::to_radians(input.right - central_meridian),
-                bottom: -scale*EARTH_RADIUS*f64::atanh(f64::sin(f64::to_radians(input.bottom))),
-                top: -scale*EARTH_RADIUS*f64::atanh(f64::sin(f64::to_radians(input.top))),
-            }),
-            Transform::Oblique { .. } => Err(anyhow!(
-                "oblique map projections are not generally cylindrical and so I don't support projecting rectangles in them."
-            )),
+            Transform::Affine { longitudinal_scale, false_easting, latitudinal_scale, false_northing, rotation } => 
+                if *rotation == 0. {
+                    Ok(Box {
+                        left: (input.left + false_easting)*1000.*longitudinal_scale,
+                        right: (input.right + false_easting)*1000.*longitudinal_scale,
+                        bottom: (input.bottom + false_northing)*1000.*latitudinal_scale,
+                        top: (input.top + false_northing)*1000.*latitudinal_scale,
+                    })
+                }
+                else {
+                    Err(anyhow!("rotation is not supported with rectangles"))
+                },
+            Transform::Mercator { central_meridian, scale } =>
+                Ok(Box {
+                    left: scale*EARTH_RADIUS*f64::to_radians(input.left - central_meridian),
+                    right: scale*EARTH_RADIUS*f64::to_radians(input.right - central_meridian),
+                    bottom: -scale*EARTH_RADIUS*f64::atanh(f64::sin(f64::to_radians(input.bottom))),
+                    top: -scale*EARTH_RADIUS*f64::atanh(f64::sin(f64::to_radians(input.top))),
+                }),
+            Transform::Oblique { .. } =>
+                Err(anyhow!(
+                    "oblique map projections are not generally cylindrical and so I don't support projecting rectangles in them."
+                )),
         };
     }
 
