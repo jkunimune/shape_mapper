@@ -109,7 +109,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
         }
 
         // resolve a Layer by loading geographic data from disc and making a bunch of Paths or Markers
-        Content::Layer { filename, class, class_column, label_column, case, abbr, marker_name, size, double, self_clip, filters } => {
+        Content::Layer { filename, class, class_column, label_column, case, abbr, marker_name, size, double, self_clip, decimation, filters } => {
             let region = outer_region.as_ref().ok_or(anyhow!(
                 "every layer must have a region defined somewhere in its hierarchy."))?;
             // check for incompatible options
@@ -227,6 +227,11 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
                                 _ => {
                                     return Err(anyhow!("we don't support {} shapefiles right now.", shape.shapetype().to_string()));
                                 }
+                            };
+
+                            let parts = match decimation {
+                                Some(tolerance) => parts.iter().map(|part| decimate(part, tolerance)).collect(),
+                                None => parts,
                             };
 
                             // pull it all together as a Content::Path
@@ -812,6 +817,28 @@ fn sanitize_XML(string: &str) -> String {
 }
 
 
+/// use the Ramer–Douglas–Peucker algorithm to downsample this curve
+fn decimate(path: &[SerializablePoint], tolerance: f64) -> Vec<SerializablePoint> {
+    let mut max_distance = 0.;
+    let mut argmax_distance = 0;
+    for i in 0..path.len() {
+        let distance = line_point_distance(&path[0], &path[path.len() - 1], &path[i]);
+        if distance > max_distance {
+            max_distance = distance;
+            argmax_distance = i;
+        }
+    }
+    if max_distance > tolerance {
+        let head = decimate(&path[..argmax_distance + 1], tolerance);
+        let tail = decimate(&path[argmax_distance..], tolerance);
+        return [head, tail].concat();
+    }
+    else {
+        return vec![path[0].clone(), path[path.len() - 1].clone()];
+    }
+}
+
+
 /// calculate the distance between a line segment and a point
 fn line_point_distance(start: &SerializablePoint, end: &SerializablePoint, point: &SerializablePoint) -> f64 {
     let length2 = (end.x - start.x).powi(2) + (end.y - start.y).powi(2);
@@ -868,6 +895,8 @@ enum Content {
         double: Option<bool>,
         /// whether to make this shape's strokes be confined within its shape (defaults to false)
         self_clip: Option<bool>,
+        /// the tolerance to use for the decimation algorithm you apply to the curves (in data units), if any
+        decimation: Option<f64>,
         /// key-[value] pairs used to show only a subset of the shapes in the file
         filters: Option<Vec<Filter>>,
     },

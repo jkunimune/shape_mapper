@@ -128,23 +128,26 @@ contents:
       - !Layer
         class: "bikepath"
         filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
-        filters:
-          - !OneOf {key: "FAC_TYPE_N", valid_values: ["Shared Use Path", "Bi/Ped Priority Roadway"]}
+        decimation: 100
+        filters: [!OneOf {key: "FAC_TYPE_N", valid_values: ["Shared Use Path", "Bi/Ped Priority Roadway"]}]
       - !Layer
         class: "street bottom"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         class_column: "STREET_NAM"
+        decimation: 100
         filters: [!OneOf {key: "RDTYPE", valid_values: [1, 2, 3, 4]}]
       - !Layer
         class: "street top"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         class_column: "STREET_NAM"
+        decimation: 100
+        filters: [!OneOf {key: "RDTYPE", valid_values: [1, 2, 3, 4]}]
       - !Layer
         class: "highway"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_RTE_MAJOR"
         double: true
-        filters:
-          - !OneOf {key: "RT_NUMBER", valid_values: ["90", "93"]}
+        decimation: 100
+        filters: [!OneOf {key: "RT_NUMBER", valid_values: ["90", "93"]}]
       - !Layer
         class: "station"
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
