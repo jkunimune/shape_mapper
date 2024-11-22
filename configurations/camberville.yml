@@ -13,7 +13,7 @@ style: |
   .frame {
     fill: none;
     stroke: black;
-    stroke-width: 2.0;
+    stroke-width: 3.0;
   }
   .municipality {
     fill: none;
@@ -21,43 +21,60 @@ style: |
     stroke-width: 0.6;
     stroke-dasharray: 1.2 .6 .6 .6;
   }
-  .path, .street, .road, .rail {
+  .bikepath, .street, .highway, .railroad {
     fill: none;
-    stroke-linejoin: round;
+    stroke-linejoin: miter;
+    stroke-miterlimit: 2.0;
     stroke-linecap: round;
   }
-  .path.bottom {
-    stroke: #444400;
-    stroke-width: 0.9;
+  /* car-free paths */
+  .bikepath {
+    stroke: green;
+    stroke-width: 1.6;
   }
-  .path.top {
-    stroke: #ffff44;
-    stroke-width: 0.3;
-  }
+  /* streets with bike lanes */
   .street.bottom {
-    stroke: #994400;
-    stroke-width: 1.2;
+    stroke: green;
+    stroke-width: 4.6;
   }
   .street.top {
-    stroke: #ff9944;
-    stroke-width: 0.6;
+    stroke: yellow;
+    stroke-width: 3.0;
   }
-  .road .bottom {
-    stroke: #440000;
-    stroke-width: 1.5;
+  /* streets without bike lanes */
+  .bottom .memorial_drive, .bottom .highland_avenue, .bottom .prospect_street
+  .bottom .washington_street, .bottom .alewife_brook_parkway,
+  .bottom .fresh_pond_parkway, .bottom .james_j_storrow_memorial_drive {
+    stroke: black;
+    stroke-width: 3.8;
   }
-  .road .top {
-    stroke: #ff4444;
-    stroke-width: 0.9;
+  .top .memorial_drive, .top .highland_avenue, .top .prospect_street,
+  .top .washington_street, .top .alewife_brook_parkway,
+  .top .fresh_pond_parkway, .top .james_j_storrow_memorial_drive {
+    stroke: orange;
+    stroke-width: 3.0;
   }
-  .rail .bottom {
+  /* roads without sidewalks */
+  .highway .bottom,
+  .bottom .mcgrath_highway, .bottom .concord_turnpike {
+    stroke: black;
+    stroke-width: 3.8;
+  }
+  .highway .top,
+  .top .mcgrath_highway, .top .concord_turnpike {
+    stroke: red;
+    stroke-width: 3.4;
+  }
+  /* train tracks*/
+  .railroad .bottom {
     stroke: purple;
-    stroke-width: 1.2;
+    stroke-width: 3.0;
+    stroke-linecap: butt;
   }
-  .rail .top {
+  .railroad .top {
     stroke: white;
-    stroke-width: 0.9;
-    stroke-dasharray: 0.8, 0.8;
+    stroke-width: 2.0;
+    stroke-dasharray: 5.0 5.0;
     stroke-linecap: butt;
   }
   .station {
@@ -76,19 +93,19 @@ style: |
     fill: cyan;
     stroke: none;
   }
-bounding_box: { left: -153, right: 153, top: -123, bottom: 123 }
+bounding_box: { left: -162, right: 162, top: -122, bottom: 122 }
 contents:
   - !Group
     frame: true
-    bounding_box: { left: -150, right: 150, top: -120, bottom: 120 }
+    bounding_box: { left: -160, right: 160, top: -120, bottom: 120 }
     region: { left: 227000, right: 238000, bottom: 900000, top: 908000 }
     transform:
       !Affine
       longitudinal_scale: 0.4e-4
       latitudinal_scale: -0.4e-4
-      false_easting: -232100
-      false_northing: -903800
-      rotation: 42
+      false_easting: -232000
+      false_northing: -903700
+      rotation: 30
     contents:
       # - !RasterLayer
       #   filename: "Natural Earth/ne_shaded_relief"
@@ -101,38 +118,38 @@ contents:
         filters:
           - !GreaterThan {key: "SHAPE_AREA", cutoff: 10000}
       - !Layer
-        class: "rail"
+        class: "railroad"
         filename: "MassGIS/mbta_rapid_transit/MBTA_ARC"
         double: true
       - !Layer
-        class: "rail"
+        class: "railroad"
         filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
         double: true
       - !Layer
-        class: "path bottom"
-        filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
-        filters:
-          - !OneOf {key: "FAC_TYPE_N", valid_values: ["Shared Use Path", "Bi/Ped Priority Roadway"]}
-      - !Layer
-        class: "path top"
+        class: "bikepath"
         filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
         filters:
           - !OneOf {key: "FAC_TYPE_N", valid_values: ["Shared Use Path", "Bi/Ped Priority Roadway"]}
       - !Layer
         class: "street bottom"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+        class_column: "STREET_NAM"
+        filters: [!OneOf {key: "RDTYPE", valid_values: [1, 2, 3, 4]}]
       - !Layer
         class: "street top"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+        class_column: "STREET_NAM"
       - !Layer
-        class: "road"
+        class: "highway"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_RTE_MAJOR"
         double: true
+        filters:
+          - !OneOf {key: "RT_NUMBER", valid_values: ["90", "93"]}
       - !Layer
         class: "station"
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
         marker_name: "mbta"
-        size: 5
+        size: 9
       # - !Layer
       #   class: "municipality"
       #   filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
