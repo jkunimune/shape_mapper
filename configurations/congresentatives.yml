@@ -409,7 +409,7 @@ contents:
         class: "town_label"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
         label_column: "TOWN"
-        case: !Sentence
+        case: !Title
         double: true
         filters:
           - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}

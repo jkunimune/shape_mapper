@@ -10,6 +10,9 @@ style: |
     fill: silver;
     stroke: none;
   }
+  .legend .background {
+    fill: white;
+  }
   .frame {
     fill: none;
     stroke: black;
@@ -33,36 +36,55 @@ style: |
     stroke-width: 1.6;
   }
   /* streets with bike lanes */
-  .street.with_bikelane.bottom {
+  .street.bottom {
     stroke: green;
-    stroke-width: 4.6;
+    stroke-width: 4.0;
   }
-  .street.with_bikelane.top {
+  .street.top {
     stroke: yellow;
-    stroke-width: 3.0;
+    stroke-width: 2.4;
   }
-  .street.without_bikelane.bottom {
+  /* streets without bike lanes */
+  .bottom .bright_road, .bottom .main_street, .bottom .commercial_street,
+  .bottom .mcgrath_highway, .bottom .highland_avenue, .bottom .elm_street,
+  .bottom .prospect_street, .bottom .mystic_avenue, .bottom .medford_street,
+  .bottom .bunker_hill_street, .bottom .rutherford_avenue, .bottom .new_rutherford_avenue,
+  .bottom .chelsea_street, .bottom .charlesgate_east, .bottom .charlesgate_west,
+  .bottom .fenway, .bottom .gerrys_landing_road, .bottom .fellsway_west,
+  .bottom .memorial_drive, .bottom .fresh_pond_parkway, .bottom .alewife_brook_parkway,
+  .bottom .mystic_valley_parkway, .bottom .james_j_storrow_memorial_drive,
+  .bottom .soldiers_field_road, .bottom .edward_h_land_boulevard, .bottom .austin_street,
+  .bottom .blanchard_road {
     stroke: brown;
-    stroke-width: 3.8;
-  }
-  .street.without_bikelane.top {
-    stroke: orange;
     stroke-width: 3.2;
   }
+  .top .bright_road, .top .main_street, .top .commercial_street,
+  .top .mcgrath_highway, .top .highland_avenue, .top .elm_street,
+  .top .prospect_street, .top .mystic_avenue, .top .medford_street,
+  .top .bunker_hill_street, .top .rutherford_avenue, .top .new_rutherford_avenue,
+  .top .chelsea_street, .top .charlesgate_east, .top .charlesgate_west,
+  .top .fenway, .top .gerrys_landing_road, .top .fellsway_west,
+  .top .memorial_drive, .top .fresh_pond_parkway, .top .alewife_brook_parkway,
+  .top .mystic_valley_parkway, .top .james_j_storrow_memorial_drive,
+  .top .soldiers_field_road, .top .edward_h_land_boulevard, .top .austin_street,
+  .top .blanchard_road {
+    stroke: orange;
+    stroke-width: 2.4;
+  }
   .highway {
-    stroke: red;
-    stroke-width: 3.8;
+    stroke: firebrick;
+    stroke-width: 3.2;
   }
   /* train tracks*/
   .railroad .bottom {
     stroke: purple;
-    stroke-width: 2.5;
+    stroke-width: 2.4;
     stroke-linecap: butt;
   }
   .railroad .top {
     stroke: white;
-    stroke-width: 1.5;
-    stroke-dasharray: 5.0 5.0;
+    stroke-width: 1.6;
+    stroke-dasharray: 4.8 4.8;
     stroke-linecap: butt;
   }
   .station {
@@ -80,6 +102,46 @@ style: |
   .water {
     fill: cyan;
     stroke: none;
+  }
+  text {
+    font-family: Helvetica Neue,Helvetica,sans-serif;
+    font-weight: bold;
+  }
+  .bikepath_label {
+    fill: black;
+    font-size: 2.4px;
+  }
+  .street_label {
+    fill: black;
+    font-size: 2.4px;
+  }
+  .highway_label {
+    fill: white;
+    font-size: 3.2px;
+  }
+  .location_label {
+    fill: black;
+    font-size: 3.2px;
+  }
+  .park_label {
+    fill: green;
+    font-size: 3.2px;
+  }
+  .water_label {
+    fill: blue;
+    font-style: italic;
+    font-weight: normal;
+    font-size: 4.0px;
+  }
+  .small_legend_text {
+    fill: black;
+    font-weight: normal;
+    font-size: 4.0px;
+  }
+  .big_legend_text {
+    fill: black;
+    font-style: italic;
+    font-size: 6.0px;
   }
 bounding_box: { left: -162, right: 162, top: -122, bottom: 122 }
 contents:
@@ -132,44 +194,8 @@ contents:
               - "Charles River Esplanade"
               - "Harborwalk Connector"
               - "Watertown-Cambridge Greenway"
-      - !Layer
-        class: "street without_bikelane bottom"
-        filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
-        class_column: "STREET_NAM"
-        decimation: 50
-        filters:
-          - !OneOf
-            key: "STREET_NAM"
-            valid_values:
-              - "BRIGHT ROAD"
-              - "MAIN STREET"
-              - "COMMERCIAL STREET"
-      - !Layer
-        class: "street without_bikelane bottom"
-        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
-        class_column: "STREET_NAM"
-        decimation: 100
-        filters:
-          - !OneOf
-            key: "STREET_NAM"
-            valid_values:
-              - "MCGRATH HIGHWAY"
-              - "HIGHLAND AVENUE"
-              - "ELM STREET"
-              - "PROSPECT STREET"
-              - "MYSTIC AVENUE"
-              - "MEDFORD STREET"
-              - "BUNKER HILL STREET"
-              - "RUTHERFORD AVENUE"
-              - "NEW RUTHERFORD AVENUE"
-              - "CHELSEA STREET"
-              - "CHARLESGATE EAST"
-              - "CHARLESGATE WEST"
-              - "FENWAY"
-              - "GERRYS LANDING ROAD"
-              - "FELLSWAY WEST"
       - !Layer # these riverside roads are too curvy and must not be decimated
-        class: "curvy street without_bikelane bottom"
+        class: "curvy street bottom"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         class_column: "STREET_NAM"
         filters:
@@ -184,40 +210,39 @@ contents:
               - "SOLDIERS FIELD ROAD"
               - "GREENOUGH BOULEVARD"
       - !Layer
-        class: "street with_bikelane bottom"
+        class: "street bottom"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
         class_column: "STREET_NAM"
-        double: true
         decimation: 50
         filters:
           - !OneOf
             key: "STREET_NAM"
             valid_values:
-              - "FIRST STREET"
               - "RINDGE AVENUE"
               - "HURON AVENUE"
               - "GROVE STREET"
-              - "BOW STREET"
+              - "BRIGHT ROAD"
               - "GRAND UNION BOULEVARD"
               - "ASSEMBLY SQUARE DRIVE"
               - "STURTEVANT STREET"
+              - "MAIN STREET"
+              - "COMMERCIAL STREET"
       - !Layer
-        class: "street with_bikelane bottom"
+        class: "street bottom"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         class_column: "STREET_NAM"
-        double: true
-        decimation: 100
+        decimation: 50
         filters:
           - !OneOf
             key: "STREET_NAM"
             valid_values:
               - "MASSACHUSETTS AVENUE"
-              - "VASSAR STREET"
               - "BROOKLINE STREET"
               - "MAIN STREET"
               - "WESTERN AVENUE"
               - "RIVER STREET"
               - "CAMBRIDGE STREET"
+              - "PROSPECT STREET"
               - "BROADWAY"
               - "HAMPSHIRE STREET"
               - "MOUNT AUBURN STREET"
@@ -225,17 +250,18 @@ contents:
               - "NORTH HARVARD STREET"
               - "GARDEN STREET"
               - "CONCORD AVENUE"
-              - "COLUMBIA STREET"
               - "WEBSTER AVENUE"
               - "BEACON STREET"
               - "SOMERVILLE AVENUE"
               - "SUMMER STREET"
+              - "HIGHLAND AVENUE"
+              - "ELM STREET"
               - "KIRKLAND STREET"
-              - "QUINCY STREET"
               - "HOLLAND STREET"
               - "COLLEGE AVENUE"
               - "BOSTON AVENUE"
               - "UNION SQUARE"
+              - "BOW STREET"
               - "WASHINGTON STREET"
               - "BELMONT STREET"
               - "TRAPELO ROAD"
@@ -252,45 +278,23 @@ contents:
               - "BOSTON UNIVERSITY BRIDGE"
               - "MONSIGNOR OBRIEN HIGHWAY"
               - "FELLSWAY"
+              - "FELLSWAY WEST"
               - "ELIOT BRIDGE"
-      - !Layer
-        class: "street without_bikelane top"
-        filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
-        class_column: "STREET_NAM"
-        decimation: 50
-        filters:
-          - !OneOf
-            key: "STREET_NAM"
-            valid_values:
-              - "BRIGHT ROAD"
-              - "MAIN STREET"
-              - "COMMERCIAL STREET"
-      - !Layer
-        class: "street without_bikelane top"
-        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
-        class_column: "STREET_NAM"
-        decimation: 100
-        filters:
-          - !OneOf
-            key: "STREET_NAM"
-            valid_values:
-              - "MCGRATH HIGHWAY" # note: the part of McGrath that crosses the train tracks has no sidewalk
-              - "HIGHLAND AVENUE"
-              - "ELM STREET"
-              - "PROSPECT STREET"
               - "MYSTIC AVENUE"
               - "MEDFORD STREET"
               - "BUNKER HILL STREET"
               - "RUTHERFORD AVENUE"
               - "NEW RUTHERFORD AVENUE"
               - "CHELSEA STREET"
-              - "CHARLESGATE EAST"
-              - "CHARLESGATE WEST"
+              - "MCGRATH HIGHWAY"
+              - "CHARLESGATE"
               - "FENWAY"
               - "GERRYS LANDING ROAD"
-              - "FELLSWAY WEST"
+              - "EDWIN H LAND BOULEVARD"
+              - "AUSTIN STREET"
+              - "BLANCHARD ROAD"
       - !Layer # these riverside roads are too curvy and must not be decimated
-        class: "curvy street without_bikelane top"
+        class: "curvy street top"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         class_column: "STREET_NAM"
         filters:
@@ -303,42 +307,41 @@ contents:
               - "MYSTIC VALLEY PARKWAY"
               - "JAMES J STORROW MEMORIAL DRIVE"
               - "SOLDIERS FIELD ROAD"
-              - "GREENOUGH BOULEVARD" # note: much of Greenough has a bikelane
+              - "GREENOUGH BOULEVARD"
       - !Layer
-        class: "street with_bikelane top"
+        class: "street top"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
         class_column: "STREET_NAM"
-        double: true
         decimation: 50
         filters:
           - !OneOf
             key: "STREET_NAM"
             valid_values:
-              - "FIRST STREET"
               - "RINDGE AVENUE"
               - "HURON AVENUE"
               - "GROVE STREET"
-              - "BOW STREET"
+              - "BRIGHT ROAD"
               - "GRAND UNION BOULEVARD"
               - "ASSEMBLY SQUARE DRIVE"
               - "STURTEVANT STREET"
+              - "MAIN STREET"
+              - "COMMERCIAL STREET"
       - !Layer
-        class: "street with_bikelane top"
+        class: "street top"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         class_column: "STREET_NAM"
-        double: true
-        decimation: 100
+        decimation: 50
         filters:
           - !OneOf
             key: "STREET_NAM"
             valid_values:
               - "MASSACHUSETTS AVENUE"
-              - "VASSAR STREET"
               - "BROOKLINE STREET"
               - "MAIN STREET"
               - "WESTERN AVENUE"
               - "RIVER STREET"
               - "CAMBRIDGE STREET"
+              - "PROSPECT STREET"
               - "BROADWAY"
               - "HAMPSHIRE STREET"
               - "MOUNT AUBURN STREET"
@@ -346,18 +349,19 @@ contents:
               - "NORTH HARVARD STREET"
               - "GARDEN STREET"
               - "CONCORD AVENUE"
-              - "COLUMBIA STREET"
               - "WEBSTER AVENUE"
               - "BEACON STREET"
               - "SOMERVILLE AVENUE"
               - "SUMMER STREET"
+              - "HIGHLAND AVENUE"
+              - "ELM STREET"
               - "KIRKLAND STREET"
-              - "QUINCY STREET"
               - "HOLLAND STREET"
               - "COLLEGE AVENUE"
               - "BOSTON AVENUE"
               - "UNION SQUARE"
-              - "WASHINGTON STREET" # note: some of washington st. in somerville does not have a bikelane
+              - "BOW STREET"
+              - "WASHINGTON STREET"
               - "BELMONT STREET"
               - "TRAPELO ROAD"
               - "ALFORD STREET"
@@ -373,7 +377,21 @@ contents:
               - "BOSTON UNIVERSITY BRIDGE"
               - "MONSIGNOR OBRIEN HIGHWAY"
               - "FELLSWAY"
+              - "FELLSWAY WEST"
               - "ELIOT BRIDGE"
+              - "MYSTIC AVENUE"
+              - "MEDFORD STREET"
+              - "BUNKER HILL STREET"
+              - "RUTHERFORD AVENUE"
+              - "NEW RUTHERFORD AVENUE"
+              - "CHELSEA STREET"
+              - "MCGRATH HIGHWAY"
+              - "CHARLESGATE"
+              - "FENWAY"
+              - "GERRYS LANDING ROAD"
+              - "EDWIN H LAND BOULEVARD"
+              - "AUSTIN STREET"
+              - "BLANCHARD ROAD"
       - !Layer
         class: "curvy highway"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
@@ -383,13 +401,170 @@ contents:
             valid_values:
               - "CONCORD TURNPIKE"
               - "INTERSTATE 93"
+              - "JOHN F FITZGERALD EXPRESSWAY"
               - "MASSACHUSETTS TURNPIKE"
-              - "CHARLESGATE"
+              - "CHARLESTOWN AVENUE"
       - !Layer
         class: "station"
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
         marker_name: "mbta"
-        size: 9
-      # - !Layer
-      #   class: "municipality"
-      #   filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
+        size: 6
+      - !Layer
+        class: "water_label"
+        filename: "MassGIS/majorhydro/MAJPOND_POLY"
+        label_column: "NAME"
+      - !Layer
+        class: "park_label"
+        filename: "MassGIS/openspace/OPENSPACE_POLY"
+        label_column: "SITE_NAME"
+        filters:
+          - !GreaterThan {key: "SHAPE_AREA", cutoff: 100000}
+      - !Layer
+        class: "location_label"
+        filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
+        label_column: "STATION"
+        abbr:
+          - {from: "SQUARE", to: "SQ"}
+      - !Layer
+        class: "bikepath_label"
+        filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
+        label_column: "LOCAL_NAME"
+        filters:
+          - !OneOf
+            key: "LOCAL_NAME"
+            valid_values:
+              - "Somerville Community Path"
+              - "Community Path"
+              - "Alewife Linear Park"
+              - "Minuteman Bikeway"
+              - "Fitchburg Cutoff"
+              - "Alewife Greenway"
+              - "Dr. Paul Dudley White Bike Path"
+              - "Charles River Esplanade"
+              - "Watertown-Cambridge Greenway"
+      - !Layer
+        class: "street_label"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+        label_column: "STREET_NAM"
+        case: !Title
+        filters:
+          - !OneOf
+            key: "STREET_NAM"
+            valid_values:
+              - "MEMORIAL DRIVE"
+              - "FRESH POND PARKWAY"
+              - "ALEWIFE BROOK PARKWAY"
+              - "MYSTIC VALLEY PARKWAY"
+              - "JAMES J STORROW MEMORIAL DRIVE"
+              - "SOLDIERS FIELD ROAD"
+              - "GREENOUGH BOULEVARD"
+              - "MASSACHUSETTS AVENUE"
+              - "BROOKLINE STREET"
+              - "MAIN STREET"
+              - "WESTERN AVENUE"
+              - "RIVER STREET"
+              - "CAMBRIDGE STREET"
+              - "PROSPECT STREET"
+              - "BROADWAY"
+              - "HAMPSHIRE STREET"
+              - "MOUNT AUBURN STREET"
+              - "JOHN F KENNEDY STREET"
+              - "NORTH HARVARD STREET"
+              - "GARDEN STREET"
+              - "CONCORD AVENUE"
+              - "WEBSTER AVENUE"
+              - "BEACON STREET"
+              - "SOMERVILLE AVENUE"
+              - "SUMMER STREET"
+              - "HIGHLAND AVENUE"
+              - "ELM STREET"
+              - "KIRKLAND STREET"
+              - "HOLLAND STREET"
+              - "COLLEGE AVENUE"
+              - "BOSTON AVENUE"
+              - "UNION SQUARE"
+              - "BOW STREET"
+              - "WASHINGTON STREET"
+              - "BELMONT STREET"
+              - "TRAPELO ROAD"
+              - "ALFORD STREET"
+              - "NORTH WASHINGTON STREET"
+              - "CROSS STREET"
+              - "GALILEO GALILEI WAY"
+              - "BINNEY STREET"
+              - "BOYLSTON STREET"
+              - "BROOKLINE AVENUE"
+              - "HARVARD BRIDGE"
+              - "LONGFELLOW BRIDGE"
+              - "LARZ ANDERSON BRIDGE"
+              - "BOSTON UNIVERSITY BRIDGE"
+              - "MONSIGNOR OBRIEN HIGHWAY"
+              - "FELLSWAY"
+              - "FELLSWAY WEST"
+              - "ELIOT BRIDGE"
+              - "MYSTIC AVENUE"
+              - "MEDFORD STREET"
+              - "BUNKER HILL STREET"
+              - "RUTHERFORD AVENUE"
+              - "NEW RUTHERFORD AVENUE"
+              - "CHELSEA STREET"
+              - "MCGRATH HIGHWAY"
+              - "CHARLESGATE"
+              - "FENWAY"
+              - "GERRYS LANDING ROAD"
+              - "EDWIN H LAND BOULEVARD"
+              - "AUSTIN STREET"
+      - !Layer
+        class: "highway_label"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+        label_column: "STREET_NAM"
+        filters:
+          - !OneOf
+            key: "STREET_NAM"
+            valid_values:
+              - "CONCORD TURNPIKE"
+              - "INTERSTATE 93"
+              - "JOHN F FITZGERALD EXPRESSWAY"
+              - "MASSACHUSETTS TURNPIKE"
+              - "CHARLESTOWN AVENUE"
+      - !Layer
+        class: "municipality"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
+  - !Group
+    class: "legend"
+    frame: true
+    bounding_box: {left: 110, right: 160, top: -120, bottom: -70}
+    region: {left: 0, right: 50, top: 0, bottom: 50}
+    contents:
+      - !Label
+        class: "big_legend_text"
+        location: {x: 0, y: 10}
+        text: "Camberville"
+      - !Label
+        class: "small_legend_text"
+        location: {x: 0, y: 15}
+        text: "The squares and streets of Cambridge and Somerville"
+      - !Label
+        class: "small_legend_text"
+        location: {x: 0, y: 20}
+        text: "Bike and pedestrian path"
+      - !Label
+        class: "small_legend_text"
+        location: {x: 0, y: 25}
+        text: "Street with bike lanes"
+      - !Label
+        class: "small_legend_text"
+        location: {x: 0, y: 30}
+        text: "Street without bike lanes"
+      - !Label
+        class: "small_legend_text"
+        location: {x: 0, y: 35}
+        text: "Highway"
+      - !Label
+        class: "small_legend_text"
+        location: {x: 0, y: 40}
+        text: "North"
+      - !Label
+        class: "small_legend_text"
+        location: {x: 0, y: 45}
+        text: "1 km"

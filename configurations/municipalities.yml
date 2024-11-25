@@ -166,12 +166,12 @@ contents:
         class: "town_hall_label"
         filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
         label_column: "CITY"
-        case: !Sentence
+        case: !Title
       - !Layer
         class: "neighborhood_label"
         filename: "MassGIS/geonames_shp/GEONAMES_PT_PLACES"
         label_column: "LABELTEXT"
-        case: !Sentence
+        case: !Title
         filters:
           - !OneOf
             key: "LABELTEXT"

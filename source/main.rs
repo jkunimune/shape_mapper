@@ -9,6 +9,7 @@ use serde::Deserialize;
 use shapefile::dbase::{FieldValue, Record};
 use shapefile::record::EsriShape;
 use shapefile::Shape;
+use titlecase::titlecase;
 
 
 
@@ -260,6 +261,7 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
                                 Some(Case::Upper) => text.to_uppercase(),
                                 Some(Case::Lower) => text.to_lowercase(),
                                 Some(Case::Sentence) => text[..1].to_uppercase() + &text[1..].to_lowercase(),
+                                Some(Case::Title) => titlecase(text),
                                 None => text.to_owned(),
                             };
                             let text = match &abbr {
@@ -1024,6 +1026,7 @@ enum Case {
     Upper,
     Lower,
     Sentence,
+    Title,
 }
 
 
