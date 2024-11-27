@@ -38,11 +38,11 @@ style: |
   /* streets with bike lanes */
   .street.bottom {
     stroke: green;
-    stroke-width: 4.0;
+    stroke-width: 3.8;
   }
   .street.top {
-    stroke: yellow;
-    stroke-width: 2.4;
+    stroke: white;
+    stroke-width: 2.2;
   }
   /* streets without bike lanes */
   .bottom .bright_road, .bottom .main_street, .bottom .commercial_street,
@@ -53,32 +53,19 @@ style: |
   .bottom .fenway, .bottom .gerrys_landing_road, .bottom .fellsway_west,
   .bottom .memorial_drive, .bottom .fresh_pond_parkway, .bottom .alewife_brook_parkway,
   .bottom .mystic_valley_parkway, .bottom .james_j_storrow_memorial_drive,
-  .bottom .soldiers_field_road, .bottom .edward_h_land_boulevard, .bottom .austin_street,
-  .bottom .blanchard_road {
-    stroke: brown;
-    stroke-width: 3.2;
+  .bottom .soldiers_field_road, .bottom .edward_h_land_boulevard, .bottom .austin_street {
+    stroke: gray;
+    stroke-width: 2.8;
   }
-  .top .bright_road, .top .main_street, .top .commercial_street,
-  .top .mcgrath_highway, .top .highland_avenue, .top .elm_street,
-  .top .prospect_street, .top .mystic_avenue, .top .medford_street,
-  .top .bunker_hill_street, .top .rutherford_avenue, .top .new_rutherford_avenue,
-  .top .chelsea_street, .top .charlesgate_east, .top .charlesgate_west,
-  .top .fenway, .top .gerrys_landing_road, .top .fellsway_west,
-  .top .memorial_drive, .top .fresh_pond_parkway, .top .alewife_brook_parkway,
-  .top .mystic_valley_parkway, .top .james_j_storrow_memorial_drive,
-  .top .soldiers_field_road, .top .edward_h_land_boulevard, .top .austin_street,
-  .top .blanchard_road {
-    stroke: orange;
-    stroke-width: 2.4;
-  }
+  /* roads without bike lanes or sidewalks */
   .highway {
     stroke: firebrick;
-    stroke-width: 3.2;
+    stroke-width: 3.8;
   }
   /* train tracks*/
   .railroad .bottom {
     stroke: purple;
-    stroke-width: 2.4;
+    stroke-width: 2.2;
     stroke-linecap: butt;
   }
   .railroad .top {
@@ -101,6 +88,18 @@ style: |
   }
   .water {
     fill: cyan;
+    stroke: none;
+  }
+  .lucode_31 { /* institution */
+    fill: pink;
+    stroke: none;
+  }
+  .lucode_16, .lucode_18 { /* industrial */
+    fill: gray;
+    stroke: none;
+  }
+  .lucode_15 { /* commercial district */
+    fill: yellow;
     stroke: none;
   }
   text {
@@ -136,11 +135,10 @@ style: |
   .small_legend_text {
     fill: black;
     font-weight: normal;
-    font-size: 4.0px;
+    font-size: 3.2px;
   }
   .big_legend_text {
     fill: black;
-    font-style: italic;
     font-size: 6.0px;
   }
 bounding_box: { left: -162, right: 162, top: -122, bottom: 122 }
@@ -162,6 +160,12 @@ contents:
       - !Layer
         class: "water"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+      - !Layer
+        class_column: "LUCODE"
+        filename: "MassGIS/landuse2005_poly/LANDUSE2005_POLY"
+        filters:
+          - !GreaterThan {key: "AREA", cutoff: 40000}
+          - !OneOf {key: "LUCODE", valid_values: [15, 18, 31]}
       - !Layer
         class: "park"
         filename: "MassGIS/openspace/OPENSPACE_POLY"
@@ -194,6 +198,7 @@ contents:
               - "Charles River Esplanade"
               - "Harborwalk Connector"
               - "Watertown-Cambridge Greenway"
+              - "Fresh Pond Paths"
       - !Layer # these riverside roads are too curvy and must not be decimated
         class: "curvy street bottom"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
@@ -221,11 +226,12 @@ contents:
               - "RINDGE AVENUE"
               - "HURON AVENUE"
               - "GROVE STREET"
-              - "BRIGHT ROAD"
+              - "BLANCHARD ROAD"
               - "GRAND UNION BOULEVARD"
               - "ASSEMBLY SQUARE DRIVE"
               - "STURTEVANT STREET"
               - "MAIN STREET"
+              - "BOSTON AVENUE"
               - "COMMERCIAL STREET"
       - !Layer
         class: "street bottom"
@@ -259,7 +265,6 @@ contents:
               - "KIRKLAND STREET"
               - "HOLLAND STREET"
               - "COLLEGE AVENUE"
-              - "BOSTON AVENUE"
               - "UNION SQUARE"
               - "BOW STREET"
               - "WASHINGTON STREET"
@@ -292,7 +297,7 @@ contents:
               - "GERRYS LANDING ROAD"
               - "EDWIN H LAND BOULEVARD"
               - "AUSTIN STREET"
-              - "BLANCHARD ROAD"
+              - "HIGH STREET"
       - !Layer # these riverside roads are too curvy and must not be decimated
         class: "curvy street top"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
@@ -320,11 +325,12 @@ contents:
               - "RINDGE AVENUE"
               - "HURON AVENUE"
               - "GROVE STREET"
-              - "BRIGHT ROAD"
+              - "BLANCHARD ROAD"
               - "GRAND UNION BOULEVARD"
               - "ASSEMBLY SQUARE DRIVE"
               - "STURTEVANT STREET"
               - "MAIN STREET"
+              - "BOSTON AVENUE"
               - "COMMERCIAL STREET"
       - !Layer
         class: "street top"
@@ -358,7 +364,6 @@ contents:
               - "KIRKLAND STREET"
               - "HOLLAND STREET"
               - "COLLEGE AVENUE"
-              - "BOSTON AVENUE"
               - "UNION SQUARE"
               - "BOW STREET"
               - "WASHINGTON STREET"
@@ -391,7 +396,7 @@ contents:
               - "GERRYS LANDING ROAD"
               - "EDWIN H LAND BOULEVARD"
               - "AUSTIN STREET"
-              - "BLANCHARD ROAD"
+              - "HIGH STREET"
       - !Layer
         class: "curvy highway"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
@@ -429,6 +434,7 @@ contents:
         class: "bikepath_label"
         filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
         label_column: "LOCAL_NAME"
+        case: !Upper
         filters:
           - !OneOf
             key: "LOCAL_NAME"
@@ -442,11 +448,18 @@ contents:
               - "Dr. Paul Dudley White Bike Path"
               - "Charles River Esplanade"
               - "Watertown-Cambridge Greenway"
+              - "Fresh Pond Paths"
       - !Layer
         class: "street_label"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         label_column: "STREET_NAM"
-        case: !Title
+        abbr:
+          - {from: " STREET", to: " ST."}
+          - {from: " ROAD", to: " RD."}
+          - {from: " AVENUE", to: " AVE."}
+          - {from: " BOULEVARD", to: " BLVD."}
+          - {from: " PARKWAY", to: " PKWY."}
+          - {from: " HIGHWAY", to: " HWY."}
         filters:
           - !OneOf
             key: "STREET_NAM"
@@ -481,7 +494,6 @@ contents:
               - "KIRKLAND STREET"
               - "HOLLAND STREET"
               - "COLLEGE AVENUE"
-              - "BOSTON AVENUE"
               - "UNION SQUARE"
               - "BOW STREET"
               - "WASHINGTON STREET"
@@ -514,6 +526,7 @@ contents:
               - "GERRYS LANDING ROAD"
               - "EDWIN H LAND BOULEVARD"
               - "AUSTIN STREET"
+              - "HIGH STREET"
       - !Layer
         class: "highway_label"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
@@ -527,9 +540,9 @@ contents:
               - "JOHN F FITZGERALD EXPRESSWAY"
               - "MASSACHUSETTS TURNPIKE"
               - "CHARLESTOWN AVENUE"
-      - !Layer
-        class: "municipality"
-        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
+      # - !Layer
+      #   class: "municipality"
+      #   filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
   - !Group
     class: "legend"
     frame: true
@@ -547,15 +560,11 @@ contents:
       - !Label
         class: "small_legend_text"
         location: {x: 0, y: 20}
-        text: "Bike and pedestrian path"
-      - !Label
-        class: "small_legend_text"
-        location: {x: 0, y: 25}
-        text: "Street with bike lanes"
+        text: "Bike lane or path"
       - !Label
         class: "small_legend_text"
         location: {x: 0, y: 30}
-        text: "Street without bike lanes"
+        text: "Road"
       - !Label
         class: "small_legend_text"
         location: {x: 0, y: 35}
