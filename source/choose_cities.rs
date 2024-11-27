@@ -98,7 +98,8 @@ fn main() -> Result<()> {
     // finally, double-check that it's sorted right
     chosen_cities.sort_by(|a: &City, b: &City| u32::cmp(&a.population, &b.population).reverse());
 
-    for city in &chosen_cities[..100] {
+    // print the result
+    for city in &chosen_cities[..20] {
         println!("{}: {}, {}", city.id, city.name, city.state_name);
     }
 
@@ -119,13 +120,13 @@ fn characterize_relationship(metropole: &City, satellite: &City) -> Relationship
     let distance = 6371.*f64::hypot(
         (metropole.latitude - satellite.latitude).to_radians(),
         (metropole.longitude - satellite.longitude).to_radians()*f64::cos(((metropole.latitude + satellite.latitude)/2.).to_radians()));
-    let z_metropole = metropole.population as f64;
-    let z_metropole = if metropole.state_name.ne(&satellite.state_name) {
-        z_metropole/10.
+    let distance = if metropole.state_name.ne(&satellite.state_name) {
+        distance + 15.
     }
     else {
-        z_metropole
+        distance
     };
+    let z_metropole = metropole.population as f64;
     let z_satellite = satellite.population as f64;
     let prominence = z_satellite - z_metropole*f64::exp(-(distance/10.).powi(2)/2.);
     if prominence < 0. {
