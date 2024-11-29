@@ -121,18 +121,18 @@ fn characterize_relationship(metropole: &City, satellite: &City) -> Relationship
         (metropole.latitude - satellite.latitude).to_radians(),
         (metropole.longitude - satellite.longitude).to_radians()*f64::cos(((metropole.latitude + satellite.latitude)/2.).to_radians()));
     let distance = if metropole.state_name.ne(&satellite.state_name) {
-        distance + 15.
+        distance + 6.
     }
     else {
         distance
     };
     let z_metropole = metropole.population as f64;
     let z_satellite = satellite.population as f64;
-    let prominence = z_satellite - z_metropole*f64::exp(-(distance/10.).powi(2)/2.);
+    let prominence = z_satellite - z_metropole*f64::exp(-(distance/8.).powi(2)/2.);
     if prominence < 0. {
         return Relationship::Merge;
     }
-    else if prominence < 20_000. {
+    else if prominence < 10_000. {
         return Relationship::ShowOne;
     }
     else {
