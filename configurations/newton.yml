@@ -1,0 +1,333 @@
+title: "The Garden City"
+description: "
+  A map of Newton, Massachusetts, the Garden City.
+  All geographic data is taken from the
+  <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
+    Massachusetts Bureau of Geographic Information
+  </a>."
+style: |
+  .background {
+    fill: oklch(96% .0 0deg);
+  }
+  .park {
+    fill: oklch(84% .12 135deg);
+  }
+  .water {
+    fill: oklch(76% .12 225deg);
+  }
+  .lucode_31 { /* institution */
+    fill: oklch(88% .10 0deg);
+  }
+  .lucode_16, .lucode_18 { /* industrial */
+    fill: oklch(80% .0 0deg);
+  }
+  .lucode_15 { /* commercial district */
+    fill: oklch(92% .10 90deg);
+  }
+  .legend .background {
+    fill: white;
+  }
+  .frame {
+    fill: none;
+    stroke: black;
+    stroke-width: 3.0;
+  }
+  .municipality {
+    fill: none;
+    stroke: black;
+    stroke-width: 0.6;
+    stroke-dasharray: 1.2 .6 .6 .6;
+  }
+  .trail, .bike_lane, .street, .highway, .railroad {
+    fill: none;
+    stroke-linejoin: miter;
+    stroke-miterlimit: 2.0;
+    stroke-linecap: round;
+  }
+  .trail {
+    stroke: oklch(56% .07 150deg);
+    stroke-width: 1.2;
+  }
+  .bike_lane {
+    stroke: oklch(56% .07 150deg);
+    stroke-width: 3.4;
+  }
+  .highway {
+    stroke: oklch(44% .15 30deg);
+    stroke-width: 3.4;
+  }
+  .bottom .rdtype_2, .bottom .rdtype_3, .bottom .rdtype_4 {
+    stroke: oklch(60% .0 0deg);
+    stroke-width: 2.6;
+  }
+  .top .rdtype_2, .top .rdtype_3, .top .rdtype_4 {
+    stroke: oklch(100% .0 0deg);
+    stroke-width: 2.2;
+  }
+  .bottom .rdtype_5 {
+    stroke: oklch(60% .0 0deg);
+    stroke-width: 1.2;
+  }
+  .top .rdtype_5 {
+    stroke: oklch(100% .0 0deg);
+    stroke-width: 0.8;
+  }
+  .railroad.green_line .bottom {
+    stroke: #00843D;
+  }
+  .railroad.commuter_rail .bottom {
+    stroke: #80276C;
+  }
+  .railroad .bottom {
+    stroke-width: 2.2;
+    stroke-linecap: butt;
+  }
+  .railroad .top {
+    stroke: white;
+    stroke-width: 1.6;
+    stroke-dasharray: 4.8 4.8;
+    stroke-linecap: butt;
+  }
+  .station {
+    fill: white;
+    stroke: black;
+  }
+  .college {
+    fill: oklch(32% .1 0deg);
+  }
+  .hospital {
+    fill: oklch(32% .1 0deg);
+  }
+  .hospital path {
+    stroke: oklch(88% .10 0deg);
+  }
+  text {
+    font-family: Helvetica Neue,Helvetica,sans-serif;
+  }
+  .trail_label {
+    fill: oklch(20% .0 0deg);
+    font-size: 2.4px;
+    font-weight: bold;
+  }
+  .street_label {
+    fill: oklch(20% .0 0deg);
+    font-size: 2.4px;
+    font-weight: bold;
+  }
+  .highway_label {
+    fill: white;
+    font-size: 3.2px;
+    font-weight: bold;
+  }
+  .location_label {
+    fill: black;
+    font-size: 3.2px;
+    font-weight: bold;
+  }
+  .park_label {
+    fill: oklch(28% .1 135deg);
+    font-size: 3.2px;
+    font-weight: bold;
+  }
+  .institution_label {
+    fill: oklch(32% .1 0deg);
+    font-size: 3.2px;
+    font-weight: bold;
+  }
+  .water_label {
+    fill: oklch(24% .1 225deg);
+    font-style: italic;
+    font-size: 4.0px;
+    font-weight: normal;
+  }
+  .small_legend_text {
+    fill: black;
+    font-size: 3.2px;
+    font-weight: normal;
+  }
+  .big_legend_text {
+    fill: black;
+    font-size: 6.0px;
+    font-weight: bold;
+  }
+bounding_box: { left: -3, right: 415, top: -3, bottom: 363 }
+contents:
+  - !Group
+    frame: true
+    bounding_box: { left: 0, right: 412, top: 0, bottom: 360 }
+    region: { left: 218500, right: 228800, bottom: 893050, top: 902050 }
+    contents:
+      # - !RasterLayer
+      #   filename: "Natural Earth/ne_shaded_relief"
+      - !Layer
+        class: "water"
+        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+      - !Layer
+        class_column: "LUCODE"
+        filename: "MassGIS/landuse2005_poly/LANDUSE2005_POLY"
+        filters:
+          - !GreaterThan {key: "AREA", cutoff: 40000}
+          - !OneOf {key: "LUCODE", valid_values: [18, 31]}
+      - !Layer
+        class: "park"
+        filename: "MassGIS/openspace/OPENSPACE_POLY"
+      - !Layer
+        class: "street bottom"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
+        class_column: "RDTYPE"
+        filters:
+          - !OneOf {key: "ROUTE_SYST", valid_values: ["US", "SR", "L", "N", "R"]}
+      - !Layer
+        class: "bike_lane"
+        filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
+        filters:
+          - !OneOf {key: "FAC_TYPE_N", valid_values: ["Bike Lane"]}
+      - !Layer
+        class: "trail"
+        filename: "MassGIS/MAD_Trails/MAD_TRAILS"
+      - !Layer
+        class: "street top"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
+        class_column: "RDTYPE"
+        filters:
+          - !OneOf {key: "ROUTE_SYST", valid_values: ["US", "SR", "L", "N", "R"]}
+      - !Layer
+        class: "highway"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+        filters:
+          - !OneOf {key: "RDTYPE", valid_values: [1]}
+      - !Layer
+        class: "railroad green_line"
+        filename: "MassGIS/mbta_rapid_transit/MBTA_ARC"
+        double: true
+      - !Layer
+        class: "railroad commuter_rail"
+        filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
+        double: true
+      - !Layer
+        class: "station"
+        filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
+        marker_name: "mbta"
+        size: 6
+      - !Layer
+        class: "station"
+        filename: "MassGIS/trains/TRAINS_NODE"
+        marker_name: "mbta"
+        size: 6
+        filters:
+          - !OneOf {key: "C_RAILSTAT", valid_values: ["Y"]}
+      - !Layer
+        class: "college"
+        filename: "MassGIS/colleges/COLLEGES_PT"
+        marker_name: "square_hat"
+        size: 8
+      - !Layer
+        class: "hospital"
+        filename: "MassGIS/acute_care_hospitals/HOSPITALS_PT"
+        marker_name: "cross"
+        size: 6
+      - !Layer
+        class: "trail_label"
+        filename: "MassGIS/Mad_Trails/MAD_TRAILS"
+        label_column: "TRAIL_NAME"
+        case: !Upper
+      - !Layer
+        class: "street_label"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+        label_column: "STREET_NAM"
+        class_column: "RDTYPE"
+        filters:
+          - !OneOf {key: "RDTYPE", valid_values: [2, 3, 4]}
+      - !Layer
+        class: "highway_label"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+        label_column: "STREET_NAM"
+        filters:
+          - !OneOf {key: "RDTYPE", valid_values: [1]}
+      - !Layer
+        class: "water_label"
+        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+        label_column: "NAME"
+      - !Layer
+        class: "park_label"
+        filename: "MassGIS/openspace/OPENSPACE_POLY"
+        label_column: "SITE_NAME"
+        filters:
+          - !GreaterThan {key: "SHAPE_AREA", cutoff: 40000}
+      - !Layer
+        class: "institution_label"
+        filename: "MassGIS/colleges/COLLEGES_PT"
+        label_column: "COLLEGE"
+      - !Layer
+        class: "institution_label"
+        filename: "MassGIS/acute_care_hospitals/HOSPITALS_PT"
+        label_column: "NAME"
+      - !Layer
+        class: "location_label"
+        filename: "MassGIS/geonames_shp/GEONAMES_PT_PLACES"
+        label_column: "LABELTEXT"
+        case: !Upper
+        filters:
+          - !OneOf
+            key: "LABELTEXT"
+            valid_values:
+              - "AUBURNDALE"
+              - "CHESTNUT HILL"
+              - "NEWTON CENTER"
+              - "NEWTON CORNER"
+              - "NEWTON HIGHLANDS"
+              - "NEWTON LOWER FALLS"
+              - "NEWTON UPPER FALLS"
+              - "NEWTONVILLE"
+              - "NONANTUM"
+              - "OAK HILL"
+              - "THOMPSONVILLE"
+              - "WABAN"
+              - "WEST NEWTON"
+              - "N E W T O N"
+              - "N E E D H A M"
+              - "W E L L E S L E Y"
+              - "W E S T O N"
+              - "W A L T H A M"
+              - "W A T E R T O W N"
+              - "BRIGHTON"
+              - "B R O O K L I N E"
+      - !Layer
+        class: "municipality"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [17]}
+  - !Group
+    class: "legend"
+    frame: true
+    bounding_box: {left: 342, right: 412, top: 330, bottom: 360}
+    region: {left: 0, right: 70, top: 0, bottom: 30}
+    contents:
+      - !Label
+        class: "big_legend_text"
+        location: {x: 0, y: 5}
+        text: "The Garden City"
+      - !Label
+        class: "small_legend_text"
+        location: {x: 0, y: 10}
+        text: "The streets and railroads of Newton, Massachusetts"
+      - !Label
+        class: "small_legend_text"
+        location: {x: 0, y: 15}
+        text: "Bike lane or trail"
+      - !Label
+        class: "small_legend_text"
+        location: {x: 0, y: 20}
+        text: "Street"
+      - !Label
+        class: "small_legend_text"
+        location: {x: 30, y: 15}
+        text: "Highway"
+      - !Label
+        class: "small_legend_text"
+        location: {x: 30, y: 20}
+        text: "North"
+      - !Label
+        class: "small_legend_text"
+        location: {x: 0, y: 25}
+        text: "1 km"

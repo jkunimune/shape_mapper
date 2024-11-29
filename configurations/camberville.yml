@@ -94,46 +94,52 @@ style: |
   }
   text {
     font-family: Helvetica Neue,Helvetica,sans-serif;
-    font-weight: bold;
   }
   .bikepath_label {
-    fill: black;
+    fill: oklch(20% .0 0deg);
     font-size: 2.4px;
+    font-weight: bold;
   }
   .street_label {
     fill: oklch(20% .0 0deg);
     font-size: 2.4px;
+    font-weight: bold;
   }
   .highway_label {
     fill: white;
     font-size: 3.2px;
+    font-weight: bold;
   }
   .location_label {
     fill: black;
     font-size: 3.2px;
+    font-weight: bold;
   }
   .park_label {
     fill: oklch(28% .1 135deg);
     font-size: 3.2px;
+    font-weight: bold;
   }
   .institution_label {
     fill: oklch(32% .1 0deg);
     font-size: 3.2px;
+    font-weight: bold;
   }
   .water_label {
     fill: oklch(24% .1 225deg);
     font-style: italic;
-    font-weight: normal;
     font-size: 4.0px;
+    font-weight: normal;
   }
   .small_legend_text {
     fill: black;
-    font-weight: normal;
     font-size: 3.2px;
+    font-weight: normal;
   }
   .big_legend_text {
     fill: black;
     font-size: 6.0px;
+    font-weight: bold;
   }
 bounding_box: { left: -162, right: 162, top: -122, bottom: 122 }
 contents:
@@ -413,6 +419,8 @@ contents:
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
         marker_name: "mbta"
         size: 6
+        abbr:
+          - {from: "Square", to: "Sq."}
       - !Layer
         class: "water_label"
         filename: "MassGIS/majorhydro/MAJPOND_POLY"
@@ -422,7 +430,7 @@ contents:
         filename: "MassGIS/openspace/OPENSPACE_POLY"
         label_column: "SITE_NAME"
         filters:
-          - !GreaterThan {key: "SHAPE_AREA", cutoff: 100000}
+          - !GreaterThan {key: "SHAPE_AREA", cutoff: 40000}
       - !Layer
         class: "location_label"
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
