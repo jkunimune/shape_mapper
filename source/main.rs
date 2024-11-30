@@ -20,8 +20,8 @@ const CURVE_PRECISION: f64 = 0.1; // mm
 
 fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
-    if args.len() > 2 {
-        return Err(anyhow!("you must pass only one argument, representing the filename of the configuration file without the 'yml'"));
+    if args.len() != 2 {
+        return Err(anyhow!("you must pass exactly one argument, representing the filename of the configuration file without the 'yml'"));
     }
     let filename = args.get(1).ok_or(anyhow!("Please pass the filename of the configuration file minus the 'yml' as a command line argument."))?;
 

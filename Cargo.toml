@@ -12,6 +12,10 @@ path = "source/main.rs"
 name = "choose_cities"
 path = "source/choose_cities.rs"
 
+[[bin]]
+name = "convert_oblique_coordinates"
+path = "source/convert_oblique_coordinates.rs"
+
 [dependencies]
 approx = "0.3"
 anyhow = "1.0"
