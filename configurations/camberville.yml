@@ -1,6 +1,6 @@
 title: "A practical map to Cambridge and Somerville"
 description: "
-  A map of the paths, streets, roads, and squares of Cambridge and Somerville, Massachusetts.
+  The squares and streets of Cambridge and Somerville, Massachusetts.
   All geographic data is taken from the
   <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
     Massachusetts Bureau of Geographic Information
@@ -67,7 +67,8 @@ style: |
   .bottom .fenway, .bottom .gerrys_landing_road, .bottom .fellsway_west,
   .bottom .memorial_drive, .bottom .fresh_pond_parkway, .bottom .alewife_brook_parkway,
   .bottom .mystic_valley_parkway, .bottom .james_j_storrow_memorial_drive,
-  .bottom .soldiers_field_road, .bottom .edward_h_land_boulevard, .bottom .austin_street {
+  .bottom .soldiers_field_road, .bottom .edward_h_land_boulevard, .bottom .austin_street,
+  .bottom .river_street, .street.bottom.without_bikelane {
     stroke: oklch(60% .0 0deg);
     stroke-width: 2.8;
   }
@@ -77,15 +78,15 @@ style: |
     stroke-width: 3.8;
   }
   /* train tracks*/
-  .railroad .bottom {
+  .railroad .bottom, .railroad.bottom {
     stroke: oklch(48% .15 300deg);
     stroke-width: 2.2;
     stroke-linecap: butt;
   }
-  .railroad .top {
+  .railroad .top, .railroad.top {
     stroke: white;
     stroke-width: 1.6;
-    stroke-dasharray: 4.8 4.8;
+    stroke-dasharray: 0 2 4 2;
     stroke-linecap: butt;
   }
   .station {
@@ -136,10 +137,27 @@ style: |
     font-size: 3.2px;
     font-weight: normal;
   }
+  .tiny_legend_text {
+    fill: black;
+    font-size: 2.4px;
+    font-weight: normal;
+  }
   .big_legend_text {
     fill: black;
     font-size: 6.0px;
     font-weight: bold;
+    text-anchor: middle;
+  }
+  .legend line {
+    stroke-linecap: butt;
+  }
+  line.compass {
+    stroke: black;
+  }
+  .ruler line {
+    stroke: black;
+    stroke-width: 0.3;
+    stroke-linecap: square;
   }
 bounding_box: { left: -162, right: 162, top: -122, bottom: 122 }
 contents:
@@ -158,9 +176,6 @@ contents:
       # - !RasterLayer
       #   filename: "Natural Earth/ne_shaded_relief"
       - !Layer
-        class: "water"
-        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
-      - !Layer
         class_column: "LUCODE"
         filename: "MassGIS/landuse2005_poly/LANDUSE2005_POLY"
         filters:
@@ -171,6 +186,9 @@ contents:
         filename: "MassGIS/openspace/OPENSPACE_POLY"
         filters:
           - !GreaterThan {key: "SHAPE_AREA", cutoff: 10000}
+      - !Layer
+        class: "water"
+        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
       - !Layer
         class: "railroad"
         filename: "MassGIS/mbta_rapid_transit/MBTA_ARC"
@@ -419,8 +437,6 @@ contents:
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
         marker_name: "mbta"
         size: 6
-        abbr:
-          - {from: "Square", to: "Sq."}
       - !Layer
         class: "water_label"
         filename: "MassGIS/majorhydro/MAJPOND_POLY"
@@ -443,6 +459,7 @@ contents:
         label_column: "LOCAL_NAME"
         case: !Upper
         filters:
+          - !GreaterThan {key: "SHAPE_LEN", cutoff: 100}
           - !OneOf
             key: "LOCAL_NAME"
             valid_values:
@@ -468,6 +485,7 @@ contents:
           - {from: " PARKWAY", to: " PKWY."}
           - {from: " HIGHWAY", to: " HWY."}
         filters:
+          - !GreaterThan {key: "SHAPE_LEN", cutoff: 100}
           - !OneOf
             key: "STREET_NAM"
             valid_values:
@@ -541,6 +559,7 @@ contents:
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         label_column: "STREET_NAM"
         filters:
+          - !GreaterThan {key: "SHAPE_LEN", cutoff: 100}
           - !OneOf
             key: "STREET_NAM"
             valid_values:
@@ -565,6 +584,7 @@ contents:
       # - !Layer
       #   class: "municipality"
       #   filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
+
   - !Group
     class: "legend"
     frame: true
@@ -573,29 +593,95 @@ contents:
     contents:
       - !Label
         class: "big_legend_text"
-        location: {x: 0, y: 10}
+        location: {x: 25, y: 5}
         text: "Camberville"
       - !Label
         class: "small_legend_text"
-        location: {x: 0, y: 15}
-        text: "The squares and streets of Cambridge and Somerville"
+        location: {x: 5, y: 10}
+        text: "The squares and streets of Cambridge and Somerville, Massachusetts"
+
+      - !Ruler
+        class: "ruler centered small_legend_text"
+        location: {x: 5, y: 20}
+        scale: 64.3738  # 1mi * 1:25k = 64mm
+        ticks: [0, 0.25, 0.5]
+        unit: "mi"
+        tick_length: 2
+      - !Ruler
+        class: "ruler centered small_legend_text"
+        location: {x: 5, y: 20}
+        scale: 40  # 1km * 1:25k = 40mm
+        ticks: [0, 0.25, 0.5, 0.75, 1.0]
+        unit: "km"
+        tick_length: -2
+
+      - !Line
+        class: "trail"
+        start: {x: 5, y: 25}
+        end: {x: 13, y: 25}
       - !Label
         class: "small_legend_text"
-        location: {x: 0, y: 20}
-        text: "Bike lane or path"
+        location: {x: 36, y: 25}
+        text: "Bike lane or trail"
+
+      - !Line
+        class: "street bottom without_bikelane"
+        start: {x: 5, y: 30}
+        end: {x: 13, y: 30}
+      - !Line
+        class: "street top"
+        start: {x: 5, y: 30}
+        end: {x: 13, y: 30}
       - !Label
         class: "small_legend_text"
-        location: {x: 0, y: 30}
-        text: "Road"
+        location: {x: 16, y: 30}
+        text: "Street"
+
+      - !Line
+        class: "highway"
+        start: {x: 5, y: 35}
+        end: {x: 13, y: 35}
       - !Label
         class: "small_legend_text"
-        location: {x: 0, y: 35}
+        location: {x: 16, y: 35}
         text: "Highway"
+
+      - !Line
+        class: "railroad bottom"
+        start: {x: 5, y: 40}
+        end: {x: 13, y: 40}
+      - !Line
+        class: "railroad top"
+        start: {x: 5, y: 40}
+        end: {x: 13, y: 40}
       - !Label
         class: "small_legend_text"
-        location: {x: 0, y: 40}
+        location: {x: 16, y: 40}
+        text: "Train tracks"
+
+      - !Marker
+        class: "compass"
+        filename: "cross_arrow"
+        location: { x: 40, y: 40 }
+        size: 20
+        bearing: 150
+      - !Label
+        class: "centered small_legend_text"
+        location: {x: 40, y: 35}
         text: "North"
+
+  - !Group
+    class: "legend"
+    frame: true
+    bounding_box: {left: 110, right: 160, top: 105, bottom: 120}
+    region: {left: 0, right: 50, top: 0, bottom: 15}
+    contents:
+      - !Marker
+        filename: "cc"
+        class: "symbol"
+        location: {x: 0, y: 10}
+        size: 0.002
       - !Label
-        class: "small_legend_text"
-        location: {x: 0, y: 45}
-        text: "1 km"
+        class: "tiny_legend_text"
+        location: {x: 5, y: 10}
+        text: "This map is licensed by Justin Kunimune under CC BY 4.0.  To view a copy of this license, visit ‹creativecommons.org/licenses/by/4.0›."

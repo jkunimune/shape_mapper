@@ -376,6 +376,51 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
             });
         }
 
+        // resolve a ruler by generating a set of lines with matching labels
+        Content::Ruler { location, scale, ticks, unit, tick_length, class } => {
+            let SerializablePoint {x: x0, y: y0} = location;
+            let length = *ticks.last().ok_or(anyhow!("at least one tick must be provided."))?;
+            let mut shapes = vec![
+                Content::Line {
+                    class: None,
+                    start: SerializablePoint {x: x0, y: y0},
+                    end: SerializablePoint {x: x0 + scale*length, y: y0},
+                },
+                Content::Line {
+                    class: None,
+                    start: SerializablePoint {x: x0, y: y0},
+                    end: SerializablePoint {x: x0, y: y0 - tick_length},
+                },
+            ];
+            for tick in ticks {
+                let label = if tick == length {
+                    format!("{} {}", format_number(tick), unit)
+                }
+                else {
+                    format!("{}", format_number(tick))
+                };
+                shapes.push(Content::Line {
+                    start: SerializablePoint {x: x0 + scale*tick, y: y0},
+                    end: SerializablePoint {x: x0 + scale*tick, y: y0 - tick_length},
+                    class: None,
+                });
+                shapes.push(Content::Label {
+                    text: label,
+                    location: SerializablePoint {x: x0 + scale*tick, y: y0 - tick_length},
+                    class: None,
+                })
+            }
+            return Ok(Content::Group {
+                contents: shapes,
+                class: class,
+                bounding_box: None,
+                region: None,
+                transform: None,
+                clip: Some(false),
+                frame: Some(false),
+            });
+        }
+
         // for markers, if a filename is given, load the file from disc
         Content::Marker { detail, filename, location, size, bearing, class } => {
             let detail = match detail {
@@ -504,6 +549,9 @@ fn transform_content(content: Content, outer_transform: &Option<Transform>, oute
         },
         Content::Graticule { .. } => {
             return Err(anyhow!("Graticules should have been purged by now"));
+        },
+        Content::Ruler { .. } => {
+            return Err(anyhow!("Rulers should have been purged by now"));
         },
     }
 }
@@ -641,6 +689,9 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
 
         Content::Graticule { .. } => {
             return Err(anyhow!("the graticules should have all been purged by now."));    
+        }
+        Content::Ruler { .. } => {
+            return Err(anyhow!("the Rulers should have all been purged by now."));    
         }
         Content::Layer{ .. } => {
             return Err(anyhow!("the Layers should have all been purged by now."));
@@ -799,6 +850,22 @@ fn prepend_to_each_line(string: &str, prefix: &str) -> String {
 }
 
 
+/// format a number normally, except that maybe the fractional part should be shown as a fraction
+fn format_number(number: f64) -> String {
+    let result = format!("{}{}",
+        number as i64,
+        match number%1. {
+            0.00 => "".to_owned(),
+            0.25 => "¼".to_owned(),
+            0.50 => "½".to_owned(),
+            0.75 => "¾".to_owned(),
+            other => format!("{}", other),
+        },
+    );
+    return Regex::new("^0+([^0])").unwrap().replace(&result, "$1").into_owned();
+}
+
+
 /// replace problematic characters like , to _ and make it all lowercase
 fn sanitize_CSS(string: &str) -> String {
     let string = string.to_lowercase();
@@ -911,6 +978,21 @@ enum Content {
         /// the SVG class to add to the element, if any
         class: Option<String>,
     },
+    /// a horizontal line with some ticks coming off of it
+    Ruler {
+        /// the coordinates of the "0" end of the ruler
+        location: SerializablePoint,
+        /// the distance on the map corresponding to each unit distance on the ruler
+        scale: f64,
+        /// the distances to mark on the spine, ordered from smallest to biggest
+        ticks: Vec<f64>,
+        /// the name of the distance unit being shown
+        unit: String,
+        /// the length of each tick in real units
+        tick_length: f64,
+        /// the SVG class to add to the element, if any
+        class: Option<String>,
+    },
     /// a line segment from one location to another
     Line {
         /// one endpoit of the line
@@ -994,6 +1076,7 @@ impl Content {
         return match self {
             Content::Layer { class, .. } => class,
             Content::Graticule { class, .. } => class,
+            Content::Ruler { class, .. } => class,
             Content::Line { class, .. } => class,
             Content::Rectangle { class, .. } => class,
             Content::Label { class, .. } => class,

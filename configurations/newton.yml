@@ -1,6 +1,5 @@
-title: "The Garden City"
+title: "Newton, Massachusetts"
 description: "
-  A map of Newton, Massachusetts, the Garden City.
   All geographic data is taken from the
   <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
     Massachusetts Bureau of Geographic Information
@@ -40,13 +39,12 @@ style: |
   }
   .trail, .bike_lane, .street, .highway, .railroad {
     fill: none;
-    stroke-linejoin: miter;
-    stroke-miterlimit: 2.0;
+    stroke-linejoin: round;
     stroke-linecap: round;
   }
   .trail {
     stroke: oklch(56% .07 150deg);
-    stroke-width: 1.2;
+    stroke-width: 0.8;
   }
   .bike_lane {
     stroke: oklch(56% .07 150deg);
@@ -54,38 +52,38 @@ style: |
   }
   .highway {
     stroke: oklch(44% .15 30deg);
-    stroke-width: 3.4;
+    stroke-width: 3.0;
   }
-  .bottom .rdtype_2, .bottom .rdtype_3, .bottom .rdtype_4 {
+  .bottom .rdtype_2, .bottom .rdtype_3, .bottom .rdtype_4, .bottom.rdtype_4 {
     stroke: oklch(60% .0 0deg);
     stroke-width: 2.6;
   }
-  .top .rdtype_2, .top .rdtype_3, .top .rdtype_4 {
+  .top .rdtype_2, .top .rdtype_3, .top .rdtype_4, .top.rdtype_4 {
     stroke: oklch(100% .0 0deg);
     stroke-width: 2.2;
   }
-  .bottom .rdtype_5 {
+  .bottom .rdtype_5, .bottom.rdtype_5 {
     stroke: oklch(60% .0 0deg);
     stroke-width: 1.2;
   }
-  .top .rdtype_5 {
+  .top .rdtype_5, .top.rdtype_5 {
     stroke: oklch(100% .0 0deg);
     stroke-width: 0.8;
   }
-  .railroad.green_line .bottom {
+  .railroad.green_line .bottom, .railroad.green_line.bottom {
     stroke: #00843D;
   }
-  .railroad.commuter_rail .bottom {
+  .railroad.commuter_rail .bottom, .railroad.commuter_rail.bottom {
     stroke: #80276C;
   }
-  .railroad .bottom {
-    stroke-width: 2.2;
+  .railroad .bottom, .railroad.bottom {
+    stroke-width: 1.8;
     stroke-linecap: butt;
   }
-  .railroad .top {
+  .railroad .top, .railroad.top {
     stroke: white;
-    stroke-width: 1.6;
-    stroke-dasharray: 4.8 4.8;
+    stroke-width: 1.2;
+    stroke-dasharray: 0 1.8 3.6 1.8;
     stroke-linecap: butt;
   }
   .station {
@@ -124,6 +122,12 @@ style: |
     font-size: 3.2px;
     font-weight: bold;
   }
+  .town_label {
+    fill: #0009;
+    font-size: 4.8px;
+    font-weight: normal;
+    letter-spacing: 2.4px;
+  }
   .park_label {
     fill: oklch(28% .1 135deg);
     font-size: 3.2px;
@@ -150,27 +154,42 @@ style: |
     font-size: 6.0px;
     font-weight: bold;
   }
-bounding_box: { left: -3, right: 415, top: -3, bottom: 363 }
+  .legend line {
+    stroke-linecap: butt;
+  }
+  line.compass {
+    stroke: black;
+    stroke-width: 0.15;
+  }
+  .ruler line {
+    stroke: black;
+    stroke-width: 0.4;
+    stroke-linecap: square;
+  }
+  .centered {
+    text-anchor: middle;
+  }
+bounding_box: { left: -3, right: 411, top: -3, bottom: 411 }
 contents:
   - !Group
     frame: true
-    bounding_box: { left: 0, right: 412, top: 0, bottom: 360 }
-    region: { left: 218500, right: 228800, bottom: 893050, top: 902050 }
+    bounding_box: { left: 0, right: 408, top: 0, bottom: 408 }
+    region: { left: 218550, right: 228750, bottom: 892600, top: 902800 }
     contents:
       # - !RasterLayer
       #   filename: "Natural Earth/ne_shaded_relief"
-      - !Layer
-        class: "water"
-        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
       - !Layer
         class_column: "LUCODE"
         filename: "MassGIS/landuse2005_poly/LANDUSE2005_POLY"
         filters:
           - !GreaterThan {key: "AREA", cutoff: 40000}
-          - !OneOf {key: "LUCODE", valid_values: [18, 31]}
+          - !OneOf {key: "LUCODE", valid_values: [15, 31]}
       - !Layer
         class: "park"
         filename: "MassGIS/openspace/OPENSPACE_POLY"
+      - !Layer
+        class: "water"
+        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
       - !Layer
         class: "street bottom"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
@@ -178,10 +197,9 @@ contents:
         filters:
           - !OneOf {key: "ROUTE_SYST", valid_values: ["US", "SR", "L", "N", "R"]}
       - !Layer
-        class: "bike_lane"
+        class: "trail"
         filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
-        filters:
-          - !OneOf {key: "FAC_TYPE_N", valid_values: ["Bike Lane"]}
+        class_column: "FAC_TYPE_N"
       - !Layer
         class: "trail"
         filename: "MassGIS/MAD_Trails/MAD_TRAILS"
@@ -205,44 +223,49 @@ contents:
         filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
         double: true
       - !Layer
+        class: "municipality"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [17]}
+      - !Layer
         class: "station"
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
         marker_name: "mbta"
-        size: 6
+        size: 5
       - !Layer
         class: "station"
         filename: "MassGIS/trains/TRAINS_NODE"
         marker_name: "mbta"
-        size: 6
+        size: 5
         filters:
           - !OneOf {key: "C_RAILSTAT", valid_values: ["Y"]}
+          - !OneOf {key: "MAP_STA", valid_values: ["Y"]}
       - !Layer
         class: "college"
         filename: "MassGIS/colleges/COLLEGES_PT"
         marker_name: "square_hat"
-        size: 8
-      - !Layer
-        class: "hospital"
-        filename: "MassGIS/acute_care_hospitals/HOSPITALS_PT"
-        marker_name: "cross"
-        size: 6
+        size: 7
       - !Layer
         class: "trail_label"
-        filename: "MassGIS/Mad_Trails/MAD_TRAILS"
-        label_column: "TRAIL_NAME"
+        filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
+        label_column: "LOCAL_NAME"
         case: !Upper
+        filters:
+          - !GreaterThan {key: "SHAPE_LEN", cutoff: 200}
       - !Layer
         class: "street_label"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         label_column: "STREET_NAM"
         class_column: "RDTYPE"
         filters:
+          - !GreaterThan {key: "SHAPE_LEN", cutoff: 200}
           - !OneOf {key: "RDTYPE", valid_values: [2, 3, 4]}
       - !Layer
         class: "highway_label"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         label_column: "STREET_NAM"
         filters:
+          - !GreaterThan {key: "SHAPE_LEN", cutoff: 200}
           - !OneOf {key: "RDTYPE", valid_values: [1]}
       - !Layer
         class: "water_label"
@@ -284,50 +307,111 @@ contents:
               - "THOMPSONVILLE"
               - "WABAN"
               - "WEST NEWTON"
-              - "N E W T O N"
-              - "N E E D H A M"
-              - "W E L L E S L E Y"
-              - "W E S T O N"
-              - "W A L T H A M"
-              - "W A T E R T O W N"
-              - "BRIGHTON"
-              - "B R O O K L I N E"
       - !Layer
-        class: "municipality"
-        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
-        filters:
-          - !OneOf {key: "OUTLINE", valid_values: [17]}
+        class: "town_label"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+        label_column: "TOWN"
+        case: !Upper
+
   - !Group
     class: "legend"
     frame: true
-    bounding_box: {left: 342, right: 412, top: 330, bottom: 360}
-    region: {left: 0, right: 70, top: 0, bottom: 30}
+    bounding_box: {left: 308, right: 408, top: 368, bottom: 408}
+    region: {left: 0, right: 100, top: 0, bottom: 40}
     contents:
       - !Label
-        class: "big_legend_text"
-        location: {x: 0, y: 5}
-        text: "The Garden City"
+        class: "centered big_legend_text"
+        location: {x: 50, y: 10}
+        text: "Newton, Massachusetts"
+
+      - !Line
+        class: "highway"
+        start: {x: 5, y: 25}
+        end: {x: 15.8, y: 25}
       - !Label
         class: "small_legend_text"
-        location: {x: 0, y: 10}
-        text: "The streets and railroads of Newton, Massachusetts"
-      - !Label
-        class: "small_legend_text"
-        location: {x: 0, y: 15}
-        text: "Bike lane or trail"
-      - !Label
-        class: "small_legend_text"
-        location: {x: 0, y: 20}
-        text: "Street"
-      - !Label
-        class: "small_legend_text"
-        location: {x: 30, y: 15}
+        location: {x: 19, y: 25}
         text: "Highway"
+
+      - !Line
+        class: "street bottom rdtype_4"
+        start: {x: 5, y: 30}
+        end: {x: 15.8, y: 30}
+      - !Line
+        class: "street top rdtype_4"
+        start: {x: 5, y: 30}
+        end: {x: 15.8, y: 30}
       - !Label
         class: "small_legend_text"
-        location: {x: 30, y: 20}
+        location: {x: 19, y: 30}
+        text: "Major street"
+
+      - !Line
+        class: "street bottom rdtype_5"
+        start: {x: 5, y: 35}
+        end: {x: 15.8, y: 35}
+      - !Line
+        class: "street top rdtype_5"
+        start: {x: 5, y: 35}
+        end: {x: 15.8, y: 35}
+      - !Label
+        class: "small_legend_text"
+        location: {x: 19, y: 35}
+        text: "Minor street"
+
+      - !Line
+        class: "trail"
+        start: {x: 45, y: 25}
+        end: {x: 55.8, y: 25}
+      - !Label
+        class: "small_legend_text"
+        location: {x: 59, y: 25}
+        text: "Bike lane or trail"
+
+      - !Line
+        class: "railroad bottom green_line"
+        start: {x: 45, y: 30}
+        end: {x: 55.8, y: 30}
+      - !Line
+        class: "railroad top green_line"
+        start: {x: 45, y: 30}
+        end: {x: 55.8, y: 30}
+      - !Label
+        class: "small_legend_text"
+        location: {x: 59, y: 30}
+        text: "Green Line"
+
+      - !Line
+        class: "railroad bottom commuter_rail"
+        start: {x: 45, y: 35}
+        end: {x: 55.8, y: 35}
+      - !Line
+        class: "railroad top commuter_rail"
+        start: {x: 45, y: 35}
+        end: {x: 55.8, y: 35}
+      - !Label
+        class: "small_legend_text"
+        location: {x: 59, y: 35}
+        text: "Commuter Rail"
+
+      - !Marker
+        class: "compass"
+        filename: "cross_arrow"
+        location: { x: 90, y: 25 }
+        size: 10
+      - !Label
+        class: "centered small_legend_text"
+        location: {x: 90, y: 15}
         text: "North"
+
       - !Label
-        class: "small_legend_text"
-        location: {x: 0, y: 25}
-        text: "1 km"
+        class: "centered small_legend_text"
+        location: {x: 40, y: 15}
+        text: "Scale 1 : 25 000"
+      - !Ruler
+        class: "ruler centered small_legend_text"
+        location: {x: 10, y: 20}
+        scale: 64.3738  # 1mi * 1:25k = 64mm
+        ticks: [0, 0.25, 0.5, 0.75, 1.0]
+        unit: "mi"
+        tick_length: 1.5

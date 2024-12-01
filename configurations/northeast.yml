@@ -1,6 +1,6 @@
 title: "The Northeast Corridor"
 description: "
-  A map of the states and cities that make up the Northeast Corridor,
+  A map of the states, cities, and railroads that make up the Northeast Corridor,
   the northeastern coastal region of the United States of America.
   Most geographic data is published by
   <a href=\"https://www.usgs.gov/the-national-map-data-delivery\">
@@ -10,10 +10,14 @@ style: |
   .background {
     fill: #98dff3;
   }
-  .frame {
+  .map .frame {
     fill: none;
     stroke: black;
     stroke-width: 2.0;
+  }
+  .legend .frame {
+    fill: none;
+    stroke: none;
   }
   .graticule {
     fill: none;
@@ -47,16 +51,17 @@ style: |
     fill: #ceeca3;
   }
   .urban_area {
-    clip-path: url(#land_polygon);
     fill: #f7efe3;
   }
   .river {
-    clip-path: url(#land_polygon);
     fill: none;
     stroke: #00748b;
     stroke-width: 0.6;
     stroke-linejoin: round;
     stroke-linecap: round;
+  }
+  .map .urban_area, .map .river {
+    clip-path: url(#land_polygon);
   }
   .coastline {
     fill: none;
@@ -122,7 +127,7 @@ style: |
   }
   .river_label {
     fill: #00748b;
-    font-size: 4.0px;
+    font-size: 3.8px;
   }
   .land_label {
     fill: #404040;
@@ -155,11 +160,43 @@ style: |
     font-size: 12.0px;
     text-anchor: middle;
   }
-bounding_box: { left: -418, right: 388, top: -103, bottom: 203 }
+  .legend text.big {
+    fill: black;
+    font-family: "Frutiger LT Pro",sans-serif;
+    font-size: 9.0px;
+    font-weight: bold;
+    text-anchor: middle;
+  }
+  .legend text.small, .ruler text {
+    fill: black;
+    font-family: "Frutiger LT Pro",sans-serif;
+    font-size: 4.0px;
+    text-anchor: middle;
+  }
+  .legend text.tiny {
+    fill: black;
+    font-family: "Frutiger LT Pro",sans-serif;
+    font-size: 2.5px;
+    text-anchor: middle;
+  }
+  .legend .symbol {
+    fill: black;
+  }
+  .legend_box {
+    stroke: black;
+    stroke-width: 0.2px;
+  }
+  .ruler line {
+    stroke: black;
+    stroke-width: 0.4px;
+    stroke-linecap: square;
+  }
+bounding_box: { left: -413, right: 387, top: -90, bottom: 210 }
 contents:
   # - !RasterLayer
   #   filename: "Natural Earth/ne_shaded_relief"
   - !Group
+    class: "map"
     frame: true
     transform:
       !Oblique  # this oblique Mercator projection puts NYC (40.7, -74.0) in the center, rotated 42.5°
@@ -181,15 +218,21 @@ contents:
         content:
           !Layer
           filename: "USGS/statesp010g/statesp010g"
+          filters:
+            - !OneOf {key: "TYPE", valid_values: ["Land"]}
       - !Layer
         class: "rural_area"
         filename: "USGS/statesp010g/statesp010g"
+        filters:
+          - !OneOf {key: "TYPE", valid_values: ["Land"]}
       - !Layer
         class: "urban_area"
         filename: "Natural Earth/ne_10m_urban_areas"
       - !Layer
         class: "state"
         filename: "USGS/statesp010g/statesp010g"
+        filters:
+          - !OneOf {key: "TYPE", valid_values: ["Land"]}
         class_column: "STATE_ABBR"
         self_clip: true
       - !Layer
@@ -209,6 +252,8 @@ contents:
         filename: "USGS/statesp010g/statesp010g"
         label_column: "NAME"
         case: !Upper
+        filters:
+          - !OneOf {key: "TYPE", valid_values: ["Land"]}
         abbr: 
           - {from: "DISTRICT OF COLUMBIA", to: "D.C."}
       - !Layer
@@ -243,13 +288,13 @@ contents:
       - !Marker
         class: "compass"
         filename: "cross_arrow"
-        location: { x: -71.5, y: 40.5 }
-        size: 200
+        location: { x: -71.5, y: 40.3 }
+        size: 100
         bearing: 0
       - !Label
         class: "compass_label"
         text: "N"
-        location: { x: -71.5, y: 40.7 }
+        location: { x: -71.5, y: 40.5 }
       - !Group
         class: "graticule_label"
         contents:
@@ -389,3 +434,62 @@ contents:
           - !Label
             location: {x: -77.2, y: 38.1}
             text: "← To Richmond"
+  - !Group
+    class: "legend"
+    frame: true
+    bounding_box: { left: -80, right: 100, top: 130, bottom: 170 }
+    region: { left: 0, right: 180, top: 0, bottom: 50 }
+    clip: false
+    contents:
+      - !Label
+        class: "big"
+        location: {x: 50, y: 10}
+        text: "The Northeast Corridor"
+      - !Label
+        class: "small"
+        location: {x: 50, y: 20}
+        text: "Cities and railways of the northeastern coast of the United States."
+      - !Marker
+        filename: "cc"
+        class: "symbol"
+        location: {x: 0, y: 40}
+        size: 0.002
+      - !Label
+        class: "tiny"
+        location: {x: 50, y: 40}
+        text: "This map is licensed by Justin Kunimune under CC BY 4.0.  To view a copy of this license, visit ‹creativecommons.org/licenses/by/4.0›."
+      - !Rectangle
+        class: "urban_area legend_box"
+        coordinates: {left: 100, right: 105, top: 10, bottom: 14}
+      - !Rectangle
+        class: "rural_area legend_box"
+        coordinates: {left: 100, right: 105, top: 20, bottom: 24}
+      - !Line
+        class: "railroad"
+        start: {x: 130, y: 10}
+        end: {x: 135, y: 10}
+      - !Line
+        class: "river"
+        start: {x: 130, y: 20}
+        end: {x: 135, y: 20}
+      - !Marker
+        class: "major_city"
+        location: {x: 160, y: 10}
+        filename: "circle"
+        size: 9
+      - !Marker
+        class: "city"
+        location: {x: 160, y: 20}
+        filename: "circle"
+        size: 4
+      - !Label
+        class: "small"
+        location: {x: 140.23, y: 30}
+        text: "Oblique Mercator projection, 1 : 1 000 000 scale."
+      - !Ruler
+        class: "ruler"
+        location: {x: 100, y: 40}
+        scale: 1.60934  # km/mi conversion (the base map scale is 1km/1mm)
+        ticks: [0, 10, 20, 30, 40, 50]
+        unit: "mi"
+        tick_length: 2

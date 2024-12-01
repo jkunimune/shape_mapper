@@ -1,4 +1,5 @@
 <svg viewBox="-1 -1.8 2 2.8" xmlns="http://www.w3.org/2000/svg" version="1.1" fill="black" stroke="black">
-    <path stroke-width=".1" d="M-1,0 H1 M0,-1 V1"/>
-    <path stroke-width="0" d="M0.0,-1.0 L-0.4,-0.9 L0,-1.8 L0.4,-0.9 Z"/>
+    <line stroke-width=".1" x1="-1" y1="0" x2="1" y2="0"/>
+    <line stroke-width=".1" x1="0" y1="-1" x2="0" y2="1"/>
+    <polygon stroke-width="0" points="0.0,-1.0 -0.4,-0.9 0,-1.8 0.4,-0.9"/>
 </svg>

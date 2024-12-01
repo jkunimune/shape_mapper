@@ -1,7 +1,7 @@
 use core::f64;
 use std::fmt::Debug;
 
-use crate::{line_point_distance, Jacobian, SerializablePoint, Transform};
+use crate::{format_number, line_point_distance, Jacobian, SerializablePoint, Transform};
 
 
 #[test]
@@ -114,6 +114,17 @@ fn test_transform_jacobian() {
             );
         }
     }
+}
+
+
+#[test]
+fn test_format_number() {
+    assert_eq!(format_number(0.00), "0");
+    assert_eq!(format_number(0.25), "¼");
+    assert_eq!(format_number(0.50), "½");
+    assert_eq!(format_number(0.75), "¾");
+    assert_eq!(format_number(1.00), "1");
+    assert_eq!(format_number(1.50), "1½");
 }
 
 

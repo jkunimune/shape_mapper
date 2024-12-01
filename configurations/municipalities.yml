@@ -59,6 +59,15 @@ style: |
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
+  .ruler line {
+    stroke: #000000;
+    stroke-width: 0.4;
+    stroke-linecap: square;
+  }
+  line.compass {
+    stroke: #000000;
+    stroke-width: 0.12;
+  }
   .town {
     stroke: none;
   }
@@ -91,12 +100,26 @@ style: |
   .town_hall_label {
     font-size: 4.5px;
     text-anchor: start;
-    alignment-baseline: baseline;
   }
   .neighborhood_label {
     font-size: 3.5px;
     text-anchor: middle;
-    alignment-baseline: baseline;
+  }
+  .road_label {
+    font-size: 3.0px;
+    text-anchor: middle;
+  }
+  .big_legend_label {
+    font-size: 5.5px;
+    text-anchor: middle;
+  }
+  .small_legend_label {
+    font-size: 3.5px;
+    text-anchor: middle;
+  }
+  .tiny_legend_label {
+    font-size: 3.0px;
+    text-anchor: middle;
   }
   .patches_for_water_issues {
     clip-path: url(#water_issue_spots)
@@ -163,6 +186,18 @@ contents:
         marker_name: "star"
         size: 12
       - !Layer
+        class: "road_label"
+        filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
+        label_column: "COMM_LINE"
+        case: !Upper
+      - !Layer
+        class: "road_label"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+        filters:
+          - !OneOf {key: "RDTYPE", valid_values: [1, 2]}
+          - !GreaterThan {key: "SHAPE_LEN", cutoff: 5000}
+        label_column: "STREET_NAM"
+      - !Layer
         class: "town_hall_label"
         filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
         label_column: "CITY"
@@ -189,3 +224,31 @@ contents:
               - "JAMAICA PLAIN"
               - "MATTAPAN"
               - "HYDE PARK"
+      - !Label
+        class: "big_legend_label"
+        text: "Cities and towns of the Boston area"
+        location: {x: 250000, y: 905000}
+      - !Label
+        class: "small_legend_label"
+        text: "Scale 1 : 100 000."
+        location: {x: 250000, y: 904000}
+      - !Ruler
+        class: "small_legend_label ruler"
+        location: {x: 246000, y: 903000}
+        ticks: [0, 1, 2, 3]
+        unit: "mi."
+        scale: 1609.34
+        tick_length: -200
+      - !Label
+        class: "small_legend_label"
+        text: "North"
+        location: {x: 250000, y: 902000}
+      - !Marker
+        class: "compass"
+        filename: "cross_arrow"
+        location: {x: 250000, y: 901000}
+        size: 10
+      - !Label
+        class: "tiny_legend_label"
+        text: "This map is licensed by Justin Kunimune under CC BY 4.0. To view a copy of this license, visit creativecommons.org/licenses/by/4.0."
+        location: {x: 250000, y: 900000}
