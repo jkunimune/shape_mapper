@@ -7,34 +7,34 @@ description: "
   </a>."
 style: |
   .background {
-    fill: oklch(96% .0 0deg);
+    fill: #f2f2f2;
   }
   .park {
-    fill: oklch(84% .15 135deg);
+    fill: #9fe079;
   }
   .water {
-    fill: oklch(76% .12 225deg);
+    fill: #49c1ea;
   }
   .lucode_31 { /* institution */
-    fill: oklch(88% .10 0deg);
+    fill: #ffbed5;
   }
   .lucode_16, .lucode_18 { /* industrial */
-    fill: oklch(80% .0 0deg);
+    fill: #bebebe;
   }
   .lucode_15 { /* commercial district */
-    fill: oklch(92% .10 90deg);
+    fill: #fee296;
   }
   .legend .background {
-    fill: white;
+    fill: #ffffff;
   }
   .frame {
     fill: none;
-    stroke: black;
+    stroke: #000000;
     stroke-width: 3.0;
   }
   .municipality {
     fill: none;
-    stroke: black;
+    stroke: #000000;
     stroke-width: 0.6;
     stroke-dasharray: 1.2 .6 .6 .6;
   }
@@ -46,16 +46,16 @@ style: |
   }
   /* car-free paths */
   .bikepath {
-    stroke: oklch(52% .07 150deg);
+    stroke: #4b7453;
     stroke-width: 1.6;
   }
   /* streets with bike lanes */
   .street.bottom {
-    stroke: oklch(52% .07 150deg);
+    stroke: #4b7453;
     stroke-width: 3.8;
   }
   .street.top {
-    stroke: oklch(100% .0 0deg);
+    stroke: #ffffff;
     stroke-width: 2.2;
   }
   /* streets without bike lanes */
@@ -69,81 +69,81 @@ style: |
   .bottom .mystic_valley_parkway, .bottom .james_j_storrow_memorial_drive,
   .bottom .soldiers_field_road, .bottom .edward_h_land_boulevard, .bottom .austin_street,
   .bottom .river_street, .street.bottom.without_bikelane {
-    stroke: oklch(60% .0 0deg);
+    stroke: #808080;
     stroke-width: 2.8;
   }
   /* roads without bike lanes or sidewalks */
   .highway {
-    stroke: oklch(44% .15 30deg);
+    stroke: #942318;
     stroke-width: 3.8;
   }
   /* train tracks*/
   .railroad .bottom, .railroad.bottom {
-    stroke: oklch(48% .15 300deg);
+    stroke: #6c44a4;
     stroke-width: 2.2;
     stroke-linecap: butt;
   }
   .railroad .top, .railroad.top {
-    stroke: white;
+    stroke: #ffffff;
     stroke-width: 1.6;
     stroke-dasharray: 0 2 4 2;
     stroke-linecap: butt;
   }
   .station {
-    fill: white;
-    stroke: black;
+    fill: #ffffff;
+    stroke: #000000;
   }
   text {
     font-family: Helvetica Neue,Helvetica,sans-serif;
   }
   .bikepath_label {
-    fill: oklch(20% .0 0deg);
+    fill: #161616;
     font-size: 2.4px;
     font-weight: bold;
   }
   .street_label {
-    fill: oklch(20% .0 0deg);
+    fill: #161616;
     font-size: 2.4px;
     font-weight: bold;
   }
   .highway_label {
-    fill: white;
+    fill: #ffffff;
     font-size: 3.2px;
     font-weight: bold;
   }
   .location_label {
-    fill: black;
+    fill: #000000;
     font-size: 3.2px;
     font-weight: bold;
   }
   .park_label {
-    fill: oklch(28% .1 135deg);
+    fill: #0f3200;
     font-size: 3.2px;
     font-weight: bold;
   }
   .institution_label {
-    fill: oklch(32% .1 0deg);
+    fill: #581631;
     font-size: 3.2px;
     font-weight: bold;
   }
   .water_label {
-    fill: oklch(24% .1 225deg);
+    fill: #002537;
     font-style: italic;
     font-size: 4.0px;
     font-weight: normal;
   }
   .small_legend_text {
-    fill: black;
+    fill: #000000;
     font-size: 3.2px;
     font-weight: normal;
   }
   .tiny_legend_text {
-    fill: black;
+    fill: #000000;
     font-size: 2.4px;
     font-weight: normal;
   }
   .big_legend_text {
-    fill: black;
+    fill: #000000;
     font-size: 6.0px;
     font-weight: bold;
     text-anchor: middle;
@@ -152,10 +152,10 @@ style: |
     stroke-linecap: butt;
   }
   line.compass {
-    stroke: black;
+    stroke: #000000;
   }
   .ruler line {
-    stroke: black;
+    stroke: #000000;
     stroke-width: 0.3;
     stroke-linecap: square;
   }
