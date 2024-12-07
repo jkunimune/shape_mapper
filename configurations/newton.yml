@@ -169,7 +169,7 @@ style: |
   .centered {
     text-anchor: middle;
   }
-bounding_box: { left: -3, right: 411, top: -3, bottom: 411 }
+bounding_box: { left: -10, right: 418, top: -10, bottom: 418 }
 contents:
   - !Group
     frame: true
@@ -190,6 +190,7 @@ contents:
       - !Layer
         class: "water"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+        filters: !OneOf {key: "POLY_CODE", valid_values: [1, 6, 8]}
       - !Layer
         class: "street bottom"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
@@ -260,6 +261,13 @@ contents:
         filters:
           - !GreaterThan {key: "SHAPE_LEN", cutoff: 200}
           - !OneOf {key: "RDTYPE", valid_values: [2, 3, 4]}
+        abbr:
+          - {from: "STREET", to: "ST"}
+          - {from: "ROAD", to: "RD"}
+          - {from: "AVENUE", to: "AVE"}
+          - {from: "BOULEVARD", to: "BLVD"}
+          - {from: "PARKWAY", to: "PKWY"}
+          - {from: "HIGHWAY", to: "HWY"}
       - !Layer
         class: "highway_label"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"

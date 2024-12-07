@@ -7,7 +7,7 @@ use regex::Regex;
 use std::{boxed, env, fs};
 use serde::Deserialize;
 use shapefile::dbase::{FieldValue, Record};
-use shapefile::record::EsriShape;
+use shapefile::record::{EsriShape, GenericBBox};
 use shapefile::Shape;
 use titlecase::titlecase;
 
@@ -733,14 +733,34 @@ fn load_SVG(marker_filename: &String) -> Result<String> {
 
 
 fn center_of(shape: &Shape) -> Result<SerializablePoint> {
-    return match bounds_of(shape) {
-        Ok([x_range, y_range]) => {
-            Ok(SerializablePoint { x: (x_range[0] + x_range[1])/2., y: (y_range[0] + y_range[1])/2. })
-        }
-        Err(_) => {
-            Err(anyhow!("I cannot calculate the center of this shape because it has no geometry."))
-        }
-    }
+    return match shape {
+        Shape::NullShape => Err(anyhow!("I cannot calculate the center of this shape because it has no geometry.")),
+        Shape::Point(point) => Ok(SerializablePoint::from(point)),
+        Shape::Multipoint(points) => Ok(SerializablePoint::from(
+            points.point(0)
+            .ok_or(anyhow!("the multipoint must have at least one point."))?)),
+        Shape::Polyline(polyline) => {
+            match polyline.part(0) {
+                Some(part) => Ok(SerializablePoint::from(
+                    part.get(part.len()/2)
+                    .ok_or(anyhow!("each part must have at least one point."))?)),
+                None => Err(anyhow!("this polyline has no parts and therefore no center.")),
+            }
+        },
+        Shape::PolylineM(polyline) => {
+            match polyline.part(0) {
+                Some(part) => Ok(SerializablePoint::from_M(
+                    part.get(part.len()/2)
+                    .ok_or(anyhow!("each part must have at least one point."))?)),
+                None => Err(anyhow!("this polyline (M) has no parts and therefore no center.")),
+            }
+        },
+        Shape::Polygon(polygon) => {
+            let GenericBBox {min, max} = polygon.bbox();
+            Ok(SerializablePoint { x: (min.x + max.x)/2., y: (min.y + max.y)/2. })
+        },
+        other => Err(anyhow!("I haven't implemented center_of for {}", other.shapetype())),
+    };
 }
 
 

@@ -189,6 +189,7 @@ contents:
       - !Layer
         class: "water"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+        filters: [!OneOf {key: "POLY_CODE", valid_values: [1, 6, 8]}]
       - !Layer
         class: "railroad"
         filename: "MassGIS/mbta_rapid_transit/MBTA_ARC"
@@ -459,7 +460,7 @@ contents:
         label_column: "LOCAL_NAME"
         case: !Upper
         filters:
-          - !GreaterThan {key: "SHAPE_LEN", cutoff: 100}
+          - !GreaterThan {key: "SHAPE_LEN", cutoff: 500}
           - !OneOf
             key: "LOCAL_NAME"
             valid_values:
@@ -485,7 +486,7 @@ contents:
           - {from: " PARKWAY", to: " PKWY."}
           - {from: " HIGHWAY", to: " HWY."}
         filters:
-          - !GreaterThan {key: "SHAPE_LEN", cutoff: 100}
+          - !GreaterThan {key: "SHAPE_LEN", cutoff: 500}
           - !OneOf
             key: "STREET_NAM"
             valid_values:
@@ -559,7 +560,7 @@ contents:
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         label_column: "STREET_NAM"
         filters:
-          - !GreaterThan {key: "SHAPE_LEN", cutoff: 100}
+          - !GreaterThan {key: "SHAPE_LEN", cutoff: 500}
           - !OneOf
             key: "STREET_NAM"
             valid_values:
