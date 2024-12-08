@@ -15,42 +15,42 @@ style: |
   }
   .pond, .background {
     fill: #aadbea;
-  }
-  .stream {
-    fill: none;
-  }
-  .pond, .stream {
     stroke: #125588;
     stroke-width: 0.5;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .rail {
+  .stream {
     fill: none;
+    stroke: #125588;
+    stroke-width: 0.5;
     stroke-linejoin: round;
-    stroke-linecap: butt;
+    stroke-linecap: round;
   }
   .rail .bottom {
+    fill: none;
     stroke: #4e455e;
     stroke-width: 1.0;
+    stroke-linejoin: round;
   }
   .rail .top {
+    fill: none;
     stroke: #ffffff;
     stroke-width: 0.6;
     stroke-dasharray: 0 1.0 2.0 1.0;
-  }
-  .highway {
-    fill: none;
     stroke-linejoin: round;
-    stroke-linecap: butt;
   }
   .highway .bottom {
+    fill: none;
     stroke: #000000;
     stroke-width: 1.0;
+    stroke-linejoin: round;
   }
   .highway .top {
+    fill: none;
     stroke: #dec12c;
     stroke-width: 0.6;
+    stroke-linejoin: round;
   }
   .town-border {
     fill: none;
@@ -67,9 +67,6 @@ style: |
   line.compass {
     stroke: #000000;
     stroke-width: 0.12;
-  }
-  .town {
-    stroke: none;
   }
   .revere, .watertown, .medford, .weymouth, .wakefield, .canton, .medfield, .marblehead, .billerica {
     fill: #AF9CB7; /* purple */
@@ -89,40 +86,53 @@ style: |
   .brookline, .somerville, .belmont, .milton, .chelsea, .melrose, .winchester, .needham, .walpole, .swampscott, .hingham, .bedford {
     fill: #879C6B; /* green */
   }
-  .town_hall path {
+  .town-hall path {
     fill: black;
   }
-  text {
+  .town-hall-label {
     fill: black;
     font-family: Helvetica, Neue Haas Grotesk, Neue Haas Grotesk Text, sans-serif;
     font-weight: normal;
-  }
-  .town_hall_label {
     font-size: 4.5px;
     text-anchor: start;
   }
-  .neighborhood_label {
+  .neighborhood-label {
+    fill: black;
+    font-family: Helvetica, Neue Haas Grotesk, Neue Haas Grotesk Text, sans-serif;
+    font-weight: normal;
     font-size: 3.5px;
     text-anchor: middle;
   }
-  .road_label {
+  .road-label {
+    fill: black;
+    font-family: Helvetica, Neue Haas Grotesk, Neue Haas Grotesk Text, sans-serif;
+    font-weight: normal;
     font-size: 3.0px;
     text-anchor: middle;
   }
-  .big_legend_label {
+  .big-legend-label {
+    fill: black;
+    font-family: Helvetica, Neue Haas Grotesk, Neue Haas Grotesk Text, sans-serif;
+    font-weight: normal;
     font-size: 5.5px;
     text-anchor: middle;
   }
-  .small_legend_label {
+  .small-legend-label {
+    fill: black;
+    font-family: Helvetica, Neue Haas Grotesk, Neue Haas Grotesk Text, sans-serif;
+    font-weight: normal;
     font-size: 3.5px;
     text-anchor: middle;
   }
-  .tiny_legend_label {
+  .tiny-legend-label {
+    fill: black;
+    font-family: Helvetica, Neue Haas Grotesk, Neue Haas Grotesk Text, sans-serif;
+    font-weight: normal;
     font-size: 3.0px;
     text-anchor: middle;
   }
-  .patches_for_water_issues {
-    clip-path: url(#water_issue_spots)
+  .patches-for-water-issues {
+    clip-path: url(#water-issue-spots)
   }
 contents:
   - !Group
@@ -151,7 +161,7 @@ contents:
         filters:
           - !OneOf {key: "OUTLINE", valid_values: [4]}
       - !ClipPath
-        id: "water_issue_spots"
+        id: "water-issue-spots"
         content:
           !Group
           contents:
@@ -162,7 +172,7 @@ contents:
             - !Rectangle
               coordinates: { left: 235800, right: 237740, bottom: 890700, top: 892200 }
       - !Layer
-        class: "pond patches_for_water_issues"
+        class: "pond patches-for-water-issues"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
         filters:
           - !OneOf {key: "NAME", valid_values: ["Mystic River", "Charles River", "Neponset River"]}
@@ -181,29 +191,29 @@ contents:
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_RTE_MAJOR"
         double: true
       - !Layer
-        class: "town_hall"
+        class: "town-hall"
         filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
         marker_name: "star"
         size: 12
       - !Layer
-        class: "road_label"
+        class: "road-label"
         filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
         label_column: "COMM_LINE"
         case: !Upper
       - !Layer
-        class: "road_label"
+        class: "road-label"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         filters:
           - !OneOf {key: "RDTYPE", valid_values: [1, 2]}
           - !GreaterThan {key: "SHAPE_LEN", cutoff: 5000}
         label_column: "STREET_NAM"
       - !Layer
-        class: "town_hall_label"
+        class: "town-hall-label"
         filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
         label_column: "CITY"
         case: !Title
       - !Layer
-        class: "neighborhood_label"
+        class: "neighborhood-label"
         filename: "MassGIS/geonames_shp/GEONAMES_PT_PLACES"
         label_column: "LABELTEXT"
         case: !Title
@@ -225,22 +235,22 @@ contents:
               - "MATTAPAN"
               - "HYDE PARK"
       - !Label
-        class: "big_legend_label"
+        class: "big-legend-label"
         text: "Cities and towns of the Boston area"
         location: {x: 250000, y: 905000}
       - !Label
-        class: "small_legend_label"
+        class: "small-legend-label"
         text: "Scale 1 : 100 000."
         location: {x: 250000, y: 904000}
       - !Ruler
-        class: "small_legend_label ruler"
+        class: "small-legend-label ruler"
         location: {x: 246000, y: 903000}
         ticks: [0, 1, 2, 3]
         unit: "mi."
         scale: 1609.34
         tick_length: -200
       - !Label
-        class: "small_legend_label"
+        class: "small-legend-label"
         text: "North"
         location: {x: 250000, y: 902000}
       - !Marker
@@ -249,6 +259,6 @@ contents:
         location: {x: 250000, y: 901000}
         size: 10
       - !Label
-        class: "tiny_legend_label"
+        class: "tiny-legend-label"
         text: "This map is licensed by Justin Kunimune under CC BY 4.0. To view a copy of this license, visit creativecommons.org/licenses/by/4.0."
         location: {x: 250000, y: 900000}

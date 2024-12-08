@@ -8,14 +8,11 @@ description: "
   </a>."
 bounding_box: { left: -3, right: 213, top: -3, bottom: 233 }
 style: |
-  text {
-    font-family: Cadman, sans-serif;
-  }
   .legend .background {
     fill: #ffffff;
     stroke: none;
   }
-  .pond, .main_map .background {
+  .pond, .main-map .background {
     fill: #E3F7F2;
     stroke: #125588;
     stroke-width: 0.4;
@@ -34,86 +31,107 @@ style: |
     stroke-width: 2.0;
     stroke-linejoin: miter;
   }
-  .state_border, .town {
+  .state-border, .town {
     fill: none;
     stroke: black;
     stroke-width: 0.4;
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
-  .road {
+  .road .top {
     fill: none;
+    stroke: #f4dd80;
+    stroke-width: 0.4;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .road .top {
-    stroke: #f4dd80;
-    stroke-width: 0.4;
-  }
   .road .bottom {
+    fill: none;
     stroke: #222222;
     stroke-width: 0.8;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
-  .district {
+  .dist-num-6 { /* orange */
+    fill: #e5d6cd;
+    stroke: #bc9b87;
     stroke-width: 5.0;
     stroke-linejoin: round;
   }
-  .dist_num_6 { /* orange */
-    fill: #e5d6cd;
-    stroke: #bc9b87;
-  }
-  .dist_num_9 { /* purple */
+  .dist-num-9 { /* purple */
     fill: #d4d1e0;
     stroke: #9d99bb;
+    stroke-width: 5.0;
+    stroke-linejoin: round;
   }
-  .dist_num_4 { /* green */
+  .dist-num-4 { /* green */
     fill: #c2cdc0;
     stroke: #809b7e;
+    stroke-width: 5.0;
+    stroke-linejoin: round;
   }
-  .dist_num_5 { /* dark blue */
+  .dist-num-5 { /* dark blue */
     fill: #c3ced9;
     stroke: #7c9bb5;
+    stroke-width: 5.0;
+    stroke-linejoin: round;
   }
-  .dist_num_7 { /* yellow */
+  .dist-num-7 { /* yellow */
     fill: #e5e3d4;
     stroke: #b0ac8a;
+    stroke-width: 5.0;
+    stroke-linejoin: round;
   }
-  .dist_num_8 { /* red */
+  .dist-num-8 { /* red */
     fill: #fac1c6;
     stroke: #f26d83;
+    stroke-width: 5.0;
+    stroke-linejoin: round;
   }
-  .district_border {
+  .district-border {
     fill: none;
     stroke: black;
     stroke-width: 0.2;
     stroke-linejoin: round;
     stroke-dasharray: 0.8 0.4;
   }
-  .town_label {
-    font-size: 4.5px;
-  }
-  .neighborhood_label {
-    font-size: 3.0px;
-  }
-  .town_label, .neighborhood_label {
+  .town-label .top {
     fill: black;
+    font-family: Cadman, sans-serif;
     font-weight: bold;
+    font-size: 4.5px;
     text-anchor: middle;
     alignment-baseline: middle;
   }
-  .town_label .bottom, .neighborhood_label .bottom {
+  .neighborhood-label .top {
+    fill: black;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 3.0px;
+    text-anchor: middle;
+    alignment-baseline: middle;
+  }
+  .town-label .bottom {
     stroke: white;
     stroke-width: 0.6px;
-  }
-  .district_label {
+    font-family: Cadman, sans-serif;
     font-weight: bold;
+    font-size: 4.5px;
+    text-anchor: middle;
+    alignment-baseline: middle;
   }
-  .main_map .district_label {
-    font-size: 50px;
+  .neighborhood-label .bottom {
+    stroke: white;
+    stroke-width: 0.6px;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 3.0px;
+    text-anchor: middle;
+    alignment-baseline: middle;
   }
 contents:
   - !Group
-    class: "main_map"
+    class: "main-map"
     frame: true
     bounding_box: { left: 0, right: 210, top: 0, bottom: 230 }
     region: { left: 215000, right: 257000, bottom: 858000, top: 904000 }
@@ -144,17 +162,17 @@ contents:
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_RTE_MAJOR"
         double: true
       - !Layer
-        class: "district_border"
+        class: "district-border"
         filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
         filters:
           - !OneOf {key: "OUTLINE", valid_values: [0]}
       - !Layer
-        class: "town_label"
+        class: "town-label"
         filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
         label_column: "CITY"
         double: true
       - !Layer
-        class: "neighborhood_label"
+        class: "neighborhood-label"
         filename: "MassGIS/geonames_shp/GEONAMES_PT_PLACES"
         label_column: "LABELTEXT"
         double: true

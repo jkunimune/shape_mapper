@@ -24,33 +24,46 @@ style: |
     stroke: #354d9c;
     stroke-width: 0.4;
   }
-  .state {
-    fill: none;
-    stroke-width: 4.0;
-    stroke-linejoin: round;
-  }
   .state .ma, .state, .md {
     stroke: #927ADC88; /* purple */
+    stroke-width: 4.0;
+    stroke-linejoin: round;
+    fill: none;
   }
   .state .me, .state .nj {
     stroke: #E370C488; /* pink */
+    stroke-width: 4.0;
+    stroke-linejoin: round;
+    fill: none;
   }
   .state .ri, .state .va {
     stroke: #DC517088; /* red */
+    stroke-width: 4.0;
+    stroke-linejoin: round;
+    fill: none;
   }
   .state .ny, .state .de {
     stroke: #D5764588; /* orange */
+    stroke-width: 4.0;
+    stroke-linejoin: round;
+    fill: none;
   }
   .state .nh, .state .dc {
     stroke: #B19D3D88; /* yellow */
+    stroke-width: 4.0;
+    stroke-linejoin: round;
+    fill: none;
   }
   .state .ct, .state .pa {
     stroke: #4B893E88; /* green */
+    stroke-width: 4.0;
+    stroke-linejoin: round;
+    fill: none;
   }
-  .rural_area {
+  .rural-area {
     fill: #ceeca3;
   }
-  .urban_area {
+  .urban-area {
     fill: #f7efe3;
   }
   .river {
@@ -60,8 +73,8 @@ style: |
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .map .urban_area, .map .river {
-    clip-path: url(#land_polygon);
+  .map .urban-area, .map .river {
+    clip-path: url(#land-polygon);
   }
   .coastline {
     fill: none;
@@ -75,7 +88,7 @@ style: |
     stroke-width: 0.9;
     stroke-linejoin: round;
   }
-  .state_border {
+  .state-border {
     fill: none;
     stroke: black;
     stroke-width: 0.2;
@@ -89,12 +102,12 @@ style: |
     stroke: #f7efe3;
     stroke-width: 0.15;
   }
-  .major_city {
+  .major-city {
     fill: black;
     stroke: #f7efe3;
     stroke-width: 0.1;
   }
-  .state_label {
+  .state-label {
     fill: #00000099;
     font-family: "Frutiger LT Pro",sans-serif;
     font-weight: 100;
@@ -102,59 +115,73 @@ style: |
     text-anchor: middle;
     letter-spacing: 0.8px;
   }
-  .graticule_label {
+  .graticule-label {
     fill: #354d9c;
     font-family: "Frutiger LT Pro",sans-serif;
     font-weight: 500;
     font-size: 5.5px;
     text-anchor: middle;
   }
-  .ocean_label, .sea_label, .river_label, .land_label {
+  .ocean-label {
+    fill: #354d9c;
     font-family: "Noto Serif",serif;
     font-style: italic;
     font-weight: 500;
     text-anchor: middle;
-  }
-  .ocean_label {
-    fill: #354d9c;
     font-size: 8.0px;
     letter-spacing: 0.8px;
   }
-  .sea_label {
+  .sea-label {
     fill: #354d9c;
+    font-family: "Noto Serif",serif;
+    font-style: italic;
+    font-weight: 500;
+    text-anchor: middle;
     font-size: 5.5px;
     letter-spacing: 0.55px;
   }
-  .river_label {
+  .river-label {
     fill: #00748b;
+    font-family: "Noto Serif",serif;
+    font-style: italic;
+    font-weight: 500;
+    text-anchor: middle;
     font-size: 3.8px;
   }
-  .land_label {
+  .land-label {
     fill: #404040;
+    font-family: "Noto Serif",serif;
+    font-style: italic;
+    font-weight: 500;
+    text-anchor: middle;
     font-size: 5.5px;
   }
-  .railroad_label {
+  .railroad-label {
     fill: #404040;
     font-family: "Frutiger LT Pro",sans-serif;
     font-weight: 500;
     font-size: 4.0px;
     text-anchor: middle;
   }
-  .city_label {
+  .city-label {
     fill: black;
     font-size: 4.0px;
     font-family: "Frutiger LT Pro",sans-serif;
     font-weight: 500;
     text-anchor: start;
   }
-  ._3651000, ._2507000, ._3451000, ._4260000, ._2404000, ._1150000,
-  ._4459000, ._5167000, ._0952000, ._2567000, ._0937000 {
+  .str3651000, .str2507000, .str3451000, .str4260000, .str2404000, .str1150000,
+  .str4459000, .str5167000, .str0952000, .str2567000, .str0937000 {
+    fill: black;
     font-size: 5.5px;
+    font-family: "Frutiger LT Pro",sans-serif;
+    font-weight: 500;
+    text-anchor: start;
   }
   .compass {
     stroke: black;
   }
-  .compass_label {
+  .compass-label {
     fill: black;
     font-family: "Frutiger LT Pro",sans-serif;
     font-size: 12.0px;
@@ -182,7 +209,7 @@ style: |
   .legend .symbol {
     fill: black;
   }
-  .legend_box {
+  .legend-box {
     stroke: black;
     stroke-width: 0.2px;
   }
@@ -214,19 +241,19 @@ contents:
         parallel_spacing: 1
         meridian_spacing: 1
       - !ClipPath
-        id: "land_polygon"
+        id: "land-polygon"
         content:
           !Layer
           filename: "USGS/statesp010g/statesp010g"
           filters:
             - !OneOf {key: "TYPE", valid_values: ["Land"]}
       - !Layer
-        class: "rural_area"
+        class: "rural-area"
         filename: "USGS/statesp010g/statesp010g"
         filters:
           - !OneOf {key: "TYPE", valid_values: ["Land"]}
       - !Layer
-        class: "urban_area"
+        class: "urban-area"
         filename: "Natural Earth/ne_10m_urban_areas"
       - !Layer
         class: "state"
@@ -236,7 +263,7 @@ contents:
         class_column: "STATE_ABBR"
         self_clip: true
       - !Layer
-        class: "state_border"
+        class: "state-border"
         filename: "USGS/statesp010g/statesp010g"
       - !Layer
         class: "river"
@@ -248,7 +275,7 @@ contents:
         class: "railroad"
         filename: "USDOT/Amtrak_Routes"
       - !Layer
-        class: "state_label"
+        class: "state-label"
         filename: "USGS/statesp010g/statesp010g"
         label_column: "NAME"
         case: !Upper
@@ -257,13 +284,13 @@ contents:
         abbr: 
           - {from: "DISTRICT OF COLUMBIA", to: "D.C."}
       - !Layer
-        class: "river_label"
+        class: "river-label"
         filename: "CECAtlas/NA_Lakes_and_Rivers/data/rivers_l/northamerica_rivers_cec_2023_GCS"
         label_column: "NameEn"
         filters:
           - !GreaterThan {key: "LengthKm", cutoff: 80}
       - !Layer
-        class: "city_label"
+        class: "city-label"
         class_column: "PLACE_FIPS"
         filename: "USA_Major_Cities"
         label_column: "NAME"
@@ -279,7 +306,7 @@ contents:
         filters:
           - !OneOf {key: "PLACE_FIPS", valid_values: ["3651000", "2507000", "4260000", "2404000", "1150000", "3642081", "3684000", "3611000", "5103000", "3451000", "4261000", "5182000", "3608026", "3457000", "4459000", "5166672", "5167000", "2472450", "0952000", "0937000", "5157000", "2567000", "3663000", "5121088", "5116000", "3451210", "2432025", "2582000", "0908000", "5156000", "2419125", "3673000", "5168000", "4202000", "3601000", "2405950", "2509000", "0973000", "0980000", "2534550", "5135000", "3618157", "2481175", "3474000", "3473110", "3345140", "2537000", "2430325", "2360545", "5147672", "2523000", "4263624", "3665508", "2408775", "2545000", "0918430", "1077580", "4224000", "5176432", "3350260", "0955990", "4269000", "3606607", "4474300", "2552490", "3650100", "4285152", "4232800", "2502690", "2426000", "4206088", "5010675", "0950370", "5114440", "3441310", "2524960", "4287048", "5145957", "3438580", "2407125", "2529405", "2467675", "3676540", "2338740", "0946450", "0908420", "3476070", "2503690", "4254656", "3467470", "2569170", "3633139", "4241216", "3318820", "3458200", "2436075", "3459190", "4242928", "5135624", "5161832", "3675484", "3651055", "5144984", "0947290", "5114968", "5103320", "1050670", "3465790", "5107784", "3314200", "4202184", "2553960", "2535075", "4480780", "3679246", "2458300", "3650034", "5121344", "5111464", "2523875", "2302795", "2538715", "2401600", "4273808", "0956200", "2471200", "1021200", "2501370", "4261536", "2417900", "3402080", "4449960", "0976500", "3643335", "2525172", "2469925", "3639853", "2425575", "3365140", "3663418", "3638077", "3659223", "3659641", "3460900", "5172272", "3647042", "4233408", "2526150", "2546330", "4234064", "3638264", "3665255", "3629113", "4221648", "5186720", "5129744", "4285312", "3655530", "0952280", "3407600", "3454690", "2541200", "3603078", "2465600", "4242168", "3624229", "3667070", "5175216", "3656979", "3678608", "3639727", "4262416", "5116096", "1047030", "3339300", "5138424", "3456430", "2304860", "3431880", "5183680", "2365725", "3362900", "4253368", "4212536", "2525485", "3643082", "2483100", "4211272", "5120752", "3658574", "2421325", "2302100", "4282704", "3418070", "4476820", "4238288", "3602066", "3454315", "0985810", "2527060", "2563345", "3618388", "5109816", "2424475", "2308395", "3655574", "3340180", "4232448", "5165392", "2380740", "2425800", "5061225", "3604715", "5186160", "3631896", "3629443", "5129968", "3661973", "4231200", "3629333", "3341300", "4236816", "3654716", "4234144", "4210464", "5149784", "4214712", "4262432", "2446725", "4281328", "2412400", "3654881", "4248360", "2546225", "3312900", "3628640", "3621105", "4267344", "4207128", "2458275", "1047420", "4281824", "3408455", "3612144", "2543755", "3646019", "3654485", "5046000"]}
       - !Layer
-        class: "major_city"
+        class: "major-city"
         filename: "USA_Major_Cities"
         marker_name: "circle"
         size: 9
@@ -292,11 +319,11 @@ contents:
         size: 100
         bearing: 0
       - !Label
-        class: "compass_label"
+        class: "compass-label"
         text: "N"
         location: { x: -71.5, y: 40.5 }
       - !Group
-        class: "graticule_label"
+        class: "graticule-label"
         contents:
           - !Label
             location: {x: -70.6, y: 43}
@@ -344,7 +371,7 @@ contents:
             location: {x: -69, y: 41.5}
             text: "69°E"
       - !Group
-        class: "land_label"
+        class: "land-label"
         contents:
           - !Label
             location: {x: -70.5, y: 42.5}
@@ -374,11 +401,11 @@ contents:
             location: {x: -76.5, y: 38}
             text: "Northern Neck Peninsula"
       - !Label
-        class: "ocean_label"
+        class: "ocean-label"
         location: {x: -73, y: 40}
         text: "ATLANTIC OCEAN"
       - !Group
-        class: "sea_label"
+        class: "sea-label"
         contents:
           - !Label
             location: {x: -71, y: 42.3}
@@ -408,7 +435,7 @@ contents:
             location: {x: -76, y: 38}
             text: "Chesapeake Bay"
       - !Group
-        class: "railroad_label"
+        class: "railroad-label"
         contents:
           - !Label
             location: {x: -70.9, y: 43.2}
@@ -459,10 +486,10 @@ contents:
         location: {x: 50, y: 40}
         text: "This map is licensed by Justin Kunimune under CC BY 4.0.  To view a copy of this license, visit ‹creativecommons.org/licenses/by/4.0›."
       - !Rectangle
-        class: "urban_area legend_box"
+        class: "urban-area legend-box"
         coordinates: {left: 100, right: 105, top: 10, bottom: 14}
       - !Rectangle
-        class: "rural_area legend_box"
+        class: "rural-area legend-box"
         coordinates: {left: 100, right: 105, top: 20, bottom: 24}
       - !Line
         class: "railroad"
@@ -473,7 +500,7 @@ contents:
         start: {x: 130, y: 20}
         end: {x: 135, y: 20}
       - !Marker
-        class: "major_city"
+        class: "major-city"
         location: {x: 160, y: 10}
         filename: "circle"
         size: 9

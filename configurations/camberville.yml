@@ -15,13 +15,13 @@ style: |
   .water {
     fill: #49c1ea;
   }
-  .lucode_31 { /* institution */
+  .lucode-31 { /* institution */
     fill: #ffbed5;
   }
-  .lucode_16, .lucode_18 { /* industrial */
+  .lucode-16, .lucode-18 { /* industrial */
     fill: #bebebe;
   }
-  .lucode_15 { /* commercial district */
+  .lucode-15 { /* commercial district */
     fill: #fee296;
   }
   .legend .background {
@@ -38,112 +38,126 @@ style: |
     stroke-width: 0.6;
     stroke-dasharray: 1.2 .6 .6 .6;
   }
-  .bikepath, .street, .highway, .railroad {
+  /* car-free paths */
+  .bikepath {
     fill: none;
-    stroke-linejoin: miter;
+    stroke: #4b7453;
+    stroke-width: 1.6;
     stroke-miterlimit: 2.0;
     stroke-linecap: round;
   }
-  /* car-free paths */
-  .bikepath {
-    stroke: #4b7453;
-    stroke-width: 1.6;
-  }
   /* streets with bike lanes */
   .street.bottom {
+    fill: none;
     stroke: #4b7453;
     stroke-width: 3.8;
+    stroke-miterlimit: 2.0;
+    stroke-linecap: round;
   }
   .street.top {
+    fill: none;
     stroke: #ffffff;
     stroke-width: 2.2;
+    stroke-miterlimit: 2.0;
+    stroke-linecap: round;
   }
   /* streets without bike lanes */
-  .bottom .bright_road, .bottom .main_street, .bottom .commercial_street,
-  .bottom .mcgrath_highway, .bottom .highland_avenue, .bottom .elm_street,
-  .bottom .prospect_street, .bottom .mystic_avenue, .bottom .medford_street,
-  .bottom .bunker_hill_street, .bottom .rutherford_avenue, .bottom .new_rutherford_avenue,
-  .bottom .chelsea_street, .bottom .charlesgate_east, .bottom .charlesgate_west,
-  .bottom .fenway, .bottom .gerrys_landing_road, .bottom .fellsway_west,
-  .bottom .memorial_drive, .bottom .fresh_pond_parkway, .bottom .alewife_brook_parkway,
-  .bottom .mystic_valley_parkway, .bottom .james_j_storrow_memorial_drive,
-  .bottom .soldiers_field_road, .bottom .edward_h_land_boulevard, .bottom .austin_street,
-  .bottom .river_street, .street.bottom.without_bikelane {
+  .bottom .bright-road, .bottom .main-street, .bottom .commercial-street,
+  .bottom .mcgrath-highway, .bottom .highland-avenue, .bottom .elm-street,
+  .bottom .prospect-street, .bottom .mystic-avenue, .bottom .medford-street,
+  .bottom .bunker-hill-street, .bottom .rutherford-avenue, .bottom .new-rutherford-avenue,
+  .bottom .chelsea-street, .bottom .charlesgate-east, .bottom .charlesgate-west,
+  .bottom .fenway, .bottom .gerrys-landing-road, .bottom .fellsway-west,
+  .bottom .memorial-drive, .bottom .fresh-pond-parkway, .bottom .alewife-brook-parkway,
+  .bottom .mystic-valley-parkway, .bottom .james-j-storrow-memorial-drive,
+  .bottom .soldiers-field-road, .bottom .edward-h-land-boulevard, .bottom .austin-street,
+  .bottom .river-street, .street.bottom.without-bikelane {
+    fill: none;
     stroke: #808080;
     stroke-width: 2.8;
+    stroke-miterlimit: 2.0;
+    stroke-linecap: round;
   }
   /* roads without bike lanes or sidewalks */
   .highway {
+    fill: none;
     stroke: #942318;
     stroke-width: 3.8;
   }
   /* train tracks*/
   .railroad .bottom, .railroad.bottom {
+    fill: none;
     stroke: #6c44a4;
     stroke-width: 2.2;
-    stroke-linecap: butt;
   }
   .railroad .top, .railroad.top {
+    fill: none;
     stroke: #ffffff;
     stroke-width: 1.6;
     stroke-dasharray: 0 2 4 2;
-    stroke-linecap: butt;
   }
   .station {
     fill: #ffffff;
     stroke: #000000;
   }
-  text {
+  .bikepath-label {
+    fill: #161616;
     font-family: Helvetica Neue,Helvetica,sans-serif;
-  }
-  .bikepath_label {
-    fill: #161616;
     font-size: 2.4px;
     font-weight: bold;
   }
-  .street_label {
+  .street-label {
     fill: #161616;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 2.4px;
     font-weight: bold;
   }
-  .highway_label {
+  .highway-label {
     fill: #ffffff;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
     font-weight: bold;
   }
-  .location_label {
+  .location-label {
     fill: #000000;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
     font-weight: bold;
   }
-  .park_label {
+  .park-label {
     fill: #0f3200;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
     font-weight: bold;
   }
-  .institution_label {
+  .institution-label {
     fill: #581631;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
     font-weight: bold;
   }
-  .water_label {
+  .water-label {
     fill: #002537;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-style: italic;
     font-size: 4.0px;
     font-weight: normal;
   }
-  .small_legend_text {
+  .small-legend-text {
     fill: #000000;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
     font-weight: normal;
   }
-  .tiny_legend_text {
+  .tiny-legend-text {
     fill: #000000;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 2.4px;
     font-weight: normal;
   }
-  .big_legend_text {
+  .big-legend-text {
     fill: #000000;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 6.0px;
     font-weight: bold;
     text-anchor: middle;
@@ -198,27 +212,6 @@ contents:
         class: "railroad"
         filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
         double: true
-      - !Layer
-        class: "bikepath"
-        filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
-        class_column: "LOCAL_NAME"
-        filters:
-          - !OneOf
-            key: "LOCAL_NAME"
-            valid_values:
-              - "Somerville Community Path"
-              - "Community Path"
-              - "Alewife Linear Park"
-              - "Minuteman Bikeway"
-              - "Fitchburg Cutoff"
-              - "Alewife Greenway"
-              - "Mystic River Reservation Bike Path"
-              - "Dr. Paul Dudley White Bike Path"
-              - "Charles River Esplanade"
-              - "Harborwalk Connector"
-              - "Watertown-Cambridge Greenway"
-              - "Fresh Pond Path"
-              - "Fresh Pond Paths"
       - !Layer # these riverside roads are too curvy and must not be decimated
         class: "curvy street bottom"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
@@ -320,6 +313,27 @@ contents:
               - "EDWIN H LAND BOULEVARD"
               - "AUSTIN STREET"
               - "HIGH STREET"
+      - !Layer
+        class: "bikepath"
+        filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
+        class_column: "LOCAL_NAME"
+        filters:
+          - !OneOf
+            key: "LOCAL_NAME"
+            valid_values:
+              - "Somerville Community Path"
+              - "Community Path"
+              - "Alewife Linear Park"
+              - "Minuteman Bikeway"
+              - "Fitchburg Cutoff"
+              - "Alewife Greenway"
+              - "Mystic River Reservation Bike Path"
+              - "Dr. Paul Dudley White Bike Path"
+              - "Charles River Esplanade"
+              - "Harborwalk Connector"
+              - "Watertown-Cambridge Greenway"
+              - "Fresh Pond Path"
+              - "Fresh Pond Paths"
       - !Layer # these riverside roads are too curvy and must not be decimated
         class: "curvy street top"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
@@ -439,23 +453,23 @@ contents:
         marker_name: "mbta"
         size: 6
       - !Layer
-        class: "water_label"
+        class: "water-label"
         filename: "MassGIS/majorhydro/MAJPOND_POLY"
         label_column: "NAME"
       - !Layer
-        class: "park_label"
+        class: "park-label"
         filename: "MassGIS/openspace/OPENSPACE_POLY"
         label_column: "SITE_NAME"
         filters:
           - !GreaterThan {key: "SHAPE_AREA", cutoff: 40000}
       - !Layer
-        class: "location_label"
+        class: "location-label"
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
         label_column: "STATION"
         abbr:
           - {from: "SQUARE", to: "SQ"}
       - !Layer
-        class: "bikepath_label"
+        class: "bikepath-label"
         filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
         label_column: "LOCAL_NAME"
         case: !Upper
@@ -475,7 +489,7 @@ contents:
               - "Watertown-Cambridge Greenway"
               - "Fresh Pond Paths"
       - !Layer
-        class: "street_label"
+        class: "street-label"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         label_column: "STREET_NAM"
         abbr:
@@ -556,7 +570,7 @@ contents:
               - "AUSTIN STREET"
               - "HIGH STREET"
       - !Layer
-        class: "highway_label"
+        class: "highway-label"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         label_column: "STREET_NAM"
         filters:
@@ -570,7 +584,7 @@ contents:
               - "MASSACHUSETTS TURNPIKE"
               - "CHARLESTOWN AVENUE"
       - !Group
-        class: "institution_label"
+        class: "institution-label"
         clip: false
         contents:
           - !Label
@@ -593,23 +607,23 @@ contents:
     region: {left: 0, right: 50, top: 0, bottom: 50}
     contents:
       - !Label
-        class: "big_legend_text"
+        class: "big-legend-text"
         location: {x: 25, y: 5}
         text: "Camberville"
       - !Label
-        class: "small_legend_text"
+        class: "small-legend-text"
         location: {x: 5, y: 10}
         text: "The squares and streets of Cambridge and Somerville, Massachusetts"
 
       - !Ruler
-        class: "ruler centered small_legend_text"
+        class: "ruler centered small-legend-text"
         location: {x: 5, y: 20}
         scale: 64.3738  # 1mi * 1:25k = 64mm
         ticks: [0, 0.25, 0.5]
         unit: "mi"
         tick_length: 2
       - !Ruler
-        class: "ruler centered small_legend_text"
+        class: "ruler centered small-legend-text"
         location: {x: 5, y: 20}
         scale: 40  # 1km * 1:25k = 40mm
         ticks: [0, 0.25, 0.5, 0.75, 1.0]
@@ -617,16 +631,16 @@ contents:
         tick_length: -2
 
       - !Line
-        class: "trail"
+        class: "bikepath"
         start: {x: 5, y: 25}
         end: {x: 13, y: 25}
       - !Label
-        class: "small_legend_text"
-        location: {x: 36, y: 25}
-        text: "Bike lane or trail"
+        class: "small-legend-text"
+        location: {x: 16, y: 25}
+        text: "Bike lane or path"
 
       - !Line
-        class: "street bottom without_bikelane"
+        class: "street bottom without-bikelane"
         start: {x: 5, y: 30}
         end: {x: 13, y: 30}
       - !Line
@@ -634,7 +648,7 @@ contents:
         start: {x: 5, y: 30}
         end: {x: 13, y: 30}
       - !Label
-        class: "small_legend_text"
+        class: "small-legend-text"
         location: {x: 16, y: 30}
         text: "Street"
 
@@ -643,7 +657,7 @@ contents:
         start: {x: 5, y: 35}
         end: {x: 13, y: 35}
       - !Label
-        class: "small_legend_text"
+        class: "small-legend-text"
         location: {x: 16, y: 35}
         text: "Highway"
 
@@ -656,7 +670,7 @@ contents:
         start: {x: 5, y: 40}
         end: {x: 13, y: 40}
       - !Label
-        class: "small_legend_text"
+        class: "small-legend-text"
         location: {x: 16, y: 40}
         text: "Train tracks"
 
@@ -667,7 +681,7 @@ contents:
         size: 20
         bearing: 150
       - !Label
-        class: "centered small_legend_text"
+        class: "centered small-legend-text"
         location: {x: 40, y: 35}
         text: "North"
 
@@ -683,6 +697,6 @@ contents:
         location: {x: 0, y: 10}
         size: 0.002
       - !Label
-        class: "tiny_legend_text"
+        class: "tiny-legend-text"
         location: {x: 5, y: 10}
         text: "This map is licensed by Justin Kunimune under CC BY 4.0.  To view a copy of this license, visit ‹creativecommons.org/licenses/by/4.0›."

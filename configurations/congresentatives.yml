@@ -8,14 +8,11 @@ description: "
   </a>."
 bounding_box: { left: 0, right: 600, top: 0, bottom: 600 }
 style: |
-  text {
-    font-family: Cadman, sans-serif;
-  }
   .legend .background {
     fill: #ffffff;
     stroke: none;
   }
-  .pond, .main_map .background, .minimap .background {
+  .pond, .main-map .background, .minimap .background {
     fill: #e5f3f4;
     stroke: none;
   }
@@ -39,7 +36,7 @@ style: |
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
-  .state_border, .town {
+  .state-border, .town {
     fill: none;
     stroke: black;
     stroke-width: 1.0;
@@ -53,173 +50,264 @@ style: |
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
-  .track {
+  .track .bottom {
     fill: none;
     stroke: #8557a3;
+    stroke-width: 0.3;
+    stroke-linejoin: round;
+  }
+  .track .top {
+    fill: none;
+    stroke: #8557a3;
+    stroke-width: 0.8;
     stroke-linejoin: round;
     stroke-linecap: butt;
-  }
-  .bottom {
-    stroke-width: 0.3;
-  }
-  .top {
-    stroke-width: 0.8;
     stroke-dasharray: 1.6 1.6;
   }
-  .road {
+  .road .class-1, .road .class-2, .road .class-3 {
     fill: none;
     stroke: #6a6a6a;
+    stroke-width: 0.9;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .road .class_1, .road .class_2, .road .class_3 {
-    stroke-width: 0.9;
-  }
-  .road .class_4, .road.class_4 {
+  .road .class-4, .road.class-4 {
+    fill: none;
+    stroke: #6a6a6a;
     stroke-width: 0.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
-  .road .class_5, .road.class_5 {
+  .road .class-5, .road.class-5 {
+    fill: none;
+    stroke: #6a6a6a;
     stroke-width: 0.3;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
   .minimap .road {
+    fill: none;
+    stroke: #6a6a6a;
     stroke-width: 0.8;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
-  .district {
+  .dist-num-1, .dist-num-6 { /* orange */
+    fill: #f5e4db;
+    stroke: #e79d79;
     stroke-width: 10.0;
     stroke-linejoin: round;
   }
-  .dist_num_1, .dist_num_6 { /* orange */
-    fill: #f5e4db;
-    stroke: #e79d79;
-  }
-  .main_map .district_label_6 {
+  .main-map .district-label-6 {
     fill: #e79d79;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 75px;
   }
-  .minimap .district_label_1, .minimap .district_label_6 {
+  .minimap .district-label-1, .minimap .district-label-6 {
     fill: #684e41;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 75px;
   }
-  .dist_num_2, .dist_num_9 { /* purple */
+  .dist-num-2, .dist-num-9 { /* purple */
     fill: #e4dfee;
     stroke: #b39fe8;
+    stroke-width: 10.0;
+    stroke-linejoin: round;
   }
-  .minimap .district_label_2, .minimap .district_label_9 {
+  .minimap .district-label-2, .minimap .district-label-9 {
     fill: #575069;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 75px;
   }
-  .dist_num_3 { /* pink */
+  .dist-num-3 { /* pink */
     fill: #fae9f4;
     stroke: #ee9bd5;
+    stroke-width: 10.0;
+    stroke-linejoin: round;
   }
-  .minimap .district_label_3 {
+  .minimap .district-label-3 {
     fill: #694c5f;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 75px;
   }
-  .dist_num_4 { /* green */
+  .dist-num-4 { /* green */
     fill: #d1dace;
     stroke: #80ac75;
+    stroke-width: 10.0;
+    stroke-linejoin: round;
   }
-  .main_map .district_label_4 {
+  .main-map .district-label-4 {
     fill: #80ac75;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 75px;
   }
-  .minimap .district_label_4 {
+  .minimap .district-label-4 {
     fill: #485743;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 75px;
   }
-  .dist_num_5 { /* dark blue */
+  .dist-num-5 { /* dark blue */
     fill: #d3dce8;
     stroke: #71aae2;
+    stroke-width: 10.0;
+    stroke-linejoin: round;
   }
-  .main_map .district_label_5 {
+  .main-map .district-label-5 {
     fill: #71aae2;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 75px;
   }
-  .dist_num_7 { /* yellow */
+  .dist-num-7 { /* yellow */
     fill: #f5f0e2;
     stroke: #c9b874;
+    stroke-width: 10.0;
+    stroke-linejoin: round;
   }
-  .main_map .district_label_7 {
+  .main-map .district-label-7 {
     fill: #c9b874;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 75px;
   }
-  .dist_num_8 { /* red */
+  .dist-num-8 { /* red */
     fill: #eed8da;
     stroke: #ed8897;
+    stroke-width: 10.0;
+    stroke-linejoin: round;
   }
-  .main_map .district_label_8 {
+  .main-map .district-label-8 {
     fill: #ed8897;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 75px;
   }
-  .district_border {
+  .district-border {
     fill: none;
     stroke: black;
     stroke-width: 0.4;
     stroke-linejoin: round;
     stroke-dasharray: 0.6 0.6;
   }
-  .station_marker {
+  .station-marker {
     fill: #ffffff;
     stroke: #000000;
   }
-  text.bottom {
+  .station-label .bottom {
     stroke: #ffffff;
     stroke-width: 0.4;
-  }
-  text.top {
-    stroke: none;
-  }
-  .station_label {
-    fill: #000000;
+    font-family: Cadman, sans-serif;
     font-size: 3.5px;
     text-anchor: start;
   }
-  .park_label {
-    fill: #2d4e1f;
+  .station-label .top {
+    fill: #000000;
+    font-family: Cadman, sans-serif;
+    font-size: 3.5px;
+    text-anchor: start;
+  }
+  .park-label .bottom {
+    stroke: #ffffff;
+    stroke-width: 0.4;
+    font-family: Cadman, sans-serif;
     font-size: 3.5px;
     text-anchor: middle;
   }
-  .pond_label {
-    fill: #125588;
+  .park-label .top {
+    fill: #2d4e1f;
+    font-family: Cadman, sans-serif;
+    font-size: 3.5px;
+    text-anchor: middle;
+  }
+  .pond-label .bottom {
+    stroke: #ffffff;
+    stroke-width: 0.4;
+    font-family: Cadman, sans-serif;
     font-size: 3.5px;
     font-style: italic;
     text-anchor: middle;
   }
-  .airport_label {
-    fill: #3b3b3b;
+  .pond-label .top {
+    fill: #125588;
+    font-family: Cadman, sans-serif;
+    font-size: 3.5px;
+    font-style: italic;
+    text-anchor: middle;
+  }
+  .airport-label .bottom {
+    stroke: #ffffff;
+    stroke-width: 0.4;
+    font-family: Cadman, sans-serif;
     font-size: 4.0px;
     text-anchor: middle;
   }
-  .town_label {
-    font-weight: bold;
+  .airport-label .top {
+    fill: #3b3b3b;
+    font-family: Cadman, sans-serif;
+    font-size: 4.0px;
+    text-anchor: middle;
   }
-  .main_map .town_label {
+  .main-map .town-label .bottom {
+    stroke: #ffffff;
+    stroke-width: 0.4;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
     font-size: 6px; /* note: 6px is actually 6 millimeters (about 17pt) */
     text-anchor: middle;
   }
-  .minimap .town_label {
+  .main-map .town-label .top {
+    filL: #000000;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 6px; /* note: 6px is actually 6 millimeters (about 17pt) */
+    text-anchor: middle;
+  }
+  .minimap .town-label .bottom {
+    stroke: #ffffff;
+    stroke-width: 0.4;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
     font-size: 5px;
     text-anchor: start;
     alignment-baseline: baseline;
   }
-  .district_label {
+  .minimap .town-label .top {
+    fill: #000000;
+    font-family: Cadman, sans-serif;
     font-weight: bold;
+    font-size: 5px;
+    text-anchor: start;
+    alignment-baseline: baseline;
   }
-  .main_map .district_label {
-    font-size: 75px;
-  }
-  .minimap .district_label {
+  .minimap .district-label {
     font-size: 15px;
   }
-  .legend_title {
+  .legend-title {
+    font-family: Cadman, sans-serif;
     font-weight: normal;
     font-size: 8px;
     text-anchor: middle;
   }
-  .legend_subtitle {
+  .legend-subtitle {
+    font-family: Cadman, sans-serif;
     font-weight: normal;
     font-size: 6px;
     text-anchor: middle;
   }
-  .legend_label {
+  .legend-label {
+    font-family: Cadman, sans-serif;
     font-weight: normal;
     font-size: 6px;
   }
 contents:
   - !Group
-    class: "main_map"
+    class: "main-map"
     frame: true
     bounding_box: { left: 5, right: 595, top: 5, bottom: 595 }
     region: { left: 217000, right: 245000, bottom: 887000, top: 915000 }
@@ -230,26 +318,26 @@ contents:
         class_column: "DIST_NUM"
         self_clip: true
       - !Group
-        class: "district_label"
+        class: "district-label"
         contents:
           - !Label
-            class: "district_label_4"
+            class: "district-label-4"
             text: "4"
             location: { x: 230000, y: 888000}
           - !Label
-            class: "district_label_5"
+            class: "district-label-5"
             text: "5"
             location: { x: 230000, y: 888000}
           - !Label
-            class: "district_label_6"
+            class: "district-label-6"
             text: "6"
             location: { x: 230000, y: 888000}
           - !Label
-            class: "district_label_7"
+            class: "district-label-7"
             text: "7"
             location: { x: 230000, y: 888000}
           - !Label
-            class: "district_label_8"
+            class: "district-label-8"
             text: "8"
             location: { x: 230000, y: 888000}
       - !Layer
@@ -278,7 +366,7 @@ contents:
           - !OneOf {key: "RDTYPE", valid_values: [1, 2, 3, 4, 5]}
           - !OneOf {key: "ROUTE_SYST", valid_values: ["I", "US", "SR", "L", "N", "R"]}
       - !Layer
-        class: "district_border"
+        class: "district-border"
         filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
       - !Layer
         class: "town"
@@ -286,7 +374,7 @@ contents:
         filters:
           - !OneOf {key: "OUTLINE", valid_values: [17]}
       - !Layer
-        class: "station_marker"
+        class: "station-marker"
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
         marker_name: "mbta"
         size: 2.8
@@ -297,7 +385,7 @@ contents:
             - !OneOf {key: "STATION", valid_values: ["Boston College", "Health Street", "Mattapan"]}
             - !Not {filter: !OneOf {key: "ROUTE", valid_values: ["B - Boston College", "C - Cleveland Circle", "E - Health Street", "Mattapan Trolley", "SL1", "SL2", "SL3", "SL1 SL2 SL3", "SL4", "SL5", "SL4 SL5"]}}
       - !Layer
-        class: "station_label"
+        class: "station-label"
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
         label_column: "STATION"
         double: true
@@ -315,7 +403,7 @@ contents:
           - {from: "Station", to: "Sta"}
           - {from: "Massachusetts", to: "Mass"}
       - !Layer
-        class: "park_label"
+        class: "park-label"
         filename: "MassGIS/openspace/OPENSPACE_POLY"
         label_column: "SITE_NAME"
         case: !Upper
@@ -323,7 +411,7 @@ contents:
         filters:
           - !GreaterThan {key: "SHAPE_AREA", cutoff: 540000}
       - !Layer
-        class: "pond_label"
+        class: "pond-label"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
         label_column: "NAME"
         case: !Upper
@@ -331,13 +419,13 @@ contents:
         filters:
           - !GreaterThan {key: "SHAPE_AREA", cutoff: 270000}
       - !Layer
-        class: "airport_label"
+        class: "airport-label"
         filename: "MassDOT/Airports"
         label_column: "AIRPORT_NA"
         case: !Upper
         double: true
       - !Layer
-        class: "town_label"
+        class: "town-label"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
         label_column: "TOWN"
         case: !Upper
@@ -361,30 +449,30 @@ contents:
         class_column: "DIST_NUM"
         self_clip: true
       - !Group
-        class: "district_label"
+        class: "district-label"
         contents:
           - !Label
-            class: "district_label_1"
+            class: "district-label-1"
             text: "1"
             location: { x: 230000, y: 888000}
           - !Label
-            class: "district_label_2"
+            class: "district-label-2"
             text: "2"
             location: { x: 230000, y: 888000}
           - !Label
-            class: "district_label_3"
+            class: "district-label-3"
             text: "3"
             location: { x: 230000, y: 888000}
           - !Label
-            class: "district_label_4"
+            class: "district-label-4"
             text: "4"
             location: { x: 230000, y: 888000}
           - !Label
-            class: "district_label_6"
+            class: "district-label-6"
             text: "6"
             location: { x: 230000, y: 888000}
           - !Label
-            class: "district_label_9"
+            class: "district-label-9"
             text: "9"
             location: { x: 230000, y: 888000}
       - !Layer
@@ -394,11 +482,11 @@ contents:
         filters:
           - !OneOf {key: "ADMIN_TYPE", valid_values: [1, 2]}
       - !Layer
-        class: "district_border"
+        class: "district-border"
         filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
       - !Rectangle
-        id: "shown_region_indicator"
-        class: "state_border"
+        id: "shown-region-indicator"
+        class: "state-border"
         coordinates: { left: 216000, right: 245000, bottom: 887000, top: 915000 }
       - !Layer
         class: "city"
@@ -406,7 +494,7 @@ contents:
         filters:
           - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}
       - !Layer
-        class: "town_label"
+        class: "town-label"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
         label_column: "TOWN"
         case: !Title
@@ -414,25 +502,25 @@ contents:
         filters:
           - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}
   - !Group
-    class: "legend legend_label"
+    class: "legend legend-label"
     frame: true
     bounding_box: { left: 405, right: 595, top: 519, bottom: 595}
     region: { left: 0, right: 100, bottom: 0, top: 40 }
     contents:
       - !Label
-        class: "legend_title"
+        class: "legend-title"
         text: "Congressional districts"
         location: { x: 50, y: 31 }
       - !Label
-        class: "legend_title"
+        class: "legend-title"
         text: "of the Boston area"
         location: { x: 50, y: 25 }
       - !Label
-        class: "legend_subtitle"
+        class: "legend-subtitle"
         text: "Conformal conic projection, 1:50k"
         location: { x: 50, y: 20}
       - !Line
-        class: "road class_3"
+        class: "road class-3"
         start: { x: 6, y: 14 }
         end: { x: 16, y: 14 }
       - !Label

@@ -46,6 +46,7 @@ fn main() -> Result<()> {
     let map_height = f64::abs(map_bounding_box.bottom - map_bounding_box.top);
     let mut svg_code = format!(
         "\
+<?xml version=\"1.0\" encoding=\"utf-8\"?>
 <svg viewBox=\"{:.2} {:.2} {:.2} {:.2}\" width=\"{:.2}mm\" height=\"{:.2}mm\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">
   <title>{}</title>
   <desc>{}</desc>
@@ -889,8 +890,8 @@ fn format_number(number: f64) -> String {
 /// replace problematic characters like , to _ and make it all lowercase
 fn sanitize_CSS(string: &str) -> String {
     let string = string.to_lowercase();
-    let string = Regex::new(r"[{},.:;]").unwrap().replace_all(&string, "_").into_owned();
-    let string = Regex::new(r"^([0-9])").unwrap().replace(&string, "_$1").into_owned();
+    let string = Regex::new(r"[{},.:;_]").unwrap().replace_all(&string, "-").into_owned();
+    let string = Regex::new(r"^([0-9])").unwrap().replace(&string, "str$1").into_owned();
     return string;
 }
 

@@ -14,13 +14,13 @@ style: |
   .water {
     fill: #49c1ea;
   }
-  .lucode_31 { /* institution */
+  .lucode-31 { /* institution */
     fill: #ffbed5;
   }
-  .lucode_16, .lucode_18 { /* industrial */
+  .lucode-16, .lucode-18 { /* industrial */
     fill: #bebebe;
   }
-  .lucode_15 { /* commercial district */
+  .lucode-15 { /* commercial district */
     fill: #fee296;
   }
   .legend .background {
@@ -37,50 +37,66 @@ style: |
     stroke-width: 0.6;
     stroke-dasharray: 1.2 .6 .6 .6;
   }
-  .trail, .bike_lane, .street, .highway, .railroad {
+  .trail {
     fill: none;
+    stroke: #56805f;
+    stroke-width: 0.8;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .trail {
-    stroke: #56805f;
-    stroke-width: 0.8;
-  }
-  .bike_lane {
+  .bike-lane {
+    fill: none;
     stroke: #56805f;
     stroke-width: 3.4;
+    stroke-linejoin: round;
   }
   .highway {
+    fill: none;
     stroke: #942318;
     stroke-width: 3.0;
   }
-  .bottom .rdtype_2, .bottom .rdtype_3, .bottom .rdtype_4, .bottom.rdtype_4 {
+  .bottom .rdtype-2, .bottom .rdtype-3, .bottom .rdtype-4, .bottom.rdtype-4 {
+    fill: none;
     stroke: #808080;
     stroke-width: 2.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
-  .top .rdtype_2, .top .rdtype_3, .top .rdtype_4, .top.rdtype_4 {
+  .top .rdtype-2, .top .rdtype-3, .top .rdtype-4, .top.rdtype-4 {
+    fill: none;
     stroke: #ffffff;
     stroke-width: 2.2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
-  .bottom .rdtype_5, .bottom.rdtype_5 {
+  .bottom .rdtype-5, .bottom.rdtype-5 {
+    fill: none;
     stroke: #808080;
     stroke-width: 1.2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
-  .top .rdtype_5, .top.rdtype_5 {
+  .top .rdtype-5, .top.rdtype-5 {
+    fill: none;
     stroke: #ffffff;
     stroke-width: 0.8;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
-  .railroad.green_line .bottom, .railroad.green_line.bottom {
+  .railroad.green-line .bottom, .railroad.green-line.bottom {
+    fill: none;
     stroke: #00843D;
+    stroke-width: 1.8;
+    stroke-linecap: butt;
   }
-  .railroad.commuter_rail .bottom, .railroad.commuter_rail.bottom {
+  .railroad.commuter-rail .bottom, .railroad.commuter-rail.bottom {
+    fill: none;
     stroke: #80276C;
-  }
-  .railroad .bottom, .railroad.bottom {
     stroke-width: 1.8;
     stroke-linecap: butt;
   }
   .railroad .top, .railroad.top {
+    fill: none;
     stroke: #ffffff;
     stroke-width: 1.2;
     stroke-dasharray: 0 1.8 3.6 1.8;
@@ -99,58 +115,65 @@ style: |
   .hospital path {
     stroke: #ffbed5;
   }
-  text {
+  .trail-label {
+    fill: #161616;
     font-family: Helvetica Neue,Helvetica,sans-serif;
-  }
-  .trail_label {
-    fill: #161616;
     font-size: 2.4px;
     font-weight: bold;
   }
-  .street_label {
+  .street-label {
     fill: #161616;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 2.4px;
     font-weight: bold;
   }
-  .highway_label {
+  .highway-label {
     fill: #ffffff;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
     font-weight: bold;
   }
-  .location_label {
+  .location-label {
     fill: #000000;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
     font-weight: bold;
   }
-  .town_label {
+  .town-label {
     fill: #00000099;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 4.8px;
     font-weight: normal;
     letter-spacing: 2.4px;
   }
-  .park_label {
+  .park-label {
     fill: #0f3200;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
     font-weight: bold;
   }
-  .institution_label {
+  .institution-label {
     fill: #581631;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
     font-weight: bold;
   }
-  .water_label {
+  .water-label {
     fill: #002537;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-style: italic;
     font-size: 4.0px;
     font-weight: normal;
   }
-  .small_legend_text {
+  .small-legend-text {
     fill: #000000;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
     font-weight: normal;
   }
-  .big_legend_text {
+  .big-legend-text {
     fill: #000000;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 6.0px;
     font-weight: bold;
   }
@@ -216,11 +239,11 @@ contents:
         filters:
           - !OneOf {key: "RDTYPE", valid_values: [1]}
       - !Layer
-        class: "railroad green_line"
+        class: "railroad green-line"
         filename: "MassGIS/mbta_rapid_transit/MBTA_ARC"
         double: true
       - !Layer
-        class: "railroad commuter_rail"
+        class: "railroad commuter-rail"
         filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
         double: true
       - !Layer
@@ -247,14 +270,14 @@ contents:
         marker_name: "square_hat"
         size: 7
       - !Layer
-        class: "trail_label"
+        class: "trail-label"
         filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
         label_column: "LOCAL_NAME"
         case: !Upper
         filters:
           - !GreaterThan {key: "SHAPE_LEN", cutoff: 200}
       - !Layer
-        class: "street_label"
+        class: "street-label"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         label_column: "STREET_NAM"
         class_column: "RDTYPE"
@@ -269,32 +292,32 @@ contents:
           - {from: "PARKWAY", to: "PKWY"}
           - {from: "HIGHWAY", to: "HWY"}
       - !Layer
-        class: "highway_label"
+        class: "highway-label"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         label_column: "STREET_NAM"
         filters:
           - !GreaterThan {key: "SHAPE_LEN", cutoff: 200}
           - !OneOf {key: "RDTYPE", valid_values: [1]}
       - !Layer
-        class: "water_label"
+        class: "water-label"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
         label_column: "NAME"
       - !Layer
-        class: "park_label"
+        class: "park-label"
         filename: "MassGIS/openspace/OPENSPACE_POLY"
         label_column: "SITE_NAME"
         filters:
           - !GreaterThan {key: "SHAPE_AREA", cutoff: 40000}
       - !Layer
-        class: "institution_label"
+        class: "institution-label"
         filename: "MassGIS/colleges/COLLEGES_PT"
         label_column: "COLLEGE"
       - !Layer
-        class: "institution_label"
+        class: "institution-label"
         filename: "MassGIS/acute_care_hospitals/HOSPITALS_PT"
         label_column: "NAME"
       - !Layer
-        class: "location_label"
+        class: "location-label"
         filename: "MassGIS/geonames_shp/GEONAMES_PT_PLACES"
         label_column: "LABELTEXT"
         case: !Upper
@@ -316,7 +339,7 @@ contents:
               - "WABAN"
               - "WEST NEWTON"
       - !Layer
-        class: "town_label"
+        class: "town-label"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
         label_column: "TOWN"
         case: !Upper
@@ -328,7 +351,7 @@ contents:
     region: {left: 0, right: 100, top: 0, bottom: 40}
     contents:
       - !Label
-        class: "centered big_legend_text"
+        class: "centered big-legend-text"
         location: {x: 50, y: 10}
         text: "Newton, Massachusetts"
 
@@ -337,33 +360,33 @@ contents:
         start: {x: 5, y: 25}
         end: {x: 15.8, y: 25}
       - !Label
-        class: "small_legend_text"
+        class: "small-legend-text"
         location: {x: 19, y: 25}
         text: "Highway"
 
       - !Line
-        class: "street bottom rdtype_4"
+        class: "street bottom rdtype-4"
         start: {x: 5, y: 30}
         end: {x: 15.8, y: 30}
       - !Line
-        class: "street top rdtype_4"
+        class: "street top rdtype-4"
         start: {x: 5, y: 30}
         end: {x: 15.8, y: 30}
       - !Label
-        class: "small_legend_text"
+        class: "small-legend-text"
         location: {x: 19, y: 30}
         text: "Major street"
 
       - !Line
-        class: "street bottom rdtype_5"
+        class: "street bottom rdtype-5"
         start: {x: 5, y: 35}
         end: {x: 15.8, y: 35}
       - !Line
-        class: "street top rdtype_5"
+        class: "street top rdtype-5"
         start: {x: 5, y: 35}
         end: {x: 15.8, y: 35}
       - !Label
-        class: "small_legend_text"
+        class: "small-legend-text"
         location: {x: 19, y: 35}
         text: "Minor street"
 
@@ -372,33 +395,33 @@ contents:
         start: {x: 45, y: 25}
         end: {x: 55.8, y: 25}
       - !Label
-        class: "small_legend_text"
+        class: "small-legend-text"
         location: {x: 59, y: 25}
         text: "Bike lane or trail"
 
       - !Line
-        class: "railroad bottom green_line"
+        class: "railroad bottom green-line"
         start: {x: 45, y: 30}
         end: {x: 55.8, y: 30}
       - !Line
-        class: "railroad top green_line"
+        class: "railroad top green-line"
         start: {x: 45, y: 30}
         end: {x: 55.8, y: 30}
       - !Label
-        class: "small_legend_text"
+        class: "small-legend-text"
         location: {x: 59, y: 30}
         text: "Green Line"
 
       - !Line
-        class: "railroad bottom commuter_rail"
+        class: "railroad bottom commuter-rail"
         start: {x: 45, y: 35}
         end: {x: 55.8, y: 35}
       - !Line
-        class: "railroad top commuter_rail"
+        class: "railroad top commuter-rail"
         start: {x: 45, y: 35}
         end: {x: 55.8, y: 35}
       - !Label
-        class: "small_legend_text"
+        class: "small-legend-text"
         location: {x: 59, y: 35}
         text: "Commuter Rail"
 
@@ -408,16 +431,16 @@ contents:
         location: { x: 90, y: 25 }
         size: 10
       - !Label
-        class: "centered small_legend_text"
+        class: "centered small-legend-text"
         location: {x: 90, y: 15}
         text: "North"
 
       - !Label
-        class: "centered small_legend_text"
+        class: "centered small-legend-text"
         location: {x: 40, y: 15}
         text: "Scale 1 : 25 000"
       - !Ruler
-        class: "ruler centered small_legend_text"
+        class: "ruler centered small-legend-text"
         location: {x: 10, y: 20}
         scale: 64.3738  # 1mi * 1:25k = 64mm
         ticks: [0, 0.25, 0.5, 0.75, 1.0]

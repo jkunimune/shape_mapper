@@ -8,14 +8,11 @@ description: "
   </a>."
 bounding_box: { left: 0, right: 416, top: 0, bottom: 300 }
 style: |
-  text {
-    font-family: Cadman, sans-serif;
-  }
   .legend .background {
     fill: #ffffff;
     stroke: none;
   }
-  .pond, .main_map .background {
+  .pond, .main-map .background {
     fill: #e5f3f4;
     stroke: #125588;
     stroke-width: 0.6;
@@ -34,14 +31,14 @@ style: |
     stroke-width: 3.0;
     stroke-linejoin: miter;
   }
-  .state_border, .town {
+  .state-border, .town {
     fill: none;
     stroke: black;
     stroke-width: 1.0;
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
-  .town_label line {
+  .town-label line {
     stroke: black;
     stroke-width: 0.7;
   }
@@ -52,89 +49,109 @@ style: |
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
-  .road {
+  .road .class-1, .road .class-2, .road .class-3 {
     fill: none;
     stroke: #6f6f6f;
+    stroke-width: 0.8;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .road .class_1, .road .class_2, .road .class_3 {
-    stroke-width: 0.8;
-  }
-  .road .class_4, .road.class_4 {
+  .road .class-4, .road.class-4 {
+    fill: none;
+    stroke: #6f6f6f;
     stroke-width: 0.4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
-  .district {
+  .dist-num-1, .dist-num-6 { /* orange */
     stroke-width: 7.0;
     stroke-linejoin: round;
-  }
-  .dist_num_1, .dist_num_6 { /* orange */
     fill: #f5e4db;
     stroke: #e79d79;
   }
-  .main_map .district_label_6 {
+  .district-label-6 {
     fill: #e79d79;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 50px;
   }
-  .dist_num_2, .dist_num_9 { /* purple */
+  .dist-num-2, .dist-num-9 { /* purple */
+    stroke-width: 7.0;
+    stroke-linejoin: round;
     fill: #e4dfee;
     stroke: #b39fe8;
   }
-  .dist_num_3 { /* pink */
+  .dist-num-3 { /* pink */
+    stroke-width: 7.0;
+    stroke-linejoin: round;
     fill: #fae9f4;
     stroke: #ee9bd5;
   }
-  .dist_num_4 { /* green */
+  .dist-num-4 { /* green */
+    stroke-width: 7.0;
+    stroke-linejoin: round;
     fill: #d1dace;
     stroke: #80ac75;
   }
-  .main_map .district_label_4 {
+  .district-label-4 {
     fill: #80ac75;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 50px;
   }
-  .dist_num_5 { /* dark blue */
+  .dist-num-5 { /* dark blue */
+    stroke-width: 7.0;
+    stroke-linejoin: round;
     fill: #d3dce8;
     stroke: #71aae2;
   }
-  .main_map .district_label_5 {
+  .district-label-5 {
     fill: #71aae2;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 50px;
   }
-  .dist_num_7 { /* yellow */
+  .dist-num-7 { /* yellow */
+    stroke-width: 7.0;
+    stroke-linejoin: round;
     fill: #f5f0e2;
     stroke: #c9b874;
   }
-  .main_map .district_label_7 {
+  .district-label-7 {
     fill: #c9b874;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 50px;
   }
-  .dist_num_8 { /* red */
+  .dist-num-8 { /* red */
+    stroke-width: 7.0;
+    stroke-linejoin: round;
     fill: #eed8da;
     stroke: #ed8897;
   }
-  .main_map .district_label_8 {
+  .district-label-8 {
     fill: #ed8897;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 50px;
   }
-  .district_border {
+  .district-border {
     fill: none;
     stroke: black;
     stroke-width: 0.4;
     stroke-linejoin: round;
     stroke-dasharray: 0.6 0.6;
   }
-  .town_label {
+  .town-label {
+    font-family: Cadman, sans-serif;
     font-weight: bold;
-  }
-  .main_map .town_label {
     font-size: 5px;
     text-anchor: middle;
     alignment-baseline: middle;
   }
-  .district_label {
-    font-weight: bold;
-  }
-  .main_map .district_label {
-    font-size: 50px;
-  }
 contents:
   - !Group
-    class: "main_map"
+    class: "main-map"
     frame: true
     bounding_box: { left: 5, right: 411, top: 5, bottom: 295 }
     region: { left: 213000, right: 248000, bottom: 888000, top: 913000 }
@@ -145,26 +162,26 @@ contents:
         class_column: "DIST_NUM"
         self_clip: true
       - !Group
-        class: "district_label"
+        class: "district-label"
         contents:
           - !Label
-            class: "district_label_4"
+            class: "district-label-4"
             text: "4"
             location: { x: 230000, y: 888000}
           - !Label
-            class: "district_label_5"
+            class: "district-label-5"
             text: "5"
             location: { x: 230000, y: 888000}
           - !Label
-            class: "district_label_6"
+            class: "district-label-6"
             text: "6"
             location: { x: 230000, y: 888000}
           - !Label
-            class: "district_label_7"
+            class: "district-label-7"
             text: "7"
             location: { x: 230000, y: 888000}
           - !Label
-            class: "district_label_8"
+            class: "district-label-8"
             text: "8"
             location: { x: 230000, y: 888000}
       - !Layer
@@ -180,7 +197,7 @@ contents:
         filters:
           - !OneOf {key: "RDTYPE", valid_values: [1, 2, 3, 4, 5]}
       - !Layer
-        class: "district_border"
+        class: "district-border"
         filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
       - !Layer
         class: "stream"
@@ -193,7 +210,7 @@ contents:
         filters:
           - !OneOf {key: "OUTLINE", valid_values: [17]}
       - !Layer
-        class: "town_label"
+        class: "town-label"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
         label_column: "TOWN"
         case: !Upper
