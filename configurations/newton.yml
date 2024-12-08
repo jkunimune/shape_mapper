@@ -190,7 +190,7 @@ contents:
       - !Layer
         class: "water"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
-        filters: !OneOf {key: "POLY_CODE", valid_values: [1, 6, 8]}
+        filters: [!OneOf {key: "POLY_CODE", valid_values: [1, 6, 8]}]
       - !Layer
         class: "street bottom"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
