@@ -173,7 +173,7 @@ style: |
     stroke-width: 0.3;
     stroke-linecap: square;
   }
-bounding_box: { left: -162, right: 162, top: -122, bottom: 122 }
+bounding_box: { left: -165, right: 165, top: -125, bottom: 125 }
 contents:
   - !Group
     frame: true

@@ -5,7 +5,7 @@ description: "
   <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
     Massachusetts Bureau of Geographic Information
   </a>."
-bounding_box: { left: -3, right: 353, top: -3, bottom: 353 }
+bounding_box: { left: -5, right: 355, top: -5, bottom: 355 }
 style: |
   .frame {
     fill: none;

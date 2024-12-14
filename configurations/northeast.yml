@@ -242,7 +242,7 @@ style: |
     stroke-width: 0.4px;
     stroke-linecap: square;
   }
-bounding_box: { left: -413, right: 387, top: -90, bottom: 210 }
+bounding_box: { left: -420, right: 394, top: -97, bottom: 217 }
 contents:
   # - !RasterLayer
   #   filename: "Natural Earth/ne_shaded_relief"

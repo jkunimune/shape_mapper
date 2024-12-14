@@ -309,7 +309,7 @@ contents:
   - !Group
     class: "main-map"
     frame: true
-    bounding_box: { left: 5, right: 595, top: 5, bottom: 595 }
+    bounding_box: { left: 10, right: 590, top: 10, bottom: 590 }
     region: { left: 217000, right: 245000, bottom: 887000, top: 915000 }
     contents:
       - !Layer
