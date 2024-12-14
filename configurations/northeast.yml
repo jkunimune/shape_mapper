@@ -353,8 +353,8 @@ contents:
         filename: "USA_Major_Cities"
         marker_name: "circle"
         size: 9
-        filters: # I manually selected these nine cities to have big markers: Boston, Springfield, Providence, Hartford, New Haven, New York, Newark, Philly, Baltimore, Washington
-          - !OneOf {key: "PLACE_FIPS", valid_values: ["3651000", "2507000", "3451000", "4260000", "2404000", "1150000", "4459000", "5167000", "0952000", "2567000", "0937000"]}
+        filters: # I manually selected these nine cities to have big markers: Boston, Providence, Hartford, New York, Newark, Philly, Baltimore, Washington
+          - !OneOf {key: "PLACE_FIPS", valid_values: ["3651000", "2507000", "3451000", "4260000", "2404000", "1150000", "4459000", "5167000", "0937000"]}
       - !Marker
         class: "compass"
         filename: "cross_arrow"
