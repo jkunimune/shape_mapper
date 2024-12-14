@@ -70,7 +70,7 @@ style: |
   .bottom .fenway, .bottom .gerrys-landing-road, .bottom .fellsway-west,
   .bottom .memorial-drive, .bottom .fresh-pond-parkway, .bottom .alewife-brook-parkway,
   .bottom .mystic-valley-parkway, .bottom .james-j-storrow-memorial-drive,
-  .bottom .soldiers-field-road, .bottom .edward-h-land-boulevard, .bottom .austin-street,
+  .bottom .soldiers-field-road, .bottom .edwin-h-land-boulevard, .bottom .austin-street,
   .bottom .river-street, .street.bottom.without-bikelane {
     fill: none;
     stroke: #808080;
@@ -101,22 +101,22 @@ style: |
     stroke: #000000;
   }
   .bikepath-label {
-    fill: #161616;
+    fill: #303030;
     font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 2.4px;
-    font-weight: bold;
+    font-weight: normal;
   }
   .street-label {
-    fill: #161616;
+    fill: #303030;
     font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 2.4px;
-    font-weight: bold;
+    font-weight: normal;
   }
   .highway-label {
     fill: #ffffff;
     font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
-    font-weight: bold;
+    font-weight: normal;
   }
   .location-label {
     fill: #000000;
@@ -128,13 +128,13 @@ style: |
     fill: #0f3200;
     font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
-    font-weight: bold;
+    font-weight: normal;
   }
   .institution-label {
     fill: #581631;
     font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
-    font-weight: bold;
+    font-weight: normal;
   }
   .water-label {
     fill: #002537;
@@ -311,6 +311,7 @@ contents:
               - "FENWAY"
               - "GERRYS LANDING ROAD"
               - "EDWIN H LAND BOULEVARD"
+              - "CHARLESTOWN AVENUE"
               - "AUSTIN STREET"
               - "HIGH STREET"
       - !Layer
@@ -433,6 +434,7 @@ contents:
               - "FENWAY"
               - "GERRYS LANDING ROAD"
               - "EDWIN H LAND BOULEVARD"
+              - "CHARLESTOWN AVENUE"
               - "AUSTIN STREET"
               - "HIGH STREET"
       - !Layer
@@ -446,7 +448,6 @@ contents:
               - "INTERSTATE 93"
               - "JOHN F FITZGERALD EXPRESSWAY"
               - "MASSACHUSETTS TURNPIKE"
-              - "CHARLESTOWN AVENUE"
       - !Layer
         class: "station"
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
@@ -567,6 +568,7 @@ contents:
               - "FENWAY"
               - "GERRYS LANDING ROAD"
               - "EDWIN H LAND BOULEVARD"
+              - "CHARLESTOWN AVENUE"
               - "AUSTIN STREET"
               - "HIGH STREET"
       - !Layer

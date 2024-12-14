@@ -103,10 +103,10 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
             });
         }
 
-        // for a ClipPath, similarly just load its child
+        // for a ClipPath, load its child and consolidate it into one element if possible
         Content::ClipPath { content, id } => {
             return Ok(Content::ClipPath {
-                id, content: boxed::Box::new(load_content(*content, outer_region)?),
+                id, content: boxed::Box::new(consolidate_content(load_content(*content, outer_region)?)?),
             });
         }
 
@@ -709,6 +709,48 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
 
     *element_count += 1;
     return Ok(string);
+}
+
+
+/// take some content and turn it into a single Rectangle, Path, or Marker element
+fn consolidate_content(content: Content) -> Result<Content> {
+    match content {
+        Content::Group { contents, .. } => {
+            let mut parts = Vec::new();
+            for child in contents {
+                let mut child_points = convert_content_to_path_points(consolidate_content(child)?)?;
+                parts.append(&mut child_points);
+            }
+            return Ok(Content::Path {
+                parts: parts, closed: true,
+                self_clip: false, class: None,
+            });
+        },
+        other => {
+            return Ok(other);
+        },
+    };
+}
+
+
+fn convert_content_to_path_points(content: Content) -> Result<Vec<Vec<SerializablePoint>>> {
+    match content {
+        Content::Path { parts, .. } => {
+            return Ok(parts);
+        }
+        Content::Rectangle { coordinates, .. } => {
+            let Box {left, right, top, bottom} = coordinates;
+            return Ok(vec![vec![
+                SerializablePoint {x: left, y: top},
+                SerializablePoint {x: left, y: bottom},
+                SerializablePoint {x: right, y: bottom},
+                SerializablePoint {x: right, y: top},
+            ]]);
+        }
+        _ => {
+            return Err(anyhow!("only paths and rectangles can be converted to paths."));
+        }
+    }
 }
 
 

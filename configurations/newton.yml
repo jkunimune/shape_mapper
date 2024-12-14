@@ -116,22 +116,22 @@ style: |
     stroke: #ffbed5;
   }
   .trail-label {
-    fill: #161616;
+    fill: #303030;
     font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 2.4px;
-    font-weight: bold;
+    font-weight: normal;
   }
   .street-label {
-    fill: #161616;
+    fill: #303030;
     font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 2.4px;
-    font-weight: bold;
+    font-weight: normal;
   }
   .highway-label {
     fill: #ffffff;
     font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
-    font-weight: bold;
+    font-weight: normal;
   }
   .location-label {
     fill: #000000;
@@ -140,23 +140,24 @@ style: |
     font-weight: bold;
   }
   .town-label {
-    fill: #00000099;
+    fill: #000000;
     font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 4.8px;
     font-weight: normal;
     letter-spacing: 2.4px;
+    opacity: 0.6;
   }
   .park-label {
     fill: #0f3200;
     font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
-    font-weight: bold;
+    font-weight: normal;
   }
   .institution-label {
     fill: #581631;
     font-family: Helvetica Neue,Helvetica,sans-serif;
     font-size: 3.2px;
-    font-weight: bold;
+    font-weight: normal;
   }
   .water-label {
     fill: #002537;
@@ -219,7 +220,8 @@ contents:
         filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
         class_column: "RDTYPE"
         filters:
-          - !OneOf {key: "ROUTE_SYST", valid_values: ["US", "SR", "L", "N", "R"]}
+          - !OneOf {key: "ROUTE_SYST", valid_values: ["US", "SR", "L", "N"]}
+          - !OneOf {key: "RDTYPE", valid_values: [2, 3, 4, 5]}
       - !Layer
         class: "trail"
         filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
@@ -232,7 +234,8 @@ contents:
         filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
         class_column: "RDTYPE"
         filters:
-          - !OneOf {key: "ROUTE_SYST", valid_values: ["US", "SR", "L", "N", "R"]}
+          - !OneOf {key: "ROUTE_SYST", valid_values: ["US", "SR", "L", "N"]}
+          - !OneOf {key: "RDTYPE", valid_values: [2, 3, 4, 5]}
       - !Layer
         class: "highway"
         filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"

@@ -24,40 +24,46 @@ style: |
     stroke: #354d9c;
     stroke-width: 0.4;
   }
-  .state .ma, .state, .md {
-    stroke: #927ADC88; /* purple */
+  .state .ma, .state .md {
+    stroke: #927ADC; /* purple */
     stroke-width: 4.0;
     stroke-linejoin: round;
+    opacity: .50;
     fill: none;
   }
   .state .me, .state .nj {
-    stroke: #E370C488; /* pink */
+    stroke: #E370C4; /* pink */
     stroke-width: 4.0;
     stroke-linejoin: round;
+    opacity: .50;
     fill: none;
   }
   .state .ri, .state .va {
-    stroke: #DC517088; /* red */
+    stroke: #DC5170; /* red */
     stroke-width: 4.0;
     stroke-linejoin: round;
+    opacity: .50;
     fill: none;
   }
   .state .ny, .state .de {
-    stroke: #D5764588; /* orange */
+    stroke: #D57645; /* orange */
     stroke-width: 4.0;
     stroke-linejoin: round;
+    opacity: .50;
     fill: none;
   }
   .state .nh, .state .dc {
-    stroke: #B19D3D88; /* yellow */
+    stroke: #B19D3D; /* yellow */
     stroke-width: 4.0;
     stroke-linejoin: round;
+    opacity: .50;
     fill: none;
   }
   .state .ct, .state .pa {
-    stroke: #4B893E88; /* green */
+    stroke: #4B893E; /* green */
     stroke-width: 4.0;
     stroke-linejoin: round;
+    opacity: .50;
     fill: none;
   }
   .rural-area {
@@ -65,6 +71,7 @@ style: |
   }
   .urban-area {
     fill: #f7efe3;
+    clip-path: url(#land-polygon);
   }
   .river {
     fill: none;
@@ -72,8 +79,6 @@ style: |
     stroke-width: 0.6;
     stroke-linejoin: round;
     stroke-linecap: round;
-  }
-  .map .urban-area, .map .river {
     clip-path: url(#land-polygon);
   }
   .coastline {
@@ -82,20 +87,38 @@ style: |
     stroke-width: 0.3;
     stroke-linejoin: round;
   }
-  .railroad {
+  .railroad .bottom, .railroad.bottom {
     fill: none;
-    stroke: #5f5f5f;
+    stroke: #505050;
+    stroke-width: 1.2;
+    stroke-linejoin: round;
+  }
+  .railroad .top, .railroad.top {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 0.6;
+    stroke-linejoin: round;
+    stroke-dasharray: 2.5;
+  }
+  .highway .bottom, .highway.bottom {
+    fill: none;
+    stroke: #636363;
     stroke-width: 0.9;
     stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .highway .top, .highway.top {
+    fill: none;
+    stroke: #eece1f;
+    stroke-width: 0.3;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
   .state-border {
     fill: none;
     stroke: black;
     stroke-width: 0.2;
     stroke-linejoin: round;
-  }
-  .state {
-    stroke: none;
   }
   .city {
     fill: black;
@@ -108,12 +131,13 @@ style: |
     stroke-width: 0.1;
   }
   .state-label {
-    fill: #00000099;
+    fill: #000000;
     font-family: "Frutiger LT Pro",sans-serif;
     font-weight: 100;
     font-size: 8.0px;
     text-anchor: middle;
     letter-spacing: 0.8px;
+    opacity: 0.6;
   }
   .graticule-label {
     fill: #354d9c;
@@ -245,11 +269,13 @@ contents:
         content:
           !Layer
           filename: "USGS/statesp010g/statesp010g"
+          decimation: 0.001
           filters:
             - !OneOf {key: "TYPE", valid_values: ["Land"]}
       - !Layer
         class: "rural-area"
         filename: "USGS/statesp010g/statesp010g"
+        decimation: 0.001
         filters:
           - !OneOf {key: "TYPE", valid_values: ["Land"]}
       - !Layer
@@ -258,6 +284,7 @@ contents:
       - !Layer
         class: "state"
         filename: "USGS/statesp010g/statesp010g"
+        decimation: 0.001
         filters:
           - !OneOf {key: "TYPE", valid_values: ["Land"]}
         class_column: "STATE_ABBR"
@@ -265,15 +292,31 @@ contents:
       - !Layer
         class: "state-border"
         filename: "USGS/statesp010g/statesp010g"
+        decimation: 0.001
       - !Layer
         class: "river"
         filename: "CECAtlas/NA_Lakes_and_Rivers/data/rivers_l/northamerica_rivers_cec_2023_GCS"
+        decimation: 0.001
       - !Layer
         class: "coastline"
         filename: "USGS/coastll010g/coastll010g"
+        decimation: 0.001
+      - !Layer
+        class: "highway bottom"
+        filename: "USDOT/NTAD_North_American_Roads/North_American_Roads"
+        decimation: 0.001
+        filters:
+          - !OneOf {key: "CLASS", valid_values: [1]}
+      - !Layer
+        class: "highway top"
+        filename: "USDOT/NTAD_North_American_Roads/North_American_Roads"
+        decimation: 0.001
+        filters:
+          - !OneOf {key: "CLASS", valid_values: [1]}
       - !Layer
         class: "railroad"
         filename: "USDOT/Amtrak_Routes"
+        double: true
       - !Layer
         class: "state-label"
         filename: "USGS/statesp010g/statesp010g"
@@ -480,7 +523,7 @@ contents:
         filename: "cc"
         class: "symbol"
         location: {x: 0, y: 40}
-        size: 0.002
+        size: 0.001
       - !Label
         class: "tiny"
         location: {x: 50, y: 40}
@@ -492,11 +535,19 @@ contents:
         class: "rural-area legend-box"
         coordinates: {left: 100, right: 105, top: 20, bottom: 24}
       - !Line
-        class: "railroad"
+        class: "railroad bottom"
         start: {x: 130, y: 10}
         end: {x: 135, y: 10}
       - !Line
-        class: "river"
+        class: "railroad top"
+        start: {x: 130, y: 10}
+        end: {x: 135, y: 10}
+      - !Line
+        class: "highway bottom"
+        start: {x: 130, y: 20}
+        end: {x: 135, y: 20}
+      - !Line
+        class: "highway top"
         start: {x: 130, y: 20}
         end: {x: 135, y: 20}
       - !Marker
@@ -515,8 +566,15 @@ contents:
         text: "Oblique Mercator projection, 1 : 1 000 000 scale."
       - !Ruler
         class: "ruler"
-        location: {x: 100, y: 40}
+        location: {x: 100, y: 30}
         scale: 1.60934  # km/mi conversion (the base map scale is 1km/1mm)
-        ticks: [0, 10, 20, 30, 40, 50]
+        ticks: [0, 10, 20, 30, 40, 50, 60]
         unit: "mi"
         tick_length: 2
+      - !Ruler
+        class: "ruler"
+        location: {x: 100, y: 30}
+        scale: 1
+        ticks: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        unit: "km"
+        tick_length: -2
