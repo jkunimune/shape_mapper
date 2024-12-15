@@ -10,18 +10,25 @@ style: |
   .frame {
     fill: none;
     stroke: black;
-    stroke-width: 3.0;
+    stroke-width: 4.0;
     stroke-linejoin: miter;
   }
-  .pond, .background {
+  .background, .pond {
     fill: #aadbea;
+    stroke: #84b6d0;
+    stroke-width: 3.0;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .shore {
+    fill: none;
     stroke: #125588;
     stroke-width: 0.5;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .stream {
-    fill: none;
+  .water-patch {
+    fill: #84b6d0;
     stroke: #125588;
     stroke-width: 0.5;
     stroke-linejoin: round;
@@ -45,12 +52,14 @@ style: |
     stroke: #000000;
     stroke-width: 1.0;
     stroke-linejoin: round;
+    stroke-linecap: round;
   }
   .highway .top {
     fill: none;
     stroke: #dec12c;
     stroke-width: 0.6;
     stroke-linejoin: round;
+    stroke-linecap: round;
   }
   .town-border {
     fill: none;
@@ -141,6 +150,11 @@ contents:
     region: { left: 218000, right: 253000, bottom: 883000, top: 918000 }
     contents:
       - !Layer
+        class: "pond"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC_GENCOAST"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [4]}
+      - !Layer
         class: "town"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM_GENCOAST"
         class_column: "TOWN"
@@ -152,11 +166,15 @@ contents:
       - !Layer
         class: "pond"
         filename: "MassGIS/majorhydro/MAJPOND_POLY"
+        self_clip: true
       - !Layer
-        class: "stream"
+        class: "shore"
+        filename: "MassGIS/majorhydro/MAJPOND_POLY"
+      - !Layer
+        class: "shore"
         filename: "MassGIS/majorhydro/MAJSTRM_ARC"
       - !Layer
-        class: "stream"
+        class: "shore"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC_GENCOAST"
         filters:
           - !OneOf {key: "OUTLINE", valid_values: [4]}
@@ -172,7 +190,7 @@ contents:
             - !Rectangle
               coordinates: { left: 235800, right: 237740, bottom: 890700, top: 892200 }
       - !Layer
-        class: "pond patches-for-water-issues"
+        class: "water-patch patches-for-water-issues"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
         filters:
           - !OneOf {key: "NAME", valid_values: ["Mystic River", "Charles River", "Neponset River"]}
