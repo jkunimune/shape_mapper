@@ -6,7 +6,7 @@ description: "
   <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
     Massachusetts Bureau of Geographic Information
   </a>."
-bounding_box: { left: 0, right: 416, top: 0, bottom: 300 }
+bounding_box: { left: 0, right: 406, top: 0, bottom: 290 }
 style: |
   .legend .background {
     fill: #ffffff;
@@ -153,7 +153,7 @@ contents:
   - !Group
     class: "main-map"
     frame: true
-    bounding_box: { left: 5, right: 411, top: 5, bottom: 295 }
+    bounding_box: { left: 0, right: 406, top: 0, bottom: 290 }
     region: { left: 213000, right: 248000, bottom: 888000, top: 913000 }
     contents:
       - !Layer

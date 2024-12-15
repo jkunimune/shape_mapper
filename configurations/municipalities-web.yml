@@ -1,0 +1,156 @@
+title: "Municipalities of the Boston area"
+description: "
+  A map of the many municipalities in the Boston area.
+  All geographic data is taken from the
+  <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
+    Massachusetts Bureau of Geographic Information
+  </a>."
+bounding_box: { left: 0, right: 150, top: 0, bottom: 150 }
+style: |
+  .frame {
+    fill: none;
+    stroke: black;
+    stroke-width: 2.0;
+    stroke-linejoin: miter;
+  }
+  .background {
+    fill: #87c6f2;
+    stroke: none;
+  }
+  .pond {
+    fill: #6eacd7;
+    stroke: #0279b3;
+    stroke-width: 0.4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .thin-shore {
+    fill: none;
+    stroke: #0279b3;
+    stroke-width: 0.4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .thick-shore {
+    fill: none;
+    stroke: #6eacd7;
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .rail .bottom {
+    fill: none;
+    stroke: #863ca4;
+    stroke-width: 0.3;
+    stroke-linejoin: round;
+  }
+  .rail .top {
+    fill: none;
+    stroke: #863ca4;
+    stroke-width: 0.8;
+    stroke-dasharray: 2.0 2.0;
+    stroke-linejoin: round;
+  }
+  .highway {
+    fill: none;
+    stroke: #d24e3e;
+    stroke-width: 0.8;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .town-border {
+    fill: none;
+    stroke: #000000;
+    stroke-width: 0.2;
+    stroke-linejoin: miter;
+    stroke-miterlimit: 2;
+  }
+  .revere, .watertown, .medford, .weymouth, .wakefield, .canton, .medfield, .marblehead, .billerica {
+    fill: #CCC8E5; /* purple */
+  }
+  .newton, .westwood, .malden, .hull, .lexington, .lynn, .reading {
+    fill: #F3D5EB; /* pink */
+  }
+  .cambridge, .quincy, .winthrop, .dedham, .woburn, .salem, .lynnfield, .weston {
+    fill: #E3BDC0; /* red */
+  }
+  .arlington, .saugus, .everett, .dover, .randolph, .wellesley, .lincoln {
+    fill: #EBCFBD; /* orange */
+  }
+  .boston, .stoneham, .braintree, .waltham, .norwood, .nahant, .peabody, .burlington {
+    fill: #E7E3C6; /* yellow */
+  }
+  .brookline, .somerville, .belmont, .milton, .chelsea, .melrose, .winchester, .needham, .walpole, .swampscott, .hingham, .bedford {
+    fill: #ADC3AB; /* green */
+  }
+  .town-hall path {
+    fill: black;
+  }
+  .town-hall-label {
+    fill: black;
+    font-family: Helvetica, Neue Haas Grotesk, Neue Haas Grotesk Text, sans-serif;
+    font-weight: normal;
+    font-size: 3.5px;
+    text-anchor: middle;
+  }
+contents:
+  - !Group
+    frame: true
+    bounding_box: { left: 0, right: 150, top: 0, bottom: 150 }
+    region: { left: 218000, right: 253000, bottom: 883000, top: 918000 }
+    contents:
+      - !Layer
+        class: "thick-shore"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC_GENCOAST"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [4]}
+      - !Layer
+        class: "town"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM_GENCOAST"
+        class_column: "TOWN"
+      - !Layer
+        class: "town-border"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC_GENCOAST"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [17]}
+      - !Layer
+        class: "pond"
+        filename: "MassGIS/majorhydro/MAJPOND_POLY"
+      - !Layer
+        class: "thin-shore"
+        filename: "MassGIS/majorhydro/MAJSTRM_ARC"
+      - !Layer
+        class: "thin-shore"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC_GENCOAST"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [4]}
+      - !ClipPath
+        id: "water-issue-spots"
+        content:
+          !Group
+          contents:
+            - !Rectangle
+              coordinates: { left: 232600, right: 233450, bottom: 905850, top: 907300 }
+            - !Rectangle
+              coordinates: { left: 235300, right: 236200, bottom: 901800, top: 902300 }
+            - !Rectangle
+              coordinates: { left: 235800, right: 237740, bottom: 890700, top: 892200 }
+      - !Layer
+        class: "thin-shore patches-for-water-issues"
+        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+        filters:
+          - !OneOf {key: "NAME", valid_values: ["Mystic River", "Charles River", "Neponset River"]}
+      - !Layer
+        class: "highway"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_RTE_MAJOR"
+        filters:
+          - !OneOf {key: "ADMIN_TYPE", valid_values: [1, 2, 3]}
+      - !Layer
+        class: "rail"
+        filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
+        double: true
+      - !Layer
+        class: "town-hall-label"
+        filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"
+        label_column: "CITY"
+        case: !Upper
