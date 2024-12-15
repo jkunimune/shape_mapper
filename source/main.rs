@@ -745,6 +745,7 @@ fn convert_content_to_path_points(content: Content) -> Result<Vec<Vec<Serializab
                 SerializablePoint {x: left, y: bottom},
                 SerializablePoint {x: right, y: bottom},
                 SerializablePoint {x: right, y: top},
+                SerializablePoint {x: left, y: top},
             ]]);
         }
         _ => {
