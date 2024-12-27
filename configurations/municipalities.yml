@@ -52,14 +52,14 @@ style: |
     stroke: #000000;
     stroke-width: 1.0;
     stroke-linejoin: round;
-    stroke-linecap: round;
+    stroke-linecap: butt;
   }
   .highway .top {
     fill: none;
-    stroke: #dec12c;
+    stroke: #f3d421;
     stroke-width: 0.6;
     stroke-linejoin: round;
-    stroke-linecap: round;
+    stroke-linecap: butt;
   }
   .town-border {
     fill: none;
@@ -78,22 +78,22 @@ style: |
     stroke-width: 0.12;
   }
   .revere, .watertown, .medford, .weymouth, .wakefield, .canton, .medfield, .marblehead, .billerica {
-    fill: #AF9CB7; /* purple */
+    fill: #D9C5DC; /* purple */
   }
   .newton, .westwood, .malden, .hull, .lexington, .lynn, .reading {
-    fill: #DCA5B7; /* pink */
+    fill: #FFD2E1; /* pink */
   }
   .cambridge, .quincy, .winthrop, .dedham, .woburn, .salem, .lynnfield, .weston {
-    fill: #CD8D85; /* red */
+    fill: #EEB9B7; /* red */
   }
   .arlington, .saugus, .everett, .dover, .randolph, .wellesley, .lincoln {
-    fill: #D1A07A; /* orange */
+    fill: #F6CBB4; /* orange */
   }
   .boston, .stoneham, .braintree, .waltham, .norwood, .nahant, .peabody, .burlington {
-    fill: #C7B87F; /* yellow */
+    fill: #F3E0BD; /* yellow */
   }
   .brookline, .somerville, .belmont, .milton, .chelsea, .melrose, .winchester, .needham, .walpole, .swampscott, .hingham, .bedford {
-    fill: #879C6B; /* green */
+    fill: #BAC0A2; /* green */
   }
   .town-hall path {
     fill: black;
@@ -220,11 +220,8 @@ contents:
         case: !Upper
       - !Layer
         class: "road-label"
-        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
-        filters:
-          - !OneOf {key: "RDTYPE", valid_values: [1, 2]}
-          - !GreaterThan {key: "SHAPE_LEN", cutoff: 5000}
-        label_column: "STREET_NAM"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_RTE_MAJOR"
+        label_column: "RT_NUMBER"
       - !Layer
         class: "town-hall-label"
         filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA"

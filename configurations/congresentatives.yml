@@ -201,7 +201,7 @@ style: |
   }
   .station-label .bottom {
     stroke: #ffffff;
-    stroke-width: 0.4;
+    stroke-width: 0.5;
     font-family: Cadman, sans-serif;
     font-size: 3.5px;
     text-anchor: start;
@@ -214,7 +214,7 @@ style: |
   }
   .park-label .bottom {
     stroke: #ffffff;
-    stroke-width: 0.4;
+    stroke-width: 0.5;
     font-family: Cadman, sans-serif;
     font-size: 3.5px;
     text-anchor: middle;
@@ -227,7 +227,7 @@ style: |
   }
   .pond-label .bottom {
     stroke: #ffffff;
-    stroke-width: 0.4;
+    stroke-width: 0.5;
     font-family: Cadman, sans-serif;
     font-size: 3.5px;
     font-style: italic;
@@ -240,14 +240,7 @@ style: |
     font-style: italic;
     text-anchor: middle;
   }
-  .airport-label .bottom {
-    stroke: #ffffff;
-    stroke-width: 0.4;
-    font-family: Cadman, sans-serif;
-    font-size: 4.0px;
-    text-anchor: middle;
-  }
-  .airport-label .top {
+  .airport-label {
     fill: #3b3b3b;
     font-family: Cadman, sans-serif;
     font-size: 4.0px;
@@ -255,7 +248,7 @@ style: |
   }
   .main-map .town-label .bottom {
     stroke: #ffffff;
-    stroke-width: 0.4;
+    stroke-width: 0.5;
     font-family: Cadman, sans-serif;
     font-weight: bold;
     font-size: 6px; /* note: 6px is actually 6 millimeters (about 17pt) */
@@ -270,7 +263,7 @@ style: |
   }
   .minimap .town-label .bottom {
     stroke: #ffffff;
-    stroke-width: 0.4;
+    stroke-width: 0.5;
     font-family: Cadman, sans-serif;
     font-weight: bold;
     font-size: 5px;
@@ -423,7 +416,7 @@ contents:
         filename: "MassDOT/Airports"
         label_column: "AIRPORT_NA"
         case: !Upper
-        double: true
+        double: false
       - !Layer
         class: "town-label"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
@@ -433,7 +426,7 @@ contents:
   - !Group
     class: "minimap"
     frame: true
-    bounding_box: { left: 5, right: 245, top: 5, bottom: 160.24 }
+    bounding_box: { left: 10, right: 250, top: 10, bottom: 170.24 }
     region: { left: 28000, right: 280000, bottom: 801000, top: 964000 }
     contents:
       - !Rectangle
@@ -484,6 +477,7 @@ contents:
       - !Layer
         class: "district-border"
         filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+        decimation: 100
       - !Rectangle
         id: "shown-region-indicator"
         class: "state-border"
@@ -501,58 +495,97 @@ contents:
         double: true
         filters:
           - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}
+      - !Layer
+        class: "state-border"
+        filename: "MassGIS/newengland/NEWENGLAND_POLY"
+        class_column: "NAME"
   - !Group
     class: "legend legend-label"
-    frame: true
-    bounding_box: { left: 405, right: 595, top: 519, bottom: 595}
-    region: { left: 0, right: 100, bottom: 0, top: 40 }
+    frame: false
+    bounding_box: { left: 18, right: 150, top: 110, bottom: 170}
+    region: { left: 0, right: 132, top: 0, bottom: 60 }
     contents:
       - !Label
         class: "legend-title"
         text: "Congressional districts"
-        location: { x: 50, y: 31 }
+        location: { x: 66, y: 10 }
       - !Label
         class: "legend-title"
         text: "of the Boston area"
-        location: { x: 50, y: 25 }
+        location: { x: 66, y: 20 }
       - !Label
         class: "legend-subtitle"
-        text: "Conformal conic projection, 1:50k"
-        location: { x: 50, y: 20}
+        text: "Conformal conic projection, 1 : 50 000"
+        location: { x: 66, y: 30}
       - !Line
         class: "road class-3"
-        start: { x: 6, y: 14 }
-        end: { x: 16, y: 14 }
+        start: { x: 10, y: 40 }
+        end: { x: 20, y: 40 }
       - !Label
         text: "Road"
-        location: { x: 18, y: 13 }
+        location: { x: 23, y: 40 }
       - !Group
         class: "track"
         contents:
           - !Line
             class: "bottom"
-            start: { x: 6, y: 7 }
-            end: { x: 16, y: 7 }
+            start: { x: 10, y: 50 }
+            end: { x: 20, y: 50 }
           - !Line
             class: "top"
-            start: { x: 6, y: 7 }
-            end: { x: 16, y: 7 }
+            start: { x: 10, y: 50 }
+            end: { x: 20, y: 50 }
       - !Label
         text: "Train track"
-        location: { x: 18, y: 6 }
-      - !Line
+        location: { x: 23, y: 50 }
+      - !Rectangle
         class: "town"
-        start: { x: 48, y: 14 }
-        end: { x: 58, y: 14 }
+        coordinates: { left: 82, right: 88, top: 38, bottom: 42 }
       - !Label
         text: "Municipal border"
-        location: { x: 60, y: 13}
+        location: { x: 93, y: 40}
       - !Rectangle
         class: "pond"
-        coordinates: { left: 48, right: 58, bottom: 5, top: 9 }
+        coordinates: { left: 82, right: 88, top: 48, bottom: 52 }
       - !Rectangle
         class: "stream"
-        coordinates: { left: 48, right: 58, bottom: 5, top: 9 }
+        coordinates: { left: 82, right: 88, top: 48, bottom: 52 }
       - !Label
         text: "Pond or river"
-        location: { x: 60, y: 6 }
+        location: { x: 93, y: 50 }
+  - !Group
+    class: "legend legend-label"
+    frame: true
+    bounding_box: { left: 535, right: 590, top: 460, bottom: 590}
+    region: { left: 0, right: 55, top: 0, bottom: 130 }
+    contents:
+      - !Label
+        text: "Current representatives:"
+        location: { x: 10, y: 10}
+      - !Label
+        text: "1: Richald Neal"
+        location: { x: 10, y: 20}
+      - !Label
+        text: "2: Jim McGovern"
+        location: { x: 10, y: 30}
+      - !Label
+        text: "3: Lori Trahan"
+        location: { x: 10, y: 40}
+      - !Label
+        text: "4: Jake Auchincloss"
+        location: { x: 10, y: 50}
+      - !Label
+        text: "5: Katherine Clark"
+        location: { x: 10, y: 60}
+      - !Label
+        text: "6: Seth Moulton"
+        location: { x: 10, y: 70}
+      - !Label
+        text: "7: Ayanna Pressley"
+        location: { x: 10, y: 80}
+      - !Label
+        text: "8: Stephen Lynch"
+        location: { x: 10, y: 90}
+      - !Label
+        text: "9: William Keating"
+        location: { x: 10, y: 100}

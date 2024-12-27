@@ -89,7 +89,7 @@ style: |
   }
   .railroad .bottom, .railroad.bottom {
     fill: none;
-    stroke: #505050;
+    stroke: #782850;
     stroke-width: 1.2;
     stroke-linejoin: round;
   }
@@ -242,7 +242,7 @@ style: |
     stroke-width: 0.4px;
     stroke-linecap: square;
   }
-bounding_box: { left: -420, right: 394, top: -97, bottom: 217 }
+bounding_box: { left: -413, right: 387, top: -90, bottom: 210 }
 contents:
   # - !RasterLayer
   #   filename: "Natural Earth/ne_shaded_relief"
@@ -257,7 +257,7 @@ contents:
         scale: 1e-6
       pole_latitude: 34.9
       pole_longitude: -200.9
-    bounding_box: { left: -410, right: 384, top: -87, bottom: 207 }
+    bounding_box: { left: -403, right: 377, top: -80, bottom: 200 }
     region: { left: -78.1, right: -69.0, bottom: 36.9, top: 43.7 }
     contents:
       - !Graticule
