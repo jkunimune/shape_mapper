@@ -1269,6 +1269,8 @@ impl Filter {
                     FieldValue::Numeric(None) => Ok(false),
                     FieldValue::Character(Some(characters)) => Ok(valid_values.contains(characters)),
                     FieldValue::Character(None) => Ok(false),
+                    FieldValue::Logical(Some(boolean)) => Ok(valid_values.contains(&bool::to_string(boolean).to_uppercase())),
+                    FieldValue::Logical(None) => Ok(false),
                     _ => return Err(anyhow!("you can only filter on numerical and character fields right now.")),
                 }
             }
