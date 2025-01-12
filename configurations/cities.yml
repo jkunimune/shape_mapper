@@ -3,16 +3,19 @@ description: "
   A collection of maps comparing the layouts of different cities in the US."
 bounding_box: { left: -5, right: 305, top: -5, bottom: 305 }
 style: |
-  .background {
+  .background, .development {
     fill: #ffffff;
+    stroke: #ffffff;
+    stroke-width: .1;
+    stroke-linejoin: round;
   }
-  .water {
+  .water, .watery .background {
     fill: #3a81d7;
     stroke: #3a81d7;
     stroke-width: .1;
     stroke-linejoin: round;
   }
-  .park {
+  .park, .parky .background {
     fill: #92d36c;
     stroke: #92d36c;
     stroke-width: .1;
@@ -20,7 +23,7 @@ style: |
   .rail {
     fill: none;
     stroke: #88012a;
-    stroke-width: .30;
+    stroke-width: .40;
     stroke-linecap: square;
     stroke-linejoin: round;
   }
@@ -66,6 +69,12 @@ contents:
     bounding_box: { left: 100, right: 200, top: 0, bottom: 100 }
     region: { left: 625500, right: 635500, bottom: 2361500, top: 2371500 }
     contents:
+      - !Rectangle
+        class: "park"
+        coordinates: { left: 632000, right: 633000, bottom: 2366800, top: 2371500 }
+      - !Rectangle
+        class: "park"
+        coordinates: { left: 634000, right: 635500, bottom: 2365000, top: 2371500 }
       - !Layer
         class: "park"
         filename: "Hawaii/Oahu_Land_Use_1998"
@@ -91,8 +100,14 @@ contents:
   - !Group
     frame: true
     bounding_box: { left: 200, right: 300, top: 0, bottom: 100 }
-    region: { left: 614000, right: 624000, bottom: 2352000, top: 2362000}
+    region: { left: 614400, right: 624400, bottom: 2351000, top: 2361000}
     contents:
+      - !Rectangle
+        class: "park"
+        coordinates: { left: 614400, right: 615100, bottom: 2355000, top: 2357000}
+      - !Rectangle
+        class: "park"
+        coordinates: { left: 614400, right: 614700, bottom: 2357000, top: 2358000}
       - !Layer
         class: "park"
         filename: "Hawaii/Oahu_Land_Use_1998"
@@ -114,7 +129,7 @@ contents:
   - !Group
     frame: true
     bounding_box: { left: 0, right: 100, top: 100, bottom: 200 }
-    region: { left: 231000, right: 241000, bottom: 895000, top: 905000 }
+    region: { left: 231000, right: 241000, bottom: 895500, top: 905500 }
     contents:
       - !Layer
         class: "park"
@@ -139,14 +154,15 @@ contents:
 
   # Pissermore
   - !Group
+    class: "parky"
     frame: true
     bounding_box: { left: 100, right: 200, top: 100, bottom: 200 }
-    region: { left: -13559700, right: -13549700, bottom: 4529000, top: 4539000}
+    region: { left: -13559700, right: -13549700, bottom: 4529100, top: 4539100}
     contents:
       - !Layer
-        class: "park"
-        filename: "Alameda County/General_Plan_Land_Use"
-        filters: [!Not {filter: !OneOf {key: "GPLU_defin", valid_values: ["Rural Density Residential", "Industrial", "Major Public", "Mixed Use"]}}]
+        class: "development"
+        filename: "Livermore/General Plan Land Use/GeneralPlanLandUse_mercator"
+        filters: [!OneOf {key: "PrimaryDes", valid_values: ["UH-1", "UH-2", "UH-3", "UH-4", "UMH", "UM", "ULM", "UL-1", "UL-2", "BCP", "OC", "LOC", "SC", "HC", "NC", "CSGC", "HII", "LII", "CF", "DA", "IN", "SV-RDA"]}]
       - !Layer
         class: "water"
         filename: "MTC/region_water_area_mercator"
@@ -162,7 +178,7 @@ contents:
   - !Group
     frame: true
     bounding_box: { left: 200, right: 300, top: 100, bottom: 200 }
-    region: { left: -122.4800, right: -122.3665, bottom: 37.7300, top: 37.8198}
+    region: { left: -122.4800, right: -122.3661, bottom: 37.73, top: 37.82}
     contents:
       - !Layer
         class: "park"
@@ -188,28 +204,91 @@ contents:
       - !Layer
         class: "road"
         filename: "San Francisco/Streets Active and Retired"
-        filters: [!OneOf {key: "active", valid_values: ["TRUE"]}]
-      # - !Line
-      #   class: "road"
-      #   start: {x: }
+        filters:
+          - !OneOf {key: "active", valid_values: ["TRUE"]}
+          - !Not {filter: !OneOf {key: "layer", valid_values: ["PRIVATE"]}}
+      - !Line
+        class: "road"
+        start: {x: -122.4775, y: 37.8112}
+        end: {x: -122.4784, y: 37.8200}
+      - !Line
+        class: "road"
+        start: {x: -122.4776, y: 37.8112}
+        end: {x: -122.4785, y: 37.8200}
 
   # New York
   - !Group
     frame: true
     bounding_box: { left: 0, right: 100, top: 200, bottom: 300 }
-    region: { left: -10000, right: 10000, bottom: -10000, top: 10000}
-    contents: []
+    region: { left: -74.0489, right: -73.93, bottom: 40.68, top: 40.77}
+    contents:
+      - !Layer
+        class: "park"
+        filename: "NYC Open Data/NYC Planimetric Database_ Open Space (Parks)/export"
+        filters:
+          - !GreaterThan {key: "shape_area", cutoff: 430556.42}
+      - !Layer
+        class: "park"
+        filename: "NYC Open Data/NYC Planimetric Database_ Open Space (Parks)/export"
+        filters:
+          - !GreaterThan {key: "shape_area", cutoff: 430556.42}
+      - !Layer
+        class: "water"
+        filename: "NYC Open Data/NYC Planimetric Database_ Hydrography/export"
+      - !Layer
+        class: "rail"
+        filename: "NYC Open Data/Subway Lines/export"
+      - !Layer
+        class: "rail"
+        filename: "Hudson County/Hudson_Bergen_Light_Rail_unprojected"
+      - !Layer
+        class: "rail"
+        filename: "Hudson County/PATH_Train_unprojected"
+      - !Layer
+        class: "road"
+        filename: "NYC Open Data/NYC Street Centerline/export"
+        filters: [!OneOf {key: "rw_type", valid_values: [1, 2, 3, 4]}]
+      - !Layer
+        class: "road"
+        filename: "Hudson County/Roads_in_Hudson_County_unprojected"
 
   # Buenos Aires
   - !Group
+    class: "watery"
     frame: true
     bounding_box: { left: 100, right: 200, top: 200, bottom: 300 }
-    region: { left: -10000, right: 10000, bottom: -10000, top: 10000}
-    contents: []
+    region: { left: -58.4492, right: -58.34, bottom: -34.65, top: -34.56}
+    contents:
+      - !Layer
+        class: "development"
+        filename: "BA Data/barrios/barrios"
+      - !Layer
+        class: "park"
+        filename: "BA Data/espacio_verde_publico/espacio_verde_publico"
+        filters:
+          - !GreaterThan {key: "area", cutoff: 40000}
+      - !Layer
+        class: "rail"
+        filename: "BA Data/lineas-subte-zip/lineas-subte"
+      - !Layer
+        class: "rail"
+        filename: "BA Data/red-de-ferrocarril/red_ferrocarriles"
+      - !Layer
+        class: "road"
+        filename: "BA Data/callejero/calles"
 
   # Tokyo
   - !Group
     frame: true
     bounding_box: { left: 200, right: 300, top: 200, bottom: 300 }
-    region: { left: -10000, right: 10000, bottom: -10000, top: 10000}
-    contents: []
+    region: { left: 139.7, right: 139.8108, bottom: 35.64, top: 35.73}
+    contents:
+      - !Layer
+        class: "water"
+        filename: "Japan MLIT/湖沼/W09-50A_13-jgd_Lake"
+      - !Layer
+        class: "rail"
+        filename: "Japan MLIT/鉄道/N02-23_RailroadSection"
+      - !Layer
+        class: "road"
+        filename: "Japan MLIT/道路/N01-07L-2K-13_Road"
