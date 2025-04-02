@@ -1,0 +1,87 @@
+title: "Municipalities of the Boston area"
+description: "
+  A map of the many municipalities in the Boston area.
+  All geographic data is taken from the
+  <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
+    Massachusetts Bureau of Geographic Information
+  </a>."
+style: |
+  .frame {
+    fill: none;
+    stroke: black;
+    stroke-width: 2.0;
+    stroke-linejoin: miter;
+  }
+  .background {
+    fill: white;
+    stroke: none;
+  }
+  .water {
+    fill: #54618c;
+    stroke: #54618c;
+    stroke-width: 0.1;
+  }
+  .park {
+    fill: #9ecba6;
+    stroke: none;
+  }
+  .boston-common, .central-burying-ground, .boston-public-garden, .commonwealth-avenue-mall, .back-bay-fens, .clemente-field, .riverway, .the-riverway, .jamaicaway, .olmsted-park, .jamaica-pond-park, .parkman-memorial, .arborway, .arnold-arboretum-i, .arnold-arboretum-ii, .south-street-tract, .walter-street-cemetery, .franklin-park, .franklin-park-zoo, .white-stadium {
+    fill: #019a46;
+    stroke: #019a46;
+    stroke-width: 0.1;
+  }
+  .rail .top {
+    fill: none;
+    stroke: white;
+    stroke-width: 0.2;
+    stroke-linejoin: round;
+  }
+  .rail .bottom {
+    fill: none;
+    stroke: #636363;
+    stroke-width: 0.6;
+    stroke-linejoin: round;
+  }
+  .road {
+    fill: none;
+    stroke: #cecece;
+    stroke-width: 0.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .road .class-4 {
+    fill: none;
+    stroke: #cecece;
+    stroke-width: 0.3;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+bounding_box: { left: -1, right: 241, top: -1, bottom: 301 }
+contents:
+  - !Group
+    bounding_box: { left: 0, right: 240, top: 0, bottom: 300 }
+    region: { left: 230000, right: 238000, bottom: 893000, top: 903000 }
+    frame: true
+    contents:
+      - !Layer
+        class: "park"
+        filename: "MassGIS/openspace/OPENSPACE_POLY"
+        class_column: "SITE_NAME"
+        filters: [!GreaterThan {key: "SHAPE_AREA", cutoff: 400}]
+      - !Layer
+        class: "water"
+        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+        filters: [!OneOf {key: "POLY_CODE", valid_values: [1, 6, 8]}]
+      - !Layer
+        class: "road"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+        class_column: "ADMIN_TYPE"
+      - !Layer
+        class: "rail"
+        filename: "MassGIS/mbta_rapid_transit/MBTA_ARC"
+        double: true
+        filters: [!OneOf {key: "ROUTE", valid_values: ["D - Riverside"]}]
+      - !Layer
+        class: "rail"
+        filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
+        double: true

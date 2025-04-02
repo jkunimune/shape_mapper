@@ -223,6 +223,9 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
                                 Shape::PolylineM(polyline) => {
                                     (SerializablePoint::deep_convert_M(polyline.parts()), false)
                                 }
+                                Shape::PolylineZ(polyline) => {
+                                    (SerializablePoint::deep_convert_Z(polyline.parts()), false)
+                                }
                                 Shape::Point(_) => {
                                     return Err(anyhow!("data/{}.shp is a POINT shapefile.  POINT layers must always have a `marker`.", filename))
                                 }
@@ -328,6 +331,12 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
                 clip: Some(false),
                 frame: Some(false),
             });
+        }
+
+        // resolve a Hillshade by loading geographic data from a GeoTIFF as a Raster
+        Content::Hillshade { filename, blur_radius } => {
+            println!("'data/{}.tif', {} km", filename, blur_radius);
+            return Err(anyhow!("this feature is not implemented.  sorry."));
         }
 
         // resolve a Graticule by generating an array of lines
@@ -546,13 +555,16 @@ fn transform_content(content: Content, outer_transform: &Option<Transform>, oute
             return Ok(Content::Label { text, location, class, });
         },
         Content::Layer { .. } => {
-            return Err(anyhow!("Layers should have been purged by now"));
+            return Err(anyhow!("Layers should have been broken up into Groups by now"));
         },
+        Content::Hillshade { .. } => {
+            return Err(anyhow!("Hillshades should have been resolved into Rasters by now"));
+        }
         Content::Graticule { .. } => {
-            return Err(anyhow!("Graticules should have been purged by now"));
+            return Err(anyhow!("Graticules should have been broken up into Groups by now"));
         },
         Content::Ruler { .. } => {
-            return Err(anyhow!("Rulers should have been purged by now"));
+            return Err(anyhow!("Rulers should have been evaulated into Groups of lines by now"));
         },
     }
 }
@@ -688,15 +700,18 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
             shape_string
         }
 
+        Content::Layer { .. } => {
+            return Err(anyhow!("Layers should have been broken up into Groups by now"));
+        },
+        Content::Hillshade { .. } => {
+            return Err(anyhow!("Hillshades should have been resolved into Rasters by now"));
+        }
         Content::Graticule { .. } => {
-            return Err(anyhow!("the graticules should have all been purged by now."));    
-        }
+            return Err(anyhow!("Graticules should have been broken up into Groups by now"));
+        },
         Content::Ruler { .. } => {
-            return Err(anyhow!("the Rulers should have all been purged by now."));    
-        }
-        Content::Layer{ .. } => {
-            return Err(anyhow!("the Layers should have all been purged by now."));
-        }
+            return Err(anyhow!("Rulers should have been evaulated into Groups of lines by now"));
+        },
     };
 
     // tack on the class, if there is one
@@ -797,6 +812,14 @@ fn center_of(shape: &Shape) -> Result<SerializablePoint> {
                     part.get(part.len()/2)
                     .ok_or(anyhow!("each part must have at least one point."))?)),
                 None => Err(anyhow!("this polyline (M) has no parts and therefore no center.")),
+            }
+        },
+        Shape::PolylineZ(polyline) => {
+            match polyline.part(0) {
+                Some(part) => Ok(SerializablePoint::from_Z(
+                    part.get(part.len()/2)
+                    .ok_or(anyhow!("each part must have at least one point."))?)),
+                None => Err(anyhow!("this polyline (Z) has no parts and therefore no center.")),
             }
         },
         Shape::Polygon(polygon) => {
@@ -1033,6 +1056,13 @@ enum Content {
         /// key-[value] pairs used to show only a subset of the shapes in the file
         filters: Option<Vec<Filter>>,
     },
+    /// a raster image providing shaded relief
+    Hillshade {
+        /// the GeoTIFF file containing the data, without the 'data/' or '.tif'
+        filename: String,
+        /// the amount to blur it (in data units)
+        blur_radius: f64,
+    },
     /// a mesh of lines of latitude and longitude
     Graticule {
         /// the spacing between each adjacent pair of lines of latitude in degrees
@@ -1147,6 +1177,7 @@ impl Content {
             Content::Path { class, .. } => class,
             Content::Marker { class, .. } => class,
             Content::Group { class, .. } => class,
+            Content::Hillshade { .. } => &None,
             Content::ClipPath { .. } => &None,
         };
     }
@@ -1198,11 +1229,17 @@ impl SerializablePoint {
     fn from_M(point: &shapefile::PointM) -> SerializablePoint {
         return SerializablePoint { x: point.x, y: point.y };
     }
+    fn from_Z(point: &shapefile::PointZ) -> SerializablePoint {
+        return SerializablePoint { x: point.x, y: point.y };
+    }
     fn deep_convert(points: &Vec<Vec<shapefile::Point>>) -> Vec<Vec<SerializablePoint>> {
         return points.iter().map(|ring| ring.iter().map(SerializablePoint::from).collect()).collect();
     }
     fn deep_convert_M(points: &Vec<Vec<shapefile::PointM>>) -> Vec<Vec<SerializablePoint>> {
         return points.iter().map(|ring| ring.iter().map(SerializablePoint::from_M).collect()).collect();
+    }
+    fn deep_convert_Z(points: &Vec<Vec<shapefile::PointZ>>) -> Vec<Vec<SerializablePoint>> {
+        return points.iter().map(|ring| ring.iter().map(SerializablePoint::from_Z).collect()).collect();
     }
 }
 

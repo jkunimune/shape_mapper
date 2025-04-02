@@ -1,0 +1,84 @@
+title: "Location map central Washington, D.C."
+description: "
+  A location map for central Washington, D.C.  Data is from
+  <a href=\"https://opendata.dc.gov\">
+    Open Data DC
+  </a>
+  and
+  <a href=\"https://gisdata-arlgis.opendata.arcgis.com/\">
+    Arlington County's official GIS open data portal
+  </a>."
+bounding_box: { left: 0, right: 120, top: 0, bottom: 114.4 }
+style: |
+  .frame {
+    fill: none;
+    stroke: black;
+    stroke-width: 1.2;
+    stroke-linejoin: miter;
+  }
+  .background {
+    fill: #eee;
+    stroke: none;
+  }
+  .park {
+    fill: #cfe8b7;
+    stroke: #cfe8b7;
+    stroke-width: 0.01;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .water {
+    fill: #9cc2ea;
+    stroke: #9cc2ea;
+    stroke-width: 0.3;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .rail {
+    fill: none;
+    stroke: #7f4995;
+    stroke-width: 0.3;
+    stroke-linejoin: round;
+  }
+  .street {
+    fill: none;
+    stroke: #aa9a9b;
+    stroke-width: 0.6;
+    stroke-linejoin: miter;
+    stroke-linecap: round;
+  }
+  .highway {
+    fill: none;
+    stroke: #96777b;
+    stroke-width: 0.9;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+contents:
+  - !Group
+    frame: true
+    bounding_box: { left: 0, right: 120, top: 0, bottom: 114.4 }
+    region: { left: -8578020, right: -8572020, bottom: 4703500, top: 4709220 }
+    contents:
+      - !Layer
+        class: "park"
+        filename: "DC/Comprehensive_Plan_Policy_in_2012"
+        filters: [!OneOf {key: "TYPE", valid_values: ["Parks"]}]
+      - !Layer
+        class: "water"
+        filename: "DC/Comprehensive_Plan_Policy_in_2012"
+        filters: [!OneOf {key: "TYPE", valid_values: ["Water"]}]
+      - !Layer
+        class: "street"
+        filename: "DC/Roadway_Block"
+      - !Layer
+        class: "street"
+        filename: "Arlington County/Street_Network_Mercator"
+      - !Layer
+        class: "highway"
+        filename: "DC/Roadway_Block"
+        filters: [!OneOf {key: "STREETTYPE", valid_values: ["I"]}]
+      - !Layer
+        class: "highway"
+        filename: "Arlington County/Street_Network_Mercator"
+        filters: [!OneOf {key: "STRTTYPE", valid_values: ["", "HWY"]}]

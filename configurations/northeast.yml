@@ -24,43 +24,22 @@ style: |
     stroke: #354d9c;
     stroke-width: 0.4;
   }
-  .state .ma, .state .md {
+  .state .ma, .state .ny, .state .de, .state .dc {
     stroke: #927ADC; /* purple */
     stroke-width: 4.0;
     stroke-linejoin: round;
     opacity: .50;
     fill: none;
   }
-  .state .me, .state .nj {
-    stroke: #E370C4; /* pink */
-    stroke-width: 4.0;
-    stroke-linejoin: round;
-    opacity: .50;
-    fill: none;
-  }
-  .state .ri, .state .va {
+  .state .me, .state .ri, .state .nj, .state .md {
     stroke: #DC5170; /* red */
     stroke-width: 4.0;
     stroke-linejoin: round;
     opacity: .50;
     fill: none;
   }
-  .state .ny, .state .de {
-    stroke: #D57645; /* orange */
-    stroke-width: 4.0;
-    stroke-linejoin: round;
-    opacity: .50;
-    fill: none;
-  }
-  .state .nh, .state .dc {
+  .state .nh, .state .ct, .state .pa, .state .va {
     stroke: #B19D3D; /* yellow */
-    stroke-width: 4.0;
-    stroke-linejoin: round;
-    opacity: .50;
-    fill: none;
-  }
-  .state .ct, .state .pa {
-    stroke: #4B893E; /* green */
     stroke-width: 4.0;
     stroke-linejoin: round;
     opacity: .50;

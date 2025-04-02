@@ -1,0 +1,137 @@
+title: "Location map Oʻahu"
+description: "
+  A location map for the island of Oʻahu.  Data is from the
+  <a href=\"https://geoportal.hawaii.gov/\">
+    Hawaii statewide GIS program
+  </a>."
+style: |
+  .frame {
+    fill: none;
+    stroke: black;
+    stroke-width: 1.2;
+    stroke-linejoin: miter;
+  }
+  .background {
+    fill: #deffbf;
+    stroke: none;
+  }
+  .city {
+    fill: #f4f0f7;
+    stroke: #f4f0f7;
+    stroke-width: 0.05;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .ocean {
+    fill: #8cc3fc;
+    stroke: #8cc3fc;
+    stroke-width: 0.05;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .pond {
+    fill: #67b3ff;
+    stroke: #67b3ff;
+    stroke-width: 0.05;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .coast {
+    fill: none;
+    stroke: #67b3ff;
+    stroke-width: 2.4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    clip-path: url(#ocean);
+  }
+  .minimap-coast {
+    fill: none;
+    stroke: #67b3ff;
+    stroke-width: 2.4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    clip-path: url(#minimap-ocean);
+  }
+  .highway {
+    fill: none;
+    stroke: #bb9298;
+    stroke-width: 0.4;
+    stroke-linejoin: miter;
+    stroke-linecap: round;
+  }
+  .freeway {
+    fill: none;
+    stroke: #bb9298;
+    stroke-width: 0.6;
+    stroke-linejoin: miter;
+    stroke-linecap: round;
+  }
+bounding_box: { left: 0, right: 140, top: 0, bottom: 110 }
+contents:
+  - !Group
+    frame: true
+    bounding_box: { left: 0, right: 140, top: 0, bottom: 110 }
+    region: { left: 572200, right: 642200, bottom: 2348500, top: 2403500 }
+    contents:
+      - !Layer
+        class: "city"
+        filename: "Hawaii/Land_Use_Land_Cover_(LULC)"
+        filters:
+          - !Either
+            filters: [!OneOf {key: "landcover", valid_values: [11, 12, 13, 14, 15, 16, 17, 75]}]
+      # - !Hillshade
+      #   filename: "Hawaii/hilloah"
+      #   blur_radius: 100
+      - !Layer
+        class: "ocean"
+        filename: "Hawaii/Ocean_Depth"
+        filters: [!GreaterThan {key: "objectid", cutoff: 100}]
+      - !ClipPath
+        id: "ocean"
+        content:
+          !Layer
+          filename: "Hawaii/Ocean_Depth"
+          filters: [!GreaterThan {key: "objectid", cutoff: 100}]
+      - !Layer
+        class: "coast"
+        filename: "Hawaii/Coastline_rebased"
+      - !Layer
+        class: "pond"
+        filename: "Hawaii/NHD_Waterbodies"
+        filters:
+          - !OneOf {key: "ftype", valid_values: [390]}
+          - !GreaterThan {key: "st_areasha", cutoff: 40000}
+      - !Layer
+        class: "highway"
+        filename: "Hawaii/Roads_-_Honolulu_County"
+        filters: [!OneOf {key: "street_cla", valid_values: [8]}]
+      - !Layer
+        class: "freeway"
+        filename: "Hawaii/Roads_-_Honolulu_County"
+        filters: [!OneOf {key: "street_cla", valid_values: [2]}]
+
+  # - !Group
+  #   frame: true
+  #   bounding_box: { left: 80, right: 140, top: 0, bottom: 40 }
+  #   region: { left: 300000, right: 1000000, bottom: 2050000, top: 2500000 }
+  #   contents:
+  #     - !Layer
+  #       class: "city"
+  #       filename: "Hawaii/Land_Use_Land_Cover_(LULC)"
+  #       filters:
+  #         - !Either
+  #           filters: [!OneOf {key: "landcover", valid_values: [11, 12, 13, 14, 15, 16, 17, 75]}]
+  #     - !Layer
+  #       class: "ocean"
+  #       filename: "Hawaii/Ocean_Depth"
+  #     - !ClipPath
+  #       id: "minimap-ocean"
+  #       content:
+  #         !Layer
+  #         filename: "Hawaii/Ocean_Depth"
+  #     - !Layer
+  #       class: "minimap-coast"
+  #       filename: "Hawaii/Coastline_rebased"
+  #     - !Rectangle
+  #       class: "frame"
+  #       coordinates: { left: 572200, right: 642200, bottom: 2348500, top: 2403500 }

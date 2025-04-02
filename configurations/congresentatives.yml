@@ -66,28 +66,28 @@ style: |
   }
   .road .class-1, .road .class-2, .road .class-3 {
     fill: none;
-    stroke: #6a6a6a;
+    stroke: #787878;
     stroke-width: 0.9;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
   .road .class-4, .road.class-4 {
     fill: none;
-    stroke: #6a6a6a;
+    stroke: #787878;
     stroke-width: 0.6;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
   .road .class-5, .road.class-5 {
     fill: none;
-    stroke: #6a6a6a;
+    stroke: #787878;
     stroke-width: 0.3;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
   .minimap .road {
     fill: none;
-    stroke: #6a6a6a;
+    stroke: #787878;
     stroke-width: 0.8;
     stroke-linejoin: round;
     stroke-linecap: round;
