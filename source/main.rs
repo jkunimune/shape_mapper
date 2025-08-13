@@ -217,6 +217,14 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
                                     }
                                     (SerializablePoint::deep_convert(&rings_as_nested_vec), true)
                                 }
+                                Shape::PolygonZ(polygon) => {
+                                    // combine the rings of the polygon into a Vec<Vec<Point>>
+                                    let mut rings_as_nested_vec: Vec<Vec<shapefile::PointZ>> = Vec::with_capacity(polygon.rings().len());
+                                    for i in 0..polygon.rings().len() {
+                                        rings_as_nested_vec.push(polygon.rings()[i].points().to_vec());
+                                    }
+                                    (SerializablePoint::deep_convert_Z(&rings_as_nested_vec), true)
+                                }
                                 Shape::Polyline(polyline) => {
                                     (SerializablePoint::deep_convert(polyline.parts()), false)
                                 }
@@ -594,6 +602,7 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
                 bounding_box.bottom - bounding_box.top,
             );
             let group_index = *element_count;
+            *element_count += 1;
             // write all the stuff
             let mut string = String::new();
             if clip.unwrap_or(true) {
@@ -688,6 +697,7 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
 
             // nest it in a clipPath element, if desired
             let shape_index = *element_count;
+            *element_count += 1;
             let shape_string = if self_clip {
                 format!("<clipPath id=\"clip_path_{}\">\n", shape_index) + &
                 shape_string + &
@@ -722,7 +732,6 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
     // add the proper indentation
     let string = prepend_to_each_line(&string, "  ");
 
-    *element_count += 1;
     return Ok(string);
 }
 
@@ -823,6 +832,10 @@ fn center_of(shape: &Shape) -> Result<SerializablePoint> {
             }
         },
         Shape::Polygon(polygon) => {
+            let GenericBBox {min, max} = polygon.bbox();
+            Ok(SerializablePoint { x: (min.x + max.x)/2., y: (min.y + max.y)/2. })
+        },
+        Shape::PolygonZ(polygon) => {
             let GenericBBox {min, max} = polygon.bbox();
             Ok(SerializablePoint { x: (min.x + max.x)/2., y: (min.y + max.y)/2. })
         },
@@ -1345,11 +1358,11 @@ enum Transform {
     Affine {
         /// the scale in the x-direction (m per shapefile units)
         longitudinal_scale: f64,
-        /// the x-coordinate of the point to put at the map origin (shapefile units)
+        /// negative the x-coordinate of the point to put at the map origin (shapefile units)
         false_easting: f64,
         /// the scale in the y-direction (m per shapefile units, should be negative)
         latitudinal_scale: f64,
-        /// the y-coordinate of the point to put at the map origin (shapefile units)
+        /// negative the y-coordinate of the point to put at the map origin (shapefile units)
         false_northing: f64,
         /// the amount to rotate the data widdershins about the map origin (degrees)
         rotation: f64,
