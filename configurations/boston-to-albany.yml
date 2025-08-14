@@ -1,0 +1,314 @@
+title: "Boston to Albany"
+description: "
+  A map of the Boston &amp; Albany Railroad.  Data is from
+  <a href=\"https://www.usgs.gov/the-national-map-data-delivery/\">
+    The National Map
+  </a>."
+style: |
+  .frame {
+    fill: none;
+    stroke: black;
+    stroke-width: 1.2;
+    stroke-linejoin: miter;
+  }
+  .background {
+    fill: #ffffff;
+    stroke: none;
+  }
+  .wood {
+    fill: #e2f0dc;
+    stroke: #e2f0dc;
+    stroke-width: 0.05;
+    stroke-linejoin: round;
+  }
+  .water .ftype-312, .water .ftype-445 {
+    fill: #c0e5f6;
+    stroke: #c0e5f6;
+    stroke-width: 0.05;
+    stroke-linejoin: round;
+  }
+  .water .ftype-460, .water .ftype-431, .water .ftype-390, .water .ftype-436 {
+    fill: #c0e5f6;
+    stroke: #c0e5f6;
+    stroke-width: 0.05;
+    stroke-linejoin: round;
+  }
+  .stream {
+    fill: none;
+    stroke: #c0e5f6;
+    stroke-width: 0.1;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .railroad {
+    fill: none;
+    stroke: #5c0300;
+    stroke-width: 0.4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .railroad .amtk {
+    fill: none;
+    stroke: #00314d;
+    stroke-width: 0.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .railroad .mbta {
+    fill: none;
+    stroke: #660754;
+    stroke-width: 0.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .road .tnmfrc-3 {
+    fill: none;
+    stroke: #bebebe;
+    stroke-width: 0.3;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .road .tnmfrc-1, .road .tnmfrc-2 {
+    fill: none;
+    stroke: #bebebe;
+    stroke-width: 0.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .label.big {
+    fill: #000000;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
+    font-size: 5.0px;
+    font-weight: bold;
+    text-anchor: middle;
+  }
+  .label.small {
+    fill: #000000;
+    font-family: Helvetica Neue,Helvetica,sans-serif;
+    font-size: 3.5px;
+    font-weight: bold;
+    text-anchor: middle;
+  }
+bounding_box: { left: 0, right: 356, top: 0, bottom: 216 }
+contents:
+  - !Group
+    frame: true
+    bounding_box: { left: 10, right: 346, top: 10, bottom: 108 }
+    region: { left: -72.643, right: -71.02, bottom: 42.05, top: 42.40 }
+    transform:
+      !Affine
+      longitudinal_scale: 0.207
+      latitudinal_scale: -0.28
+      false_easting: 72.6913
+      false_northing: -42.4357
+      rotation: 0
+    contents:
+      - !Layer
+        class: "wood"
+        filename: "USGS/LNDCVR_Massachusetts_State_Shape/LandCover_Woodland"
+        decimation: 0.0005
+      # - !Layer
+      #   class: "stream"
+      #   filename: "USGS/NHD_H_Massachusetts_State_Shape/NHDFlowline"
+      #   filters: [!OneOf {key: "ftype", valid_values: [336, 460, 558]}]
+      #   decimation: 0.0005
+      - !Layer
+        class: "water"
+        filename: "USGS/NHD_H_Massachusetts_State_Shape/NHDWaterbody"
+        filters: [!OneOf {key: "ftype", valid_values: [390, 436]}]
+        class_column: "ftype"
+        decimation: 0.0002
+      - !Layer
+        class: "water"
+        filename: "USGS/NHD_H_Massachusetts_State_Shape/NHDArea"
+        filters: [!OneOf {key: "ftype", valid_values: [312, 431, 445, 460]}]
+        class_column: "ftype"
+        decimation: 0.0002
+      - !Layer
+        class: "road"
+        filename: "USGS/TRAN_Massachusetts_State_Shape/Trans_RoadSegment"
+        filters: [!OneOf {key: "tnmfrc", valid_values: [1, 2, 3]}]
+        class_column: "tnmfrc"
+        decimation: 0.0002
+      - !Layer
+        class: "railroad"
+        filename: "USGS/TRAN_Massachusetts_State_Shape/Trans_RailFeature"
+        class_column: "railownerc"
+        decimation: 0.0002
+      - !Layer
+        class: "label big"
+        filename: "USA_Major_Cities"
+        label_column: "NAME"
+        filters:
+          - !OneOf
+            key: "NAME"
+            valid_values:
+              - "Boston"
+              - "Worcester"
+              - "Springfield"
+      - !Layer
+        class: "Label small"
+        filename: "MassGIS/trains/TRAINS_NODE_unprojected"
+        label_column: "STATION"
+        case: !Sentence
+        abbr:
+          - {from: " center", to: ""}
+          - {from: " square", to: ""}
+        filters:
+          - !OneOf
+            key: "MAP_STA"
+            valid_values: ["Y"]
+          - !OneOf
+            key: "STATION"
+            valid_values:
+              - "WALTHAM"
+              - "NEEDHAM CENTER"
+              - "FRANKLIN/DEAN COLLEGE"
+              - "CANTON CENTER"
+              - "STOUGHTON"
+              - "WELLESLEY SQUARE"
+              - "NATICK CENTER"
+              - "FRAMINGHAM"
+              - "ASHLAND"
+              - "SOUTHBOROUGH"
+              - "WESTBOROUGH"
+              - "GRAFTON"
+      - !Layer
+        class: "label small"
+        filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA_unprojected"
+        label_column: "CITY"
+        case: !Sentence
+        filters:
+          - !OneOf
+            key: "CITY"
+            valid_values:
+              - "MILFORD"
+              - "NEWTON"
+              - "MILLBURY"
+              - "AUBURN"
+              - "OXFORD"
+              - "CHARLTON"
+              - "SPENCER"
+              - "BROOKFIELD"
+              - "WARREN"
+              - "BRIMFIELD"
+              - "PALMER"
+              - "WARE"
+              - "WILBRAHAM"
+              - "LUDLOW"
+              - "HOLYOKE"
+              - "NORTHAMPTON"
+  - !Group
+    frame: true
+    bounding_box: { left: 10, right: 346, top: 108, bottom: 206 }
+    region: { left: -74.1, right: -72.4, bottom: 42.0, top: 42.8 }
+    transform:
+      !Affine
+      longitudinal_scale: 0.207
+      latitudinal_scale: -0.28
+      false_easting: 73.85
+      false_northing: -43.13
+      rotation: 18
+    contents:
+      - !Layer
+        class: "wood"
+        filename: "USGS/LNDCVR_Massachusetts_State_Shape/LandCover_Woodland"
+        decimation: 0.0005
+      - !Layer
+        class: "wood"
+        filename: "USGS/LNDCVR_New_York_State_Shape/LandCover_Woodland"
+        decimation: 0.0005
+      # - !Layer
+      #   class: "stream"
+      #   filename: "USGS/NHD_H_Massachusetts_State_Shape/NHDFlowline"
+      #   filters: [!OneOf {key: "ftype", valid_values: [336, 460, 558]}]
+      #   decimation: 0.0005
+      - !Layer
+        class: "water"
+        filename: "USGS/NHD_H_Massachusetts_State_Shape/NHDWaterbody"
+        filters: [!OneOf {key: "ftype", valid_values: [390, 436]}]
+        class_column: "ftype"
+        decimation: 0.0002
+      - !Layer
+        class: "water"
+        filename: "USGS/NHD_H_Massachusetts_State_Shape/NHDArea"
+        filters: [!OneOf {key: "ftype", valid_values: [312, 431, 445, 460]}]
+        class_column: "ftype"
+        decimation: 0.0002
+      - !Layer
+        class: "road"
+        filename: "USGS/TRAN_Massachusetts_State_Shape/Trans_RoadSegment"
+        filters: [!OneOf {key: "tnmfrc", valid_values: [1, 2, 3]}]
+        class_column: "tnmfrc"
+        decimation: 0.0002
+      - !Layer
+        class: "road"
+        filename: "USGS/TRAN_New_York_State_Shape/Trans_RoadSegment_0"
+        filters: [!OneOf {key: "tnmfrc", valid_values: [1, 2, 3]}]
+        class_column: "tnmfrc"
+        decimation: 0.0002
+      - !Layer
+        class: "road"
+        filename: "USGS/TRAN_New_York_State_Shape/Trans_RoadSegment_1"
+        filters: [!OneOf {key: "tnmfrc", valid_values: [1, 2, 3]}]
+        class_column: "tnmfrc"
+        decimation: 0.0002
+      - !Layer
+        class: "railroad"
+        filename: "USGS/TRAN_Massachusetts_State_Shape/Trans_RailFeature"
+        class_column: "railownerc"
+        decimation: 0.0002
+      - !Layer
+        class: "railroad"
+        filename: "USGS/TRAN_New_York_State_Shape/Trans_RailFeature"
+        class_column: "railownerc"
+        decimation: 0.0002
+      - !Layer
+        class: "label big"
+        filename: "USA_Major_Cities"
+        label_column: "NAME"
+        filters:
+          - !OneOf
+            key: "NAME"
+            valid_values:
+              - "Springfield"
+              - "Pittsfield"
+              - "Albany"
+      - !Layer
+        class: "label small"
+        filename: "MassGIS/townhalls_pt/TOWNHALLS_PT_MEMA_unprojected"
+        label_column: "CITY"
+        case: !Sentence
+        filters:
+          - !OneOf
+            key: "CITY"
+            valid_values:
+              - "HOLYOKE"
+              - "NORTHAMPTON"
+              - "WESTFIELD"
+              - "RUSSELL"
+              - "HUNTINGTON"
+              - "CHESTER"
+              - "MIDDLEFIELD"
+              - "BECKET"
+              - "WASHINGTON"
+              - "HINSDALE"
+              - "DALTON"
+              - "FARNAMS"
+              - "RICHMOND"
+      - !Layer
+        class: "label small"
+        filename: "New York/NYS_Civil_Boundaries.shp/Cities_Towns_unprojected"
+        class_column: "NAME"
+        label_column: "NAME"
+        filters:
+          - !OneOf
+            key: "NAME"
+            valid_values:
+              - "Canaan"
+              - "Chatham"
+              - "Kinderhook"
+              - "Schodack"
+              - "East Greenbush"
+              - "Rensselaer"
+              - "Coxsackie"

@@ -1,7 +1,7 @@
-title: "Congressional districts in and around Boston"
+title: "Massachusetts House districts in and around Boston"
 description: "
-  A map of the Boston area, with a greater Massachusetts map inset, that shows the borders of the
-  nine Massachusetts Congressional voting districts in relation to municipality borders and streets.
+  A map of the Boston area that shows the borders of the Massachusetts House
+  of Representatives districts in relation to municipality borders and streets.
   All geographic data is taken from the
   <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
     Massachusetts Bureau of Geographic Information
@@ -12,13 +12,13 @@ style: |
     fill: #ffffff;
     stroke: none;
   }
-  .pond, .main-map .background, .minimap .background {
-    fill: #e5f3f4;
+  .pond, .main-map .background {
+    fill: #f0f9f9;
     stroke: none;
   }
   .stream {
     fill: none;
-    stroke: #125588;
+    stroke: #025e62;
     stroke-width: 0.6;
     stroke-linejoin: round;
     stroke-linecap: round;
@@ -64,144 +64,150 @@ style: |
     stroke-linecap: butt;
     stroke-dasharray: 1.6 1.6;
   }
-  .road .class-1, .road .class-2, .road .class-3 {
+  .road .class-1 {
     fill: none;
     stroke: #787878;
     stroke-width: 0.9;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .road .class-4, .road.class-4 {
+  .road .class-2, .road .class-3, .road .class-4, .legend .road {
     fill: none;
     stroke: #787878;
     stroke-width: 0.6;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .road .class-5, .road.class-5 {
+  .road .class-5 {
     fill: none;
     stroke: #787878;
     stroke-width: 0.3;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .minimap .road {
-    fill: none;
-    stroke: #787878;
-    stroke-width: 0.6;
-    stroke-linejoin: round;
-    stroke-linecap: round;
-  }
-  .dist-num-1, .dist-num-6 { /* orange */
-    fill: #f5e4db;
-    stroke: #e79d79;
-    stroke-width: 10.0;
-    stroke-linejoin: round;
-  }
-  .main-map .district-label-6 {
-    fill: #e79d79;
-    font-family: Cadman, sans-serif;
-    font-weight: bold;
-    font-size: 75px;
-  }
-  .minimap .district-label-1, .minimap .district-label-6 {
-    fill: #684e41;
-    font-family: Cadman, sans-serif;
-    font-weight: bold;
-    font-size: 75px;
-  }
-  .dist-num-2, .dist-num-9 { /* purple */
-    fill: #e4dfee;
-    stroke: #b39fe8;
-    stroke-width: 10.0;
-    stroke-linejoin: round;
-  }
-  .minimap .district-label-2, .minimap .district-label-9 {
-    fill: #575069;
-    font-family: Cadman, sans-serif;
-    font-weight: bold;
-    font-size: 75px;
-  }
-  .dist-num-3 { /* pink */
-    fill: #fae9f4;
-    stroke: #ee9bd5;
-    stroke-width: 10.0;
-    stroke-linejoin: round;
-  }
-  .minimap .district-label-3 {
-    fill: #694c5f;
-    font-family: Cadman, sans-serif;
-    font-weight: bold;
-    font-size: 75px;
-  }
-  .dist-num-4 { /* green */
-    fill: #d1dace;
-    stroke: #80ac75;
-    stroke-width: 10.0;
-    stroke-linejoin: round;
-  }
-  .main-map .district-label-4 {
-    fill: #80ac75;
-    font-family: Cadman, sans-serif;
-    font-weight: bold;
-    font-size: 75px;
-  }
-  .minimap .district-label-4 {
-    fill: #485743;
-    font-family: Cadman, sans-serif;
-    font-weight: bold;
-    font-size: 75px;
-  }
-  .dist-num-5 { /* dark blue */
+
+  /* dark blue */
+  .middle12, .middle23, .middle26, .middle29, .suffolk01, .suffolk07, .norfolk02, .essex11 {
     fill: #d3dce8;
     stroke: #71aae2;
-    stroke-width: 10.0;
+    stroke-width: 6.0;
     stroke-linejoin: round;
   }
-  .main-map .district-label-5 {
-    fill: #71aae2;
+  .dist-label .middle12, .dist-label .middle23, .dist-label .middle26, .dist-label .middle29, .dist-label .suffolk01, .dist-label .suffolk07, .dist-label .norfolk02, .dist-label .essex11 {
+    fill: #629ad1;
+    stroke: none;
     font-family: Cadman, sans-serif;
+    font-size: 12px;
     font-weight: bold;
-    font-size: 75px;
+    text-anchor: start;
   }
-  .dist-num-7 { /* yellow */
-    fill: #f5f0e2;
-    stroke: #c9b874;
-    stroke-width: 10.0;
+  /* purple */
+  .middle09, .middle21, .middle33, .suffolk03, .suffolk13, .suffolk14, .suffolk17, .norfolk05 {
+    fill: #e4dfee;
+    stroke: #b39fe8;
+    stroke-width: 6.0;
     stroke-linejoin: round;
   }
-  .main-map .district-label-7 {
-    fill: #c9b874;
+  .dist-label .middle09, .dist-label .middle21, .dist-label .middle33, .dist-label .suffolk03, .dist-label .suffolk13, .dist-label .suffolk14, .dist-label .suffolk17, .dist-label .norfolk05 {
+    fill: #9b87cf;
+    stroke: none;
     font-family: Cadman, sans-serif;
+    font-size: 12px;
     font-weight: bold;
-    font-size: 75px;
+    text-anchor: start;
   }
-  .dist-num-8 { /* red */
+  /* pink */
+  .middle31, .middle34, .suffolk15, .suffolk19, .norfolk13 {
+    fill: #fae9f4;
+    stroke: #ee9bd5;
+    stroke-width: 6.0;
+    stroke-linejoin: round;
+  }
+  .dist-label .middle31, .dist-label .middle34, .dist-label .suffolk15, .dist-label .suffolk19, .dist-label .norfolk13 {
+    fill: #c676af;
+    stroke: none;
+    font-family: Cadman, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    text-anchor: start;
+  }
+  /* red */
+  .middle10, .middle13, .middle25, .suffolk02, .norfolk01, .essex09 {
     fill: #eed8da;
     stroke: #ed8897;
-    stroke-width: 10.0;
+    stroke-width: 6.0;
     stroke-linejoin: round;
   }
-  .main-map .district-label-8 {
-    fill: #ed8897;
+  .dist-label .middle10, .dist-label .middle13, .dist-label .middle25, .dist-label .suffolk02, .dist-label .norfolk01, .dist-label .essex09 {
+    fill: #d57382;
+    stroke: none;
     font-family: Cadman, sans-serif;
+    font-size: 12px;
     font-weight: bold;
-    font-size: 75px;
+    text-anchor: start;
   }
-  .district-border {
+  /* orange */
+  .middle15, .middle35, .suffolk06, .suffolk09, .suffolk11, .norfolk04,  .norfolk07, .norfolk15, .essex10 {
+    fill: #f5e4db;
+    stroke: #e79d79;
+    stroke-width: 6.0;
+    stroke-linejoin: round;
+  }
+  .dist-label .middle15, .dist-label .middle35, .dist-label .suffolk06, .dist-label .suffolk09, .dist-label .suffolk11, .dist-label .norfolk04, .dist-label .norfolk07, .dist-label .norfolk15, .dist-label .essex10 {
+    fill: #c9815e;
+    stroke: none;
+    font-family: Cadman, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    text-anchor: start;
+  }
+  /* yellow */
+  .middle11, .middle24, .suffolk04, .suffolk08, .suffolk16, .norfolk03, .norfolk11 {
+    fill: #f5f0e2;
+    stroke: #c9b874;
+    stroke-width: 6.0;
+    stroke-linejoin: round;
+  }
+  .dist-label .middle11, .dist-label .middle24, .dist-label .suffolk04, .dist-label .suffolk08, .dist-label .suffolk16, .dist-label .norfolk03, .dist-label .norfolk11 {
+    fill: #a69552;
+    stroke: none;
+    font-family: Cadman, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    text-anchor: start;
+  }
+  /* green */
+  .middle27, .middle28, .middle30, .middle32, .suffolk05, .suffolk10, .suffolk12, .suffolk18, .norfolk14 {
+    fill: #d1dace;
+    stroke: #80ac75;
+    stroke-width: 6.0;
+    stroke-linejoin: round;
+  }
+  .dist-label .middle27, .dist-label .middle28, .dist-label .middle30, .dist-label .middle32, .dist-label .suffolk05, .dist-label .suffolk10, .dist-label .suffolk12, .dist-label .suffolk18, .dist-label .norfolk14 {
+    fill: #78a36d;
+    stroke: none;
+    font-family: Cadman, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    text-anchor: start;
+  }
+
+  .dist-border {
     fill: none;
     stroke: black;
-    stroke-width: 0.4;
+    stroke-width: 0.3;
     stroke-linejoin: round;
-    stroke-dasharray: 0.6 0.6;
+    stroke-dasharray: 0.4 0.4;
   }
   .station-marker {
     fill: #ffffff;
     stroke: #000000;
   }
   .station-label .bottom {
+    fill: none;
     stroke: #ffffff;
     stroke-width: 0.5;
+    stroke-miterlimit: 2;
     font-family: Cadman, sans-serif;
     font-size: 3.5px;
     text-anchor: start;
@@ -213,8 +219,10 @@ style: |
     text-anchor: start;
   }
   .park-label .bottom {
+    fill: none;
     stroke: #ffffff;
     stroke-width: 0.5;
+    stroke-miterlimit: 2;
     font-family: Cadman, sans-serif;
     font-size: 3.5px;
     text-anchor: middle;
@@ -226,8 +234,10 @@ style: |
     text-anchor: middle;
   }
   .pond-label .bottom {
+    fill: none;
     stroke: #ffffff;
     stroke-width: 0.5;
+    stroke-miterlimit: 2;
     font-family: Cadman, sans-serif;
     font-size: 3.5px;
     font-style: italic;
@@ -246,40 +256,20 @@ style: |
     font-size: 4.0px;
     text-anchor: middle;
   }
-  .main-map .town-label .bottom {
+  .town-label .bottom {
+    fill: none;
     stroke: #ffffff;
     stroke-width: 0.5;
+    stroke-miterlimit: 2;
     font-family: Cadman, sans-serif;
-    font-weight: bold;
-    font-size: 6px; /* note: 6px is actually 6 millimeters (about 17pt) */
+    font-size: 6.0px; /* note: 6px is actually 6 millimeters (about 17pt) */
     text-anchor: middle;
   }
-  .main-map .town-label .top {
-    filL: #000000;
-    font-family: Cadman, sans-serif;
-    font-weight: bold;
-    font-size: 6px; /* note: 6px is actually 6 millimeters (about 17pt) */
-    text-anchor: middle;
-  }
-  .minimap .town-label .bottom {
-    stroke: #ffffff;
-    stroke-width: 0.5;
-    font-family: Cadman, sans-serif;
-    font-weight: bold;
-    font-size: 5px;
-    text-anchor: start;
-    alignment-baseline: baseline;
-  }
-  .minimap .town-label .top {
+  .town-label .top {
     fill: #000000;
     font-family: Cadman, sans-serif;
-    font-weight: bold;
-    font-size: 5px;
-    text-anchor: start;
-    alignment-baseline: baseline;
-  }
-  .minimap .district-label {
-    font-size: 15px;
+    font-size: 6.0px; /* note: 6px is actually 6 millimeters (about 17pt) */
+    text-anchor: middle;
   }
   .legend-title {
     font-family: Cadman, sans-serif;
@@ -298,6 +288,11 @@ style: |
     font-weight: normal;
     font-size: 6px;
   }
+  .legend-small {
+    font-family: Cadman, sans-serif;
+    font-weight: normal;
+    font-size: 4px;
+  }
 contents:
   - !Group
     class: "main-map"
@@ -307,32 +302,20 @@ contents:
     contents:
       - !Layer
         class: "district"
-        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_POLY"
-        class_column: "DIST_NUM"
+        filename: "MassGIS/HOUSE2021/HOUSE2021_POLY"
+        class_column: "DIST_CODE"
         self_clip: true
-      - !Group
-        class: "district-label"
-        contents:
-          - !Label
-            class: "district-label-4"
-            text: "4"
-            location: { x: 230000, y: 888000}
-          - !Label
-            class: "district-label-5"
-            text: "5"
-            location: { x: 230000, y: 888000}
-          - !Label
-            class: "district-label-6"
-            text: "6"
-            location: { x: 230000, y: 888000}
-          - !Label
-            class: "district-label-7"
-            text: "7"
-            location: { x: 230000, y: 888000}
-          - !Label
-            class: "district-label-8"
-            text: "8"
-            location: { x: 230000, y: 888000}
+      - !Layer
+        class: "dist-label"
+        filename: "MassGIS/HOUSE2021/HOUSE2021_POLY"
+        label_column: "DIST_CODE"
+        class_column: "DIST_CODE"
+        abbr:
+          - {from: "ESSEX", to: "Ess"}
+          - {from: "MIDDLE", to: "Mid"}
+          - {from: "NORFOLK", to: "Nor"}
+          - {from: "SUFFOLK", to: "Suf"}
+          - {from: "0", to: ""}
       - !Layer
         class: "pond"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
@@ -366,8 +349,10 @@ contents:
           - !OneOf {key: "RDTYPE", valid_values: [1, 2, 3, 4, 5]}
           - !OneOf {key: "ROUTE_SYST", valid_values: ["I", "US", "SR", "L", "N", "R"]}
       - !Layer
-        class: "district-border"
-        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+        class: "dist-border"
+        filename: "MassGIS/HOUSE2021/HOUSE2021_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [0]}
       - !Layer
         class: "town"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
@@ -397,7 +382,7 @@ contents:
         abbr:
           - {from: "Street", to: "St"}
           - {from: "Avenue", to: "Ave"}
-          - {from: "Square", to: "Sq"}
+          - {from: " Square", to: ""}
           - {from: "Centre", to: "Ctr"}
           - {from: "Center", to: "Ctr"}
           - {from: "Station", to: "Sta"}
@@ -431,86 +416,10 @@ contents:
         case: !Upper
         double: true
   - !Group
-    class: "minimap"
-    frame: true
-    bounding_box: { left: 10, right: 250, top: 10, bottom: 170.24 }
-    region: { left: 28000, right: 280000, bottom: 801000, top: 964000 }
-    contents:
-      - !Rectangle
-        class: "state new-york"
-        coordinates: { left: 0, right: 100000, bottom: 760000, top: 1000000}
-      - !Layer
-        class: "state"
-        filename: "MassGIS/newengland/NEWENGLAND_POLY"
-        class_column: "NAME"
-      - !Layer
-        class: "district"
-        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_POLY"
-        class_column: "DIST_NUM"
-        self_clip: true
-      - !Group
-        class: "district-label"
-        contents:
-          - !Label
-            class: "district-label-1"
-            text: "1"
-            location: { x: 230000, y: 888000}
-          - !Label
-            class: "district-label-2"
-            text: "2"
-            location: { x: 230000, y: 888000}
-          - !Label
-            class: "district-label-3"
-            text: "3"
-            location: { x: 230000, y: 888000}
-          - !Label
-            class: "district-label-4"
-            text: "4"
-            location: { x: 230000, y: 888000}
-          - !Label
-            class: "district-label-6"
-            text: "6"
-            location: { x: 230000, y: 888000}
-          - !Label
-            class: "district-label-9"
-            text: "9"
-            location: { x: 230000, y: 888000}
-      - !Layer
-        class: "road"
-        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
-        class_column: "ADMIN_TYPE"
-        filters:
-          - !OneOf {key: "ADMIN_TYPE", valid_values: [1, 2]}
-      - !Layer
-        class: "district-border"
-        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
-        decimation: 100
-      - !Rectangle
-        id: "shown-region-indicator"
-        class: "state-border"
-        coordinates: { left: 216000, right: 245000, bottom: 887000, top: 915000 }
-      - !Layer
-        class: "city"
-        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
-        filters:
-          - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}
-      - !Layer
-        class: "town-label"
-        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
-        label_column: "TOWN"
-        case: !Title
-        double: true
-        filters:
-          - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}
-      - !Layer
-        class: "state-border"
-        filename: "MassGIS/newengland/NEWENGLAND_POLY"
-        class_column: "NAME"
-  - !Group
     class: "legend legend-label"
-    frame: false
-    bounding_box: { left: 18, right: 150, top: 110, bottom: 170}
-    region: { left: 0, right: 132, top: 0, bottom: 60 }
+    frame: true
+    bounding_box: { left: 10, right: 140, top: 410, bottom: 590}
+    region: { left: 0, right: 55, top: 0, bottom: 130 }
     contents:
       - !Label
         class: "legend-title"
@@ -525,7 +434,7 @@ contents:
         text: "Conformal conic projection, 1 : 50 000"
         location: { x: 66, y: 30}
       - !Line
-        class: "road class-3"
+        class: "road"
         start: { x: 10, y: 40 }
         end: { x: 20, y: 40 }
       - !Label
@@ -560,39 +469,40 @@ contents:
       - !Label
         text: "Pond or river"
         location: { x: 93, y: 50 }
-  - !Group
-    class: "legend legend-label"
-    frame: true
-    bounding_box: { left: 535, right: 590, top: 460, bottom: 590}
-    region: { left: 0, right: 55, top: 0, bottom: 130 }
-    contents:
-      - !Label
-        text: "Current representatives:"
-        location: { x: 10, y: 10}
-      - !Label
-        text: "1: Richald Neal"
-        location: { x: 10, y: 20}
-      - !Label
-        text: "2: Jim McGovern"
-        location: { x: 10, y: 30}
-      - !Label
-        text: "3: Lori Trahan"
-        location: { x: 10, y: 40}
-      - !Label
-        text: "4: Jake Auchincloss"
-        location: { x: 10, y: 50}
-      - !Label
-        text: "5: Katherine Clark"
-        location: { x: 10, y: 60}
-      - !Label
-        text: "6: Seth Moulton"
-        location: { x: 10, y: 70}
-      - !Label
-        text: "7: Ayanna Pressley"
-        location: { x: 10, y: 80}
-      - !Label
-        text: "8: Stephen Lynch"
-        location: { x: 10, y: 90}
-      - !Label
-        text: "9: William Keating"
-        location: { x: 10, y: 100}
+      - !Group
+        frame: false
+        class: "legend-small"
+        contents:
+          - !Label
+            text: "Current representatives:"
+            location: { x: 10, y: 70}
+          - !Label
+            text: "Essex 20th: Richald Neal"
+            location: { x: 10, y: 80}
+          - !Label
+            text: "Essex 21st: Jim McGovern"
+            location: { x: 10, y: 90}
+          - !Label
+            text: "Middlesex 1st: Lori Trahan"
+            location: { x: 10, y: 100}
+          - !Label
+            text: "Middlesex 3rd: Jake Auchincloss"
+            location: { x: 10, y: 110}
+          - !Label
+            text: "Middlesex 1st: Katherine Clark"
+            location: { x: 10, y: 120}
+          - !Label
+            text: "Norfolk 2nd: Seth Moulton"
+            location: { x: 10, y: 130}
+          - !Label
+            text: "Norfolk 3rd: Ayanna Pressley"
+            location: { x: 10, y: 140}
+          - !Label
+            text: "Suffolk 10th: Stephen Lynch"
+            location: { x: 10, y: 150}
+          - !Label
+            text: "Suffolk 11th: William Keating"
+            location: { x: 10, y: 160}
+          - !Label
+            text: "Suffolk 12th: and me"
+            location: { x: 10, y: 160}
