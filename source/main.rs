@@ -261,9 +261,13 @@ fn load_content(content: Content, outer_region: &Option<Box>) -> Result<Content>
                                     Some(characters) => characters,
                                     None => continue,
                                 },
-                                Some(value) => {
-                                    return Err(anyhow!("you can only label by string columns, but '{}' is a {} column.", label_column, value.field_type().to_string()));
-                                }
+                                Some(FieldValue::Numeric(value)) => match value {
+                                    Some(value) => &value.to_string(),
+                                    None => continue,
+                                },
+                                Some(thing) => {
+                                    return Err(anyhow!("you can only label by string or numeric columns, but '{}' is a {} column.", label_column, thing.field_type().to_string()));
+                                },
                                 None => {
                                     return Err(anyhow!("you can't label by the column '{}' because it doesn't seem to exist.", label_column));
                                 }

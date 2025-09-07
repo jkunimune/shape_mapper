@@ -1,12 +1,12 @@
-title: "Massachusetts House districts in and around Boston"
+title: "Massachusetts Senate districts in and around Boston"
 description: "
-  A map of the Boston area that shows the borders of the Massachusetts House
-  of Representatives districts in relation to municipality borders and streets.
+  A map of the Boston area that shows the borders of the Massachusetts Senate
+  in relation to municipality borders and streets.
   All geographic data is taken from the
   <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
     Massachusetts Bureau of Geographic Information
   </a>."
-bounding_box: { left: 0, right: 600, top: 0, bottom: 600 }
+bounding_box: { left: 0, right: 400, top: 0, bottom: 400 }
 style: |
   .legend .background {
     fill: #ffffff;
@@ -67,18 +67,11 @@ style: |
   .road .class-1 {
     fill: none;
     stroke: #787878;
-    stroke-width: 0.9;
-    stroke-linejoin: round;
-    stroke-linecap: round;
-  }
-  .road .class-2, .road .class-3, .road .class-4, .legend .road {
-    fill: none;
-    stroke: #787878;
     stroke-width: 0.6;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .road .class-5 {
+  .road .class-2, .road .class-3, .road .class-4, .legend .road {
     fill: none;
     stroke: #787878;
     stroke-width: 0.3;
@@ -87,107 +80,107 @@ style: |
   }
 
   /* dark blue */
-  .middle12, .middle23, .middle26, .middle29, .suffolk01, .suffolk07, .norfolk02, .essex11 {
+  .sendistnum-14, .sendistnum-25 {
     fill: #d3dce8;
     stroke: #71aae2;
     stroke-width: 6.0;
     stroke-linejoin: round;
   }
-  .dist-label .middle12, .dist-label .middle23, .dist-label .middle26, .dist-label .middle29, .dist-label .suffolk01, .dist-label .suffolk07, .dist-label .norfolk02, .dist-label .essex11 {
+  .dist-label .sendistnum-14, .dist-label .sendistnum-25 {
     fill: #629ad1;
     stroke: none;
     font-family: Cadman, sans-serif;
-    font-size: 12px;
+    font-size: 18px;
     font-weight: bold;
     text-anchor: start;
   }
   /* purple */
-  .middle09, .middle21, .middle33, .suffolk03, .suffolk13, .suffolk14, .suffolk17, .norfolk05 {
+  .sendistnum-28, .sendistnum-31, .sendistnum-35 {
     fill: #e4dfee;
     stroke: #b39fe8;
     stroke-width: 6.0;
     stroke-linejoin: round;
   }
-  .dist-label .middle09, .dist-label .middle21, .dist-label .middle33, .dist-label .suffolk03, .dist-label .suffolk13, .dist-label .suffolk14, .dist-label .suffolk17, .dist-label .norfolk05 {
+  .dist-label .sendistnum-28, .dist-label .sendistnum-31, .dist-label .sendistnum-35 {
     fill: #9b87cf;
     stroke: none;
     font-family: Cadman, sans-serif;
-    font-size: 12px;
+    font-size: 18px;
     font-weight: bold;
     text-anchor: start;
   }
   /* pink */
-  .middle31, .middle34, .suffolk15, .suffolk19, .norfolk13 {
+  .sendistnum-13, .sendistnum-18, .sendistnum-23 {
     fill: #fae9f4;
     stroke: #ee9bd5;
     stroke-width: 6.0;
     stroke-linejoin: round;
   }
-  .dist-label .middle31, .dist-label .middle34, .dist-label .suffolk15, .dist-label .suffolk19, .dist-label .norfolk13 {
+  .dist-label .sendistnum-13, .dist-label .sendistnum-18, .dist-label .sendistnum-23 {
     fill: #c676af;
     stroke: none;
     font-family: Cadman, sans-serif;
-    font-size: 12px;
+    font-size: 18px;
     font-weight: bold;
     text-anchor: start;
   }
   /* red */
-  .middle10, .middle13, .middle25, .suffolk02, .norfolk01, .essex09 {
+  .sendistnum-26, .sendistnum-30, .sendistnum-34 {
     fill: #eed8da;
     stroke: #ed8897;
     stroke-width: 6.0;
     stroke-linejoin: round;
   }
-  .dist-label .middle10, .dist-label .middle13, .dist-label .middle25, .dist-label .suffolk02, .dist-label .norfolk01, .dist-label .essex09 {
+  .dist-label .sendistnum-26, .dist-label .sendistnum-30, .dist-label .sendistnum-34 {
     fill: #d57382;
     stroke: none;
     font-family: Cadman, sans-serif;
-    font-size: 12px;
+    font-size: 18px;
     font-weight: bold;
     text-anchor: start;
   }
   /* orange */
-  .middle15, .middle35, .suffolk06, .suffolk09, .suffolk11, .norfolk04,  .norfolk07, .norfolk15, .essex10 {
+  .sendistnum-16, .sendistnum-17, .sendistnum-32 {
     fill: #f5e4db;
     stroke: #e79d79;
     stroke-width: 6.0;
     stroke-linejoin: round;
   }
-  .dist-label .middle15, .dist-label .middle35, .dist-label .suffolk06, .dist-label .suffolk09, .dist-label .suffolk11, .dist-label .norfolk04, .dist-label .norfolk07, .dist-label .norfolk15, .dist-label .essex10 {
+  .dist-label .sendistnum-16, .dist-label .sendistnum-17, .dist-label .sendistnum-32 {
     fill: #c9815e;
     stroke: none;
     font-family: Cadman, sans-serif;
-    font-size: 12px;
+    font-size: 18px;
     font-weight: bold;
     text-anchor: start;
   }
   /* yellow */
-  .middle11, .middle24, .suffolk04, .suffolk08, .suffolk16, .norfolk03, .norfolk11 {
+  .sendistnum-24, .sendistnum-29 {
     fill: #f5f0e2;
     stroke: #c9b874;
     stroke-width: 6.0;
     stroke-linejoin: round;
   }
-  .dist-label .middle11, .dist-label .middle24, .dist-label .suffolk04, .dist-label .suffolk08, .dist-label .suffolk16, .dist-label .norfolk03, .dist-label .norfolk11 {
+  .dist-label .sendistnum-24, .dist-label .sendistnum-29 {
     fill: #a69552;
     stroke: none;
     font-family: Cadman, sans-serif;
-    font-size: 12px;
+    font-size: 18px;
     font-weight: bold;
     text-anchor: start;
   }
   /* green */
-  .middle27, .middle28, .middle30, .middle32, .suffolk05, .suffolk10, .suffolk12, .suffolk18, .norfolk14 {
+  .sendistnum-15, .sendistnum-27, .sendistnum-33 {
     fill: #d1dace;
     stroke: #80ac75;
     stroke-width: 6.0;
     stroke-linejoin: round;
   }
-  .dist-label .middle27, .dist-label .middle28, .dist-label .middle30, .dist-label .middle32, .dist-label .suffolk05, .dist-label .suffolk10, .dist-label .suffolk12, .dist-label .suffolk18, .dist-label .norfolk14 {
+  .dist-label .sendistnum-15, .dist-label .sendistnum-27, .dist-label .sendistnum-33 {
     fill: #78a36d;
     stroke: none;
     font-family: Cadman, sans-serif;
-    font-size: 12px;
+    font-size: 18px;
     font-weight: bold;
     text-anchor: start;
   }
@@ -297,24 +290,19 @@ contents:
   - !Group
     class: "main-map"
     frame: true
-    bounding_box: { left: 10, right: 590, top: 10, bottom: 590 }
+    bounding_box: { left: 10, right: 390, top: 10, bottom: 390 }
     region: { left: 217000, right: 245000, bottom: 887000, top: 915000 }
     contents:
       - !Layer
         class: "district"
-        filename: "MassGIS/HOUSE2021/HOUSE2021_POLY"
-        class_column: "DIST_CODE"
+        filename: "MassGIS/SENATE2021/SENATE2021_POLY"
+        class_column: "SENDISTNUM"
         self_clip: true
       - !Layer
         class: "dist-label"
-        filename: "MassGIS/HOUSE2021/HOUSE2021_POLY"
-        label_column: "DIST_CODE"
-        class_column: "DIST_CODE"
-        abbr:
-          - {from: "ESSEX", to: "Ess"}
-          - {from: "MIDDLE", to: "Mid"}
-          - {from: "NORFOLK", to: "Nor"}
-          - {from: "SUFFOLK", to: "Suf"}
+        filename: "MassGIS/SENATE2021/SENATE2021_POLY"
+        label_column: "SENDISTNUM"
+        class_column: "SENDISTNUM"
       - !Layer
         class: "pond"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
@@ -342,14 +330,11 @@ contents:
           - !OneOf {key: "LINE_BRNCH", valid_values: ["NEEDHAM BRANCH"]}
       - !Layer
         class: "road"
-        filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
         class_column: "CLASS"
-        filters:
-          - !OneOf {key: "RDTYPE", valid_values: [1, 2, 3, 4, 5]}
-          - !OneOf {key: "ROUTE_SYST", valid_values: ["I", "US", "SR", "L", "N", "R"]}
       - !Layer
         class: "dist-border"
-        filename: "MassGIS/HOUSE2021/HOUSE2021_ARC"
+        filename: "MassGIS/SENATE2021/SENATE2021_ARC"
         filters:
           - !OneOf {key: "OUTLINE", valid_values: [0]}
       - !Layer
@@ -364,20 +349,16 @@ contents:
         size: 2.8
         class_column: "LINE"
         filters:
-          - !Either
-            filters:
-            - !OneOf {key: "STATION", valid_values: ["Boston College", "Heath Street", "Mattapan"]}
-            - !Not {filter: !OneOf {key: "ROUTE", valid_values: ["B - Boston College", "C - Cleveland Circle", "E - Health Street", "Mattapan Trolley", "SL1", "SL2", "SL3", "SL1 SL2 SL3", "SL4", "SL5", "SL4 SL5"]}}
+        - !OneOf {key: "STATION", valid_values: ["Alewife", "Harvard", "Quincy Center", "South Station", "JFK/UMass", "Braintree", "Ashmont", "Mattapan", "Medford/Tufts", "North Station", "Boston College", "Riverside", "Heath Street", "Airport", "Wonderland", "Oak Grove", "Malden Center", "Sullivan Square", "Back Bay", "Forest Hills"]}
+        - !Not {filter: !OneOf {key: "ROUTE", valid_values: ["SL1", "SL2", "SL3", "SL1 SL2 SL3", "SL4", "SL5", "SL4 SL5"]}}
       - !Layer
         class: "station-label"
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
         label_column: "STATION"
         double: true
         filters:
-          - !Either
-            filters:
-            - !OneOf {key: "STATION", valid_values: ["Boston College", "Heath Street", "Mattapan"]}
-            - !Not {filter: !OneOf {key: "ROUTE", valid_values: ["B - Boston College", "C - Cleveland Circle", "E - Health Street", "Mattapan Trolley", "SL1", "SL2", "SL3", "SL1 SL2 SL3", "SL4", "SL5", "SL4 SL5"]}}
+          - !OneOf {key: "STATION", valid_values: ["Alewife", "Harvard", "Quincy Center", "South Station", "JFK/UMass", "Braintree", "Ashmont", "Mattapan", "Medford/Tufts", "North Station", "Boston College", "Riverside", "Heath Street", "Airport", "Wonderland", "Oak Grove", "Malden Center", "Sullivan Square", "Back Bay", "Forest Hills"]}
+          - !Not {filter: !OneOf {key: "ROUTE", valid_values: ["SL1", "SL2", "SL3", "SL1 SL2 SL3", "SL4", "SL5", "SL4 SL5"]}}
         abbr:
           - {from: "Street", to: "St"}
           - {from: "Avenue", to: "Ave"}
@@ -393,7 +374,7 @@ contents:
         case: !Upper
         double: true
         filters:
-          - !GreaterThan {key: "SHAPE_AREA", cutoff: 540000}
+          - !GreaterThan {key: "SHAPE_AREA", cutoff: 1000000}
       - !Layer
         class: "pond-label"
         filename: "MassGIS/hydro25k/HYDRO25K_POLY"
@@ -401,7 +382,7 @@ contents:
         case: !Upper
         double: true
         filters:
-          - !GreaterThan {key: "SHAPE_AREA", cutoff: 270000}
+          - !GreaterThan {key: "SHAPE_AREA", cutoff: 500000}
       - !Layer
         class: "airport-label"
         filename: "MassDOT/Airports"
@@ -417,12 +398,12 @@ contents:
   - !Group
     class: "legend legend-label"
     frame: true
-    bounding_box: { left: 10, right: 140, top: 410, bottom: 590}
+    bounding_box: { left: 310, right: 390, top: 210, bottom: 390}
     region: { left: 0, right: 55, top: 0, bottom: 130 }
     contents:
       - !Label
         class: "legend-title"
-        text: "MA House districts"
+        text: "MA Senate districts"
         location: { x: 66, y: 10 }
       - !Label
         class: "legend-title"
