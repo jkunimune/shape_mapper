@@ -1,0 +1,41 @@
+title: "Blank world map"
+description: "
+  A physical map of the world, including coastlines and major rivers.
+  The projection is the equirectangular projection.
+  Geographic data is taken from
+  <a href=\"https://naturalearthdata.com/\">
+    Natural Earth
+  </a>.
+"
+style: |
+  .water {
+    fill:#ffffff;
+    stroke:none;
+  }
+  .land {
+    fill:#c0c0c0; /* gray */
+    stroke:none;
+  }
+  .river {
+    fill:none;
+    stroke:#ffffff;
+    stroke-width:.2;
+    stroke-linecap:round;
+  }
+bounding_box: { left: -180, right: 180, top: -90, bottom: 90 }
+region: { left: -180, right: 180, bottom: -90, top: 90 }
+contents:
+  - !Layer
+    class: "land"
+    filename: "Natural Earth/ne_110m_land"
+    region: { left: -180, right: 180, bottom: -60, top: 90 }
+  - !Layer
+    class: "antarctic land"
+    filename: "Natural Earth/ne_110m_land"
+    region: { left: -180, right: 180, bottom: -90, top: -60 }
+  - !Layer
+    class: "river"
+    filename: "Natural Earth/ne_110m_rivers"
+  - !Layer
+    class: "water"
+    filename: "Natural Earth/ne_110m_lakes"

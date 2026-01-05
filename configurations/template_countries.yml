@@ -1,0 +1,143 @@
+title: "Blank world map"
+description: "
+  An SVG map of the world with grouping enabled to connect all non-contiguous parts of a country's territory for easy coloring.
+  The projection is the equirectangular projection.
+
+  The <style/> block has options to show circles over small countries, and to modify the borders according to political preference.
+  By default, the map largely shows the <i>de facto</i> borders of all territories in 2022, with some exceptions,
+  as according to <a href=\"https://naturalearthdata.com/\">Natural Earth</a>.
+  To hide an undesired map element, find its selector in the CSS block and change <code>display:block</code> to <code>display:none</code>.
+  To show a hidden map element, find its selector in the CSS block and change <code>display:none</code> to <code>display:block</code>.
+  <ul>
+    <li>
+      The small country circles are shown by default but can be hidden by hiding <code>circle</code>.
+    </li>
+    <li>
+      The borders between Pakistan, India, and China in [[:en:Kashmir]] are ''de facto'' by default
+      but can be set to match each country's official stance by showing
+      <code>.PK-claims</code>, <code>.IN-claims</code>, and <code>.CN-claims</code>, respectively.
+    </li>
+    <li>
+      The border between Sudan and South Sudan is ''de facto'' by default
+      but can be set to match South Sudan's official stance by showing <code>.SS-claims</code>.
+    </li>
+    <li>
+      The borders between Suriname and France and Guyana are ''de facto'' by default
+      but can be set to match Suriname's official stance by showing <code>.SR-claims</code>.
+    </li>
+    <li>
+      The Golan Heights are part of Israel by default
+      but can be made part of Syria by showing <code>.SY-Golan-Heights</code>.
+    </li>
+    <li>
+      The Halaib Triangle is part of Egypt by default
+      but can be made part of Sudan by showing <code>.SD-Halaib-Triangle</code>.
+    </li>
+    <li>
+      Crimea is part of Ukraine by default
+      but can be made part of Russia by showing <code>.RU-Crimea</code>.
+    </li>
+    <li>
+      The Falkland Islands are part of the United Kingdom by default
+      but can be made part of Argentina by showing <code>.AR-Malvinas</code>.
+    </li>
+    <li>
+      North Cyprus is fully independent by default
+      but can be made part of the Republic of Cyprus by hiding <code>.CP</code>.
+    </li>
+    <li>
+      [[:en:Kosovo|]] is fully independent by default
+      but can be made part of the Serbia by hiding <code>.XK</code>.
+    </li>
+    <li>
+      The [[:en:Donbas|]] is part of Ukraine by default
+      but can be made partially independent by showing <code>.DL</code>.
+    </li>
+    <li>
+      [[:en:Taiwan|]] is independent by default
+      but can be made part of China by hiding <code>.TN</code>.
+    </li>
+    <li>
+      [[:en:Somaliland|]] is independent by default
+      but can be made part of Somalia by hiding <code>.SD</code>.
+    </li>
+    <li>
+      [[:en:Transnistria|]] is part of Moldova by default
+      but can be made independent by showing <code>.TN</code>.
+    </li>
+    <li>
+      [[:en:Abkhazia|]] is part of Georgia by default
+      but can be made independent by showing <code>.AB</code>.
+    </li>
+    <li>
+      [[:en:South Ossetia|]] is part of Georgia by default
+      but can be made independent by showing <code>.SO</code>.
+    </li>
+    <li>
+      [[:en:Artsakh|]] is part of Azerbaijan by default
+      but can be made independent by showing <code>.AR</code>.
+    </li>
+    <li>
+      The [[:en:Kuril Islands|]] are part of Russia by default
+      but can be divided as per Japan's official stance by showing <code>.JP-Northern-Territories</code>.
+    </li>
+    <li>
+      The [[:en:European Union|]] is shown as multiple countries
+      but can be styled together using <code>.EU</code>.
+    </li>
+  </ul>
+"
+style: |
+  /*
+    * color in provinces here by inserting their or their countries' ISO 3166 A2 codes. for example:
+    * (color Alberta, Canada in red)
+    * .CA-AB {
+    * 	fill:#ff0000;
+    * }
+    * (color all of Brazil in green)
+    * .BR {
+    * 	fill:#00ff00;
+    * }
+    */
+  /* top-level administrative divisions of large countries */
+  .subcountry, .province {
+    fill:#c0c0c0; /* gray */
+    stroke:#ffffff;
+    stroke-width:.03;
+  }
+  /* countries whose divisions are not shown */
+  .country {
+    fill:#c0c0c0; /* gray */
+    stroke:#ffffff;
+    stroke-width:.10;
+  }
+  /* thick outline for countries whose divisions are shown */
+  .country_outline {
+    fill:none;
+    stroke:#ffffff;
+    stroke-width:.10;
+  }
+  /* ocean and lakes */
+  .water {
+    fill:#ffffff;
+    stroke:none;
+  }
+bounding_box: { left: -180, right: 180, top: -90, bottom: 90 }
+region: { left: -180, right: 180, bottom: -90, top: 90 }
+contents:
+  - !Layer
+    class: "country"
+    filename: "Natural Earth/ne_110m_admin_0_countries"
+    hierarchy: ["international_org", "NAME"]
+  - !Layer
+    class: "subcountry"
+    filename: "Natural Earth/ne_50m_admin_0_map_units"
+  - !Layer
+    class: "province"
+    filename: "Natural Earth/ne_50m_admin_1_states_provinces"
+  - !Layer
+    class: "country_outline"
+    filename: "NaturalEarth/ne_50m_admin_0_countries"
+  - !Layer
+    class: "water"
+    filename: "Natural Earth/ne_50m_lakes"

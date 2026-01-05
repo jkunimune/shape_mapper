@@ -1321,6 +1321,8 @@ impl Filter {
                 match value {
                     FieldValue::Numeric(Some(number)) => Ok(valid_values.contains(&f64::to_string(number))),
                     FieldValue::Numeric(None) => Ok(false),
+                    FieldValue::Float(Some(number)) => Ok(valid_values.contains(&f32::to_string(number))),
+                    FieldValue::Float(None) => Ok(false),
                     FieldValue::Character(Some(characters)) => Ok(valid_values.contains(characters)),
                     FieldValue::Character(None) => Ok(false),
                     FieldValue::Logical(Some(boolean)) => Ok(valid_values.contains(&bool::to_string(boolean).to_uppercase())),

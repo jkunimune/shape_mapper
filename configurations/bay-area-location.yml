@@ -1,0 +1,99 @@
+title: "Location map San Francisco Bay Area"
+description: "
+  A location map for the San Francisco Bay Area.  Data is from the
+  <a href=\"https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html\">
+    TIGER/Line dataset
+  </a>."
+style: |
+  .frame {
+    fill: none;
+    stroke: none;
+  }
+  .water {
+    fill: #c6ecff;
+    stroke: #0978ab;
+    stroke-width: 0.3;
+    stroke-linejoin: round;
+  }
+  .background {
+    fill: #fefee9;
+    stroke: none;
+  }
+  .county {
+    fill: none;
+    stroke: #646464;
+    stroke-width: 0.45;
+    stroke-linejoin: round;
+  }
+  .highway.bottom {
+    fill: none;
+    stroke: #cd755e;
+    stroke-width: 0.9;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .highway.top {
+    fill: none;
+    stroke: #fefee9;
+    stroke-width: 0.45;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+bounding_box: { left: 0, right: 104.8, top: 0, bottom: 127.2 }
+contents:
+  - !Group
+    frame: true
+    bounding_box: { left: 0, right: 104.8, top: 0, bottom: 127.2 }
+    region: { left: -122.6445, right: -121.5871, bottom: 37.1897, top: 38.2033 }
+    contents:
+      - !Layer
+        class: "water"
+        filename: "US Census/tl_2025_06001_areawater"
+        filters: [!GreaterThan {key: "AWATER", cutoff: 2000000}]
+      - !Layer
+        class: "water"
+        filename: "US Census/tl_2025_06013_areawater"
+        filters: [!GreaterThan {key: "AWATER", cutoff: 2000000}]
+      - !Layer
+        class: "water"
+        filename: "US Census/tl_2025_06041_areawater"
+        filters: [!GreaterThan {key: "AWATER", cutoff: 2000000}]
+      - !Layer
+        class: "water"
+        filename: "US Census/tl_2025_06055_areawater"
+        filters: [!GreaterThan {key: "AWATER", cutoff: 2000000}]
+      - !Layer
+        class: "water"
+        filename: "US Census/tl_2025_06067_areawater"
+        filters: [!GreaterThan {key: "AWATER", cutoff: 2000000}]
+      - !Layer
+        class: "water"
+        filename: "US Census/tl_2025_06075_areawater"
+        filters: [!GreaterThan {key: "AWATER", cutoff: 2000000}]
+      - !Layer
+        class: "water"
+        filename: "US Census/tl_2025_06081_areawater"
+        filters: [!GreaterThan {key: "AWATER", cutoff: 2000000}]
+      - !Layer
+        class: "water"
+        filename: "US Census/tl_2025_06085_areawater"
+        filters: [!GreaterThan {key: "AWATER", cutoff: 2000000}]
+      - !Layer
+        class: "water"
+        filename: "US Census/tl_2025_06095_areawater"
+        filters: [!GreaterThan {key: "AWATER", cutoff: 2000000}]
+      - !Layer
+        class: "water"
+        filename: "US Census/tl_2025_06097_areawater"
+        filters: [!GreaterThan {key: "AWATER", cutoff: 2000000}]
+      - !Layer
+        class: "highway bottom"
+        filename: "USDOT/NTAD_North_American_Roads/North_American_Roads"
+        filters: [!OneOf {key: "NHS", valid_values: [1, 3, 7]}]
+      - !Layer
+        class: "highway top"
+        filename: "USDOT/NTAD_North_American_Roads/North_American_Roads"
+        filters: [!OneOf {key: "NHS", valid_values: [1, 3, 7]}]
+      - !Layer
+        class: "county"
+        filename: "US Census/tl_2025_us_county"

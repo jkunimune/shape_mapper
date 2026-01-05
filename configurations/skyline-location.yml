@@ -1,0 +1,172 @@
+title: "Location map southern Oʻahu"
+description: "
+  A location map of southern Oʻahu, with the Honolulu Skyline highlighted.  
+  Geographic data is taken from <a href=\"https://honolulu-cchnl.opendata.arcgis.com/\">
+  Honolulu's ArcGIS data portal
+  </a>.  Transverse Mercator projection, scale 1 mm : 1000 ft."
+bounding_box: { left: 0, right: 110, top: 0, bottom: 70 }
+style: |
+  .development {
+    fill: #ffffff;
+    stroke: #ffffff;
+    stroke-width: .1;
+    stroke-linejoin: round;
+  }
+  .background {
+    fill: #cdf8d5;
+    stroke: #cdf8d5;
+    stroke-width: .1;
+    stroke-linejoin: round;
+  }
+  .water {
+    fill: #b1deff;
+    stroke: none;
+  }
+  .airport {
+    fill: #f3e7f2;
+    stroke: #f3e7f2;
+    stroke-width: .1;
+  }
+  .runway {
+    fill: #d6c9d4;
+    stroke: none;
+  }
+  .rail .top {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: .36;
+    stroke-linecap: butt;
+    stroke-linejoin: round;
+    stroke-dasharray: 2.64 2.64;
+  }
+  .rail .bottom {
+    fill: none;
+    stroke: #778ccd;
+    stroke-width: 1.08;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .planned.rail .bottom {
+    fill: none;
+    stroke: #a4b0d2;
+    stroke-width: 1.08;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .major-highway {
+    fill: none;
+    stroke: #dcb46e;
+    stroke-width: .72;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .minor-highway {
+    fill: none;
+    stroke: #dcb46e;
+    stroke-width: .54;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .major-street {
+    fill: none;
+    stroke: #cbc3b6;
+    stroke-width: .36;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .frame {
+    fill: none;
+    stroke: #000000;
+    stroke-width: .72;
+  }
+contents:
+  - !Group
+    frame: true
+    bounding_box: { left: 0, right: 110, top: 0, bottom: 70 }
+    region: { left: 1605000, right: 1715000, bottom: 30000, top: 100000}
+    contents:
+      - !Layer
+        class: "development"
+        filename: "Honolulu/State_Land_Use_Districts"
+        decimation: 30
+        filters:
+          - !OneOf {key: "lud_code", valid_values: [1]}
+      - !Layer
+        class: "airport"
+        filename: "Honolulu/Airports reprojected"
+      # - !Layer
+      #   class: "runway"
+      #   filename: "Honolulu/HDOT_Airports_-_Airspace_10_Foot_Contours reprojected"
+      #   filters:
+      #     - !OneOf {key: "contour", valid_values: ["10 Feet"]}
+      - !Layer
+        class: "water"
+        filename: "Honolulu/Wetlands"
+        decimation: 30
+        filters:
+          - !OneOf {key: "wetland_ty", valid_values: ["Riverine", "Lake", "Freshwater Pond", "Estuarine and Marine Deepwater", "Estuarine and Marine Wetland"]}
+      - !Rectangle
+        class: "water"
+        coordinates: {left: 1605000, right: 1680000, bottom: 30000, top: 40000}
+      - !Layer
+        class: "major-street"
+        filename: "Honolulu/Street_Centerlines"
+        decimation: 30
+        filters:
+          - !OneOf {key: "street_cla", valid_values: [4, 6]}
+          - !Either
+            filters:
+              - !OneOf {key: "street_typ", valid_values: ["HWY", "PKWY"]}
+              - !OneOf
+                key: "fullname"
+                valid_values:
+                  - "UNIVERSITY AVE"
+                  - "KALIHI ST"
+                  - "BISHOP ST"
+                  - "DILLINGHAM BLVD"
+                  - "N VINEYARD BLVD"
+                  - "S VINEYARD BLVD"
+                  - "N KING ST"
+                  - "S KING ST"
+                  - "N BERETANIA ST"
+                  - "S BERETANIA ST"
+                  - "KALAKAUA AVE"
+                  - "KAPIOLANI BLVD"
+                  - "WAIALAE AVE"
+                  - "ALA MOANA"
+                  - "ALA WAI BLVD"
+                  - "PAKI AVE"
+                  - "SALT LAKE BLVD"
+                  - "PUULOA RD"
+                  - "LAGOON DR"
+                  - "SAND ISLAND ACC RD"
+                  - "WAIMANO HOME RD"
+                  - "KA UKA BLVD"
+                  - "LANIKUHANA AVE"
+                  - "KEONEULA BLVD"
+                  - "FORT WEAVER RD"
+                  - "KALAELOA BLVD"
+                  - "KAMOKILA BLVD"
+                  - "KANEOHE BAY DR"
+      - !Layer
+        class: "minor-highway"
+        filename: "Honolulu/Street_Centerlines"
+        decimation: 30
+        filters: [!OneOf {key: "street_cla", valid_values: [8]}]
+      - !Layer
+        class: "major-highway"
+        filename: "Honolulu/Street_Centerlines"
+        decimation: 30
+        filters: [!OneOf {key: "street_cla", valid_values: [2]}]
+      - !Layer
+        class: "planned rail"
+        filename: "Honolulu/Guideway_Alignment"
+        decimation: 30
+        double: true
+        filters: [!OneOf {key: "feature_na", valid_values: ["City Center Section"]}]
+      - !Layer
+        class: "rail"
+        filename: "Honolulu/Guideway_Alignment"
+        decimation: 30
+        double: true
+        filters: [!OneOf {key: "feature_na", valid_values: ["West Oahu/Farrington Highway Section", "Kamehameha Highway Section", "Airport Section"]}]

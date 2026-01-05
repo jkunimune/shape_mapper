@@ -6,28 +6,43 @@ description: "
   <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
     Massachusetts Bureau of Geographic Information
   </a>."
-bounding_box: { left: 0, right: 600, top: 0, bottom: 600 }
+bounding_box: { left: 0, right: 460, top: 0, bottom: 460 }
 style: |
-  .legend .background {
-    fill: #ffffff;
-    stroke: none;
-  }
-  .pond, .main-map .background, .minimap .background {
-    fill: #e5f3f4;
+  .pond, .background {
+    fill: #f0f9f9;
     stroke: none;
   }
   .stream {
     fill: none;
-    stroke: #125588;
+    stroke: #025e62;
     stroke-width: 0.6;
     stroke-linejoin: round;
     stroke-linecap: round;
   }
+  .outlined-pond {
+    fill: #f0f9f9;
+    stroke: #025e62;
+    stroke-width: 0.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .legend .background {
+    fill: #ffffff;
+    stroke: none;
+  }
   .frame {
     fill: none;
     stroke: black;
-    stroke-width: 3.0;
+    stroke-width: 2.0;
     stroke-linejoin: miter;
+  }
+  .shown-region-indicator {
+    fill: none;
+    stroke: black;
+    stroke-width: 0.6;
+    stroke-linejoin: miter;
+    stroke-linecap: square;
+    stroke-dasharray: 1.2 1.8;
   }
   .state {
     fill: white;
@@ -36,19 +51,28 @@ style: |
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
-  .state-border, .town {
+  .county {
+    fill: none;
+    stroke: black;
+    stroke-width: 0.6;
+    stroke-linecap: round;
+    stroke-linejoin: miter;
+    stroke-miterlimit: 2;
+  }
+  .town {
     fill: none;
     stroke: black;
     stroke-width: 1.0;
+    stroke-linecap: round;
     stroke-linejoin: miter;
     stroke-miterlimit: 2;
   }
   .city {
     fill: none;
     stroke: black;
-    stroke-width: 1.0;
-    stroke-linejoin: miter;
-    stroke-miterlimit: 2;
+    stroke-width: 2.0;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
   .track .bottom {
     fill: none;
@@ -85,93 +109,104 @@ style: |
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .minimap .road {
-    fill: none;
-    stroke: #787878;
-    stroke-width: 0.6;
-    stroke-linejoin: round;
-    stroke-linecap: round;
-  }
   .dist-num-1, .dist-num-6 { /* orange */
     fill: #f5e4db;
     stroke: #e79d79;
     stroke-width: 10.0;
     stroke-linejoin: round;
   }
-  .main-map .district-label-6 {
+  .detail .district-label-6 {
     fill: #e79d79;
     font-family: Cadman, sans-serif;
     font-weight: bold;
     font-size: 75px;
   }
-  .minimap .district-label-1, .minimap .district-label-6 {
-    fill: #684e41;
+  .main-map .district-label-1, .minimap .district-label-1, .main-map .district-label-6, .minimap .district-label-6 {
+    fill: #a15d3b;
     font-family: Cadman, sans-serif;
     font-weight: bold;
-    font-size: 75px;
+    font-size: 30px;
   }
   .dist-num-2, .dist-num-9 { /* purple */
     fill: #e4dfee;
     stroke: #b39fe8;
-    stroke-width: 10.0;
+    stroke-width: 8.0;
     stroke-linejoin: round;
   }
-  .minimap .district-label-2, .minimap .district-label-9 {
-    fill: #575069;
+  .main-map .district-label-2, .minimap .district-label-2, .main-map .district-label-2, .minimap .district-label-9 {
+    fill: #7864a8;
     font-family: Cadman, sans-serif;
     font-weight: bold;
-    font-size: 75px;
+    font-size: 30px;
   }
   .dist-num-3 { /* pink */
     fill: #fae9f4;
     stroke: #ee9bd5;
-    stroke-width: 10.0;
+    stroke-width: 8.0;
     stroke-linejoin: round;
   }
-  .minimap .district-label-3 {
+  .detail .district-label-3 {
     fill: #694c5f;
     font-family: Cadman, sans-serif;
     font-weight: bold;
-    font-size: 75px;
+    font-size: 30px;
+  }
+  .main-map .district-label-3, .minimap .district-label-3 {
+    fill: #9f5289;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 30px;
   }
   .dist-num-4 { /* green */
     fill: #d1dace;
     stroke: #80ac75;
-    stroke-width: 10.0;
+    stroke-width: 8.0;
     stroke-linejoin: round;
   }
-  .main-map .district-label-4 {
+  .detail .district-label-4 {
     fill: #80ac75;
     font-family: Cadman, sans-serif;
     font-weight: bold;
     font-size: 75px;
   }
-  .minimap .district-label-4 {
-    fill: #485743;
+  .main-map .district-label-4, .minimap .district-label-4 {
+    fill: #557f4a;
     font-family: Cadman, sans-serif;
     font-weight: bold;
-    font-size: 75px;
+    font-size: 30px;
   }
   .dist-num-5 { /* dark blue */
     fill: #d3dce8;
     stroke: #71aae2;
-    stroke-width: 10.0;
+    stroke-width: 8.0;
     stroke-linejoin: round;
   }
-  .main-map .district-label-5 {
+  .detail .district-label-5 {
     fill: #71aae2;
     font-family: Cadman, sans-serif;
     font-weight: bold;
     font-size: 75px;
   }
+  .main-map .district-label-5, .minimap .district-label-5 {
+    fill: #3e75aa;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 30px;
+  }
   .dist-num-7 { /* yellow */
     fill: #f5f0e2;
     stroke: #c9b874;
-    stroke-width: 10.0;
+    stroke-width: 8.0;
     stroke-linejoin: round;
   }
-  .main-map .district-label-7 {
+  .detail .district-label-7 {
     fill: #c9b874;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 75px;
+  }
+  .main-map .district-label-7, .minimap .district-label-7 {
+    fill: #81712d;
     font-family: Cadman, sans-serif;
     font-weight: bold;
     font-size: 75px;
@@ -179,11 +214,17 @@ style: |
   .dist-num-8 { /* red */
     fill: #eed8da;
     stroke: #ed8897;
-    stroke-width: 10.0;
+    stroke-width: 8.0;
     stroke-linejoin: round;
   }
-  .main-map .district-label-8 {
+  .detail .district-label-8 {
     fill: #ed8897;
+    font-family: Cadman, sans-serif;
+    font-weight: bold;
+    font-size: 75px;
+  }
+  .main-map .district-label-8, .minimap .district-label-8 {
+    fill: #ad4f5f;
     font-family: Cadman, sans-serif;
     font-weight: bold;
     font-size: 75px;
@@ -193,7 +234,8 @@ style: |
     stroke: black;
     stroke-width: 0.4;
     stroke-linejoin: round;
-    stroke-dasharray: 0.6 0.6;
+    stroke-linecap: square;
+    stroke-dasharray: 0.1 0.9;
   }
   .station-marker {
     fill: #ffffff;
@@ -202,11 +244,12 @@ style: |
   .station-label .bottom {
     stroke: #ffffff;
     stroke-width: 0.5;
+    stroke-miterlimit: 2;
     font-family: Cadman, sans-serif;
     font-size: 3.5px;
     text-anchor: start;
   }
-  .station-label .top {
+  .station-label {
     fill: #000000;
     font-family: Cadman, sans-serif;
     font-size: 3.5px;
@@ -215,11 +258,12 @@ style: |
   .park-label .bottom {
     stroke: #ffffff;
     stroke-width: 0.5;
+    stroke-miterlimit: 2;
     font-family: Cadman, sans-serif;
     font-size: 3.5px;
     text-anchor: middle;
   }
-  .park-label .top {
+  .park-label {
     fill: #2d4e1f;
     font-family: Cadman, sans-serif;
     font-size: 3.5px;
@@ -228,49 +272,46 @@ style: |
   .pond-label .bottom {
     stroke: #ffffff;
     stroke-width: 0.5;
+    stroke-miterlimit: 2;
     font-family: Cadman, sans-serif;
     font-size: 3.5px;
     font-style: italic;
     text-anchor: middle;
   }
-  .pond-label .top {
+  .pond-label {
     fill: #125588;
     font-family: Cadman, sans-serif;
     font-size: 3.5px;
     font-style: italic;
     text-anchor: middle;
   }
-  .airport-label {
-    fill: #3b3b3b;
-    font-family: Cadman, sans-serif;
-    font-size: 4.0px;
-    text-anchor: middle;
-  }
-  .main-map .town-label .bottom {
+  .detail .town-label .bottom {
     stroke: #ffffff;
     stroke-width: 0.5;
+    stroke-miterlimit: 2;
     font-family: Cadman, sans-serif;
     font-weight: bold;
-    font-size: 6px; /* note: 6px is actually 6 millimeters (about 17pt) */
+    font-size: 7px; /* note: 7px is actually 7 millimeters (about 20pt) */
     text-anchor: middle;
   }
-  .main-map .town-label .top {
+  .detail .town-label {
     filL: #000000;
     font-family: Cadman, sans-serif;
     font-weight: bold;
-    font-size: 6px; /* note: 6px is actually 6 millimeters (about 17pt) */
+    font-size: 7px; /* note: 6px is actually 7 millimeters (about 20pt) */
     text-anchor: middle;
   }
-  .minimap .town-label .bottom {
+  .main-map .town-label .bottom, .minimap .town-label .bottom {
     stroke: #ffffff;
     stroke-width: 0.5;
+    stroke-miterlimit: 2;
     font-family: Cadman, sans-serif;
     font-weight: bold;
     font-size: 5px;
     text-anchor: start;
     alignment-baseline: baseline;
   }
-  .minimap .town-label .top {
+  .main-map .town-label, .minimap .town-label {
     fill: #000000;
     font-family: Cadman, sans-serif;
     font-weight: bold;
@@ -278,7 +319,7 @@ style: |
     text-anchor: start;
     alignment-baseline: baseline;
   }
-  .minimap .district-label {
+  .main-map .district-label, .minimap .district-label {
     font-size: 15px;
   }
   .legend-title {
@@ -300,10 +341,99 @@ style: |
   }
 contents:
   - !Group
+    class: "minimap"
+    frame: true
+    bounding_box: { left: 10, right: 250, top: 210, bottom: 380 }
+    region: { left: 29000, right: 293000, bottom: 777000, top: 964000 }
+    contents:
+      - !Rectangle
+        class: "state new-york"
+        coordinates: { left: 0, right: 100000, bottom: 760000, top: 1000000}
+      - !Layer
+        class: "state"
+        filename: "MassGIS/newengland/NEWENGLAND_POLY"
+        filters:
+          - !Not {filter: !OneOf {key: "NAME", valid_values: ["MASSACHUSETTS"]}}
+      - !Layer
+        class: "district"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_POLY"
+        class_column: "DIST_NUM"
+        self_clip: true
+        decimation: 100
+      - !Group
+        class: "district-label"
+        contents:
+          - !Label
+            class: "district-label-1"
+            text: "1"
+            location: { x: 230000, y: 888000}
+          - !Label
+            class: "district-label-2"
+            text: "2"
+            location: { x: 230000, y: 888000}
+          - !Label
+            class: "district-label-3"
+            text: "3"
+            location: { x: 230000, y: 888000}
+          - !Label
+            class: "district-label-4"
+            text: "4"
+            location: { x: 230000, y: 888000}
+          - !Label
+            class: "district-label-6"
+            text: "6"
+            location: { x: 230000, y: 888000}
+          - !Label
+            class: "district-label-9"
+            text: "9"
+            location: { x: 230000, y: 888000}
+      - !Layer
+        class: "stream"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+        decimation: 100
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [2]}
+      - !Layer
+        class: "district-border"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+        decimation: 100
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [0]}
+      - !Layer
+        class: "county"
+        filename: "MassGIS/counties/COUNTIES_ARC"
+        decimation: 100
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [9]}
+      - !Layer
+        class: "town"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+        decimation: 100
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [1]}
+      - !Rectangle
+        class: "shown-region-indicator"
+        coordinates: { left: 210000, right: 260000, bottom: 879000, top: 919000 }
+      - !Layer
+        class: "city"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+        self_clip: true
+        decimation: 100
+        filters:
+          - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD", "BOSTON"]}
+      - !Layer
+        class: "town-label"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+        label_column: "TOWN"
+        case: !Title
+        double: false
+        filters:
+          - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD", "BOSTON"]}
+  - !Group
     class: "main-map"
     frame: true
-    bounding_box: { left: 10, right: 590, top: 10, bottom: 590 }
-    region: { left: 217000, right: 245000, bottom: 887000, top: 915000 }
+    bounding_box: { left: 10, right: 250, top: 10, bottom: 210 }
+    region: { left: 211000, right: 259000, bottom: 879000, top: 919000 }
     contents:
       - !Layer
         class: "district"
@@ -334,15 +464,246 @@ contents:
             text: "8"
             location: { x: 230000, y: 888000}
       - !Layer
-        class: "pond"
-        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+        class: "outlined-pond"
+        filename: "MassGIS/majorhydro/MAJPOND_POLY"
         filters:
-          - !OneOf {key: "POLY_CODE", valid_values: [1, 6]}
+          - !GreaterThan {key: "SHAPE_AREA", cutoff: 200000}
       - !Layer
         class: "stream"
-        filename: "MassGIS/hydro25k/HYDRO25K_ARC"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
         filters:
-          - !OneOf {key: "ARC_CODE", valid_values: [1, 8, 10]}
+          - !OneOf {key: "OUTLINE", valid_values: [2]}
+      - !Layer
+        class: "district-border"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [0]}
+      - !Rectangle
+        class: "shown-region-indicator"
+        coordinates: { left: 218200, right: 221700, bottom: 913600, top: 917100 }
+      - !Rectangle
+        class: "shown-region-indicator"
+        coordinates: { left: 215700, right: 221700, bottom: 891500, top: 897500 }
+      - !Rectangle
+        class: "shown-region-indicator"
+        coordinates: { left: 227500, right: 237500, bottom: 884800, top: 906300 }
+      - !Layer
+        class: "town"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [17]}
+      - !Layer
+        class: "town-label"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+        label_column: "TOWN"
+        case: !Upper
+        double: true
+  - !Group
+    class: "bedford detail"
+    frame: true
+    bounding_box: { left: 180, right: 250, top: 380, bottom: 450 }
+    region: { left: 218200, right: 221700, bottom: 913600, top: 917100 }
+    contents:
+      - !Layer
+        class: "district"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_POLY"
+        class_column: "DIST_NUM"
+        self_clip: true
+      - !Group
+        class: "district-label"
+        contents:
+          - !Label
+            class: "district-label-5"
+            text: "5"
+            location: { x: 220000, y: 915000}
+          - !Label
+            class: "district-label-6"
+            text: "6"
+            location: { x: 220000, y: 915000}
+      - !Layer
+        class: "pond"
+        filename: "MassGIS/hydro100k/HYDRO100K_POLY"
+      - !Layer
+        class: "stream"
+        filename: "MassGIS/hydro100k/HYDRO100K_ARC"
+      - !Layer
+        class: "road"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
+        class_column: "CLASS"
+        filters:
+          - !OneOf {key: "RDTYPE", valid_values: [1, 2, 3, 4, 5]}
+          - !OneOf {key: "ROUTE_SYST", valid_values: ["I", "US", "SR", "L", "N", "R"]}
+      - !Layer
+        class: "district-border"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [0]}
+      - !Layer
+        class: "town"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [17]}
+      - !Layer
+        class: "park-label"
+        filename: "MassGIS/openspace/OPENSPACE_POLY"
+        label_column: "SITE_NAME"
+        case: !Upper
+        double: true
+        filters:
+          - !GreaterThan {key: "SHAPE_AREA", cutoff: 540000}
+      - !Layer
+        class: "pond-label"
+        filename: "MassGIS/hydro100k/HYDRO100K_POLY"
+        label_column: "NAME"
+        case: !Upper
+        double: true
+        filters:
+          - !GreaterThan {key: "SHAPE_AREA", cutoff: 270000}
+      - !Layer
+        class: "town-label"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+        label_column: "TOWN"
+        case: !Upper
+        double: true
+  - !Group
+    class: "wellesley detail"
+    frame: true
+    bounding_box: { left: 60, right: 180, top: 330, bottom: 450 }
+    region: { left: 215700, right: 221700, bottom: 891500, top: 897500 }
+    contents:
+      - !Layer
+        class: "district"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_POLY"
+        class_column: "DIST_NUM"
+        self_clip: true
+      - !Group
+        class: "district-label"
+        contents:
+          - !Label
+            class: "district-label-4"
+            text: "4"
+            location: { x: 220000, y: 895000}
+          - !Label
+            class: "district-label-5"
+            text: "5"
+            location: { x: 220000, y: 895000}
+      - !Layer
+        class: "pond"
+        filename: "MassGIS/hydro100k/HYDRO100K_POLY"
+      - !Layer
+        class: "stream"
+        filename: "MassGIS/hydro100k/HYDRO100K_ARC"
+      - !Layer
+        class: "track"
+        filename: "MassGIS/trains/TRAINS_ARC"
+        double: true
+        filters:
+          - !OneOf {key: "TYPE", valid_values: [1, 9]}
+          - !OneOf {key: "RT_CLASS", valid_values: [0, 1, 2, 3, 4, 6]}
+          - !OneOf {key: "TRACK", valid_values: [1]}
+      - !Layer
+        class: "road"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
+        class_column: "CLASS"
+        filters:
+          - !OneOf {key: "RDTYPE", valid_values: [1, 2, 3, 4, 5]}
+          - !OneOf {key: "ROUTE_SYST", valid_values: ["I", "US", "SR", "L", "N", "R"]}
+      - !Layer
+        class: "district-border"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [0]}
+      - !Layer
+        class: "town"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [17]}
+      - !Layer
+        class: "station-marker"
+        filename: "MassGIS/trains/TRAINS_NODE"
+        marker_name: "mbta"
+        size: 2.8
+        filters:
+          - !OneOf {key: "MAP_STA", valid_values: ["Y"]}
+      - !Layer
+        class: "station-label"
+        filename: "MassGIS/trains/TRAINS_NODE"
+        label_column: "STATION"
+        case: !Title
+        double: true
+        filters:
+          - !OneOf {key: "MAP_STA", valid_values: ["Y"]}
+        abbr:
+          - {from: "Street", to: "St"}
+          - {from: "Avenue", to: "Ave"}
+          - {from: "Square", to: "Sq"}
+          - {from: "Centre", to: "Ctr"}
+          - {from: "Center", to: "Ctr"}
+          - {from: "Station", to: "Sta"}
+          - {from: "Massachusetts", to: "Mass"}
+      - !Layer
+        class: "park-label"
+        filename: "MassGIS/openspace/OPENSPACE_POLY"
+        label_column: "SITE_NAME"
+        case: !Upper
+        double: true
+        filters:
+          - !GreaterThan {key: "SHAPE_AREA", cutoff: 540000}
+      - !Layer
+        class: "pond-label"
+        filename: "MassGIS/hydro100k/HYDRO100K_POLY"
+        label_column: "NAME"
+        case: !Upper
+        double: true
+        filters:
+          - !GreaterThan {key: "SHAPE_AREA", cutoff: 270000}
+      - !Layer
+        class: "town-label"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
+        label_column: "TOWN"
+        case: !Upper
+        double: true
+  - !Group
+    class: "boston detail"
+    frame: true
+    bounding_box: { left: 250, right: 450, top: 10, bottom: 450 }
+    region: { left: 227500, right: 237500, bottom: 884800, top: 906300 }
+    contents:
+      - !Layer
+        class: "district"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_POLY"
+        class_column: "DIST_NUM"
+        self_clip: true
+      - !Group
+        class: "district-label"
+        contents:
+          - !Label
+            class: "district-label-4"
+            text: "4"
+            location: { x: 230000, y: 888000}
+          - !Label
+            class: "district-label-5"
+            text: "5"
+            location: { x: 230000, y: 888000}
+          - !Label
+            class: "district-label-7"
+            text: "7"
+            location: { x: 230000, y: 888000}
+          - !Label
+            class: "district-label-8"
+            text: "8"
+            location: { x: 230000, y: 888000}
+      - !Layer
+        class: "pond"
+        filename: "MassGIS/hydro100k/HYDRO100K_POLY"
+      - !Layer
+        class: "stream"
+        filename: "MassGIS/hydro100k/HYDRO100K_ARC"
+      - !Layer
+        class: "stream"
+        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [2]}
       - !Layer
         class: "track"
         filename: "MassGIS/trains/TRAINS_ARC"
@@ -368,6 +729,8 @@ contents:
       - !Layer
         class: "district-border"
         filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [0]}
       - !Layer
         class: "town"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC"
@@ -375,15 +738,37 @@ contents:
           - !OneOf {key: "OUTLINE", valid_values: [17]}
       - !Layer
         class: "station-marker"
+        filename: "MassGIS/trains/TRAINS_NODE"
+        marker_name: "mbta"
+        size: 2.8
+        filters:
+          - !OneOf {key: "MAP_STA", valid_values: ["Y"]}
+      - !Layer
+        class: "station-marker"
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
         marker_name: "mbta"
         size: 2.8
-        class_column: "LINE"
         filters:
           - !Either
             filters:
             - !OneOf {key: "STATION", valid_values: ["Boston College", "Heath Street", "Mattapan"]}
             - !Not {filter: !OneOf {key: "ROUTE", valid_values: ["B - Boston College", "C - Cleveland Circle", "E - Health Street", "Mattapan Trolley", "SL1", "SL2", "SL3", "SL1 SL2 SL3", "SL4", "SL5", "SL4 SL5"]}}
+      - !Layer
+        class: "station-label"
+        filename: "MassGIS/trains/TRAINS_NODE"
+        label_column: "STATION"
+        case: !Title
+        double: true
+        filters:
+          - !OneOf {key: "MAP_STA", valid_values: ["Y"]}
+        abbr:
+          - {from: "Street", to: "St"}
+          - {from: "Avenue", to: "Ave"}
+          - {from: "Square", to: "Sq"}
+          - {from: "Centre", to: "Ctr"}
+          - {from: "Center", to: "Ctr"}
+          - {from: "Station", to: "Sta"}
+          - {from: "Massachusetts", to: "Mass"}
       - !Layer
         class: "station-label"
         filename: "MassGIS/mbta_rapid_transit/MBTA_NODE"
@@ -412,187 +797,33 @@ contents:
           - !GreaterThan {key: "SHAPE_AREA", cutoff: 540000}
       - !Layer
         class: "pond-label"
-        filename: "MassGIS/hydro25k/HYDRO25K_POLY"
+        filename: "MassGIS/hydro100k/HYDRO100K_POLY"
         label_column: "NAME"
         case: !Upper
         double: true
         filters:
           - !GreaterThan {key: "SHAPE_AREA", cutoff: 270000}
       - !Layer
-        class: "airport-label"
-        filename: "MassDOT/Airports"
-        label_column: "AIRPORT_NA"
-        case: !Upper
-        double: false
-      - !Layer
         class: "town-label"
         filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
         label_column: "TOWN"
         case: !Upper
         double: true
   - !Group
-    class: "minimap"
+    class: "legend"
     frame: true
-    bounding_box: { left: 10, right: 250, top: 10, bottom: 170.24 }
-    region: { left: 28000, right: 280000, bottom: 801000, top: 964000 }
-    contents:
-      - !Rectangle
-        class: "state new-york"
-        coordinates: { left: 0, right: 100000, bottom: 760000, top: 1000000}
-      - !Layer
-        class: "state"
-        filename: "MassGIS/newengland/NEWENGLAND_POLY"
-        class_column: "NAME"
-      - !Layer
-        class: "district"
-        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_POLY"
-        class_column: "DIST_NUM"
-        self_clip: true
-      - !Group
-        class: "district-label"
-        contents:
-          - !Label
-            class: "district-label-1"
-            text: "1"
-            location: { x: 230000, y: 888000}
-          - !Label
-            class: "district-label-2"
-            text: "2"
-            location: { x: 230000, y: 888000}
-          - !Label
-            class: "district-label-3"
-            text: "3"
-            location: { x: 230000, y: 888000}
-          - !Label
-            class: "district-label-4"
-            text: "4"
-            location: { x: 230000, y: 888000}
-          - !Label
-            class: "district-label-6"
-            text: "6"
-            location: { x: 230000, y: 888000}
-          - !Label
-            class: "district-label-9"
-            text: "9"
-            location: { x: 230000, y: 888000}
-      - !Layer
-        class: "road"
-        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
-        class_column: "ADMIN_TYPE"
-        filters:
-          - !OneOf {key: "ADMIN_TYPE", valid_values: [1, 2]}
-      - !Layer
-        class: "district-border"
-        filename: "MassGIS/CONGRESSMA118/CONGRESSMA118_ARC"
-        decimation: 100
-      - !Rectangle
-        id: "shown-region-indicator"
-        class: "state-border"
-        coordinates: { left: 216000, right: 245000, bottom: 887000, top: 915000 }
-      - !Layer
-        class: "city"
-        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
-        filters:
-          - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}
-      - !Layer
-        class: "town-label"
-        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM"
-        label_column: "TOWN"
-        case: !Title
-        double: true
-        filters:
-          - !OneOf {key: "TOWN", valid_values: ["PITTSFIELD", "GREENFIELD", "HOLYOKE", "SPRINGFIELD", "FITCHBURG", "WORCESTER", "FRAMINGHAM", "LOWELL", "HAVERHILL", "BROCKTON", "FALL RIVER", "NEW BEDFORD"]}
-      - !Layer
-        class: "state-border"
-        filename: "MassGIS/newengland/NEWENGLAND_POLY"
-        class_column: "NAME"
-  - !Group
-    class: "legend legend-label"
-    frame: false
-    bounding_box: { left: 18, right: 150, top: 110, bottom: 170}
-    region: { left: 0, right: 132, top: 0, bottom: 60 }
+    bounding_box: {left: 10, right: 60, top: 330, bottom: 450}
+    region: {left: 0, right: 50, top: 0, bottom: 120}
     contents:
       - !Label
         class: "legend-title"
-        text: "Congressional districts"
-        location: { x: 66, y: 10 }
-      - !Label
-        class: "legend-title"
-        text: "of the Boston area"
-        location: { x: 66, y: 20 }
+        text: "Congressional"
+        location: { x: 5, y: 5 }
       - !Label
         class: "legend-subtitle"
-        text: "Conformal conic projection, 1 : 50 000"
-        location: { x: 66, y: 30}
-      - !Line
-        class: "road class-3"
-        start: { x: 10, y: 40 }
-        end: { x: 20, y: 40 }
+        text: "districts"
+        location: { x: 5, y: 15 }
       - !Label
-        text: "Road"
-        location: { x: 23, y: 40 }
-      - !Group
-        class: "track"
-        contents:
-          - !Line
-            class: "bottom"
-            start: { x: 10, y: 50 }
-            end: { x: 20, y: 50 }
-          - !Line
-            class: "top"
-            start: { x: 10, y: 50 }
-            end: { x: 20, y: 50 }
-      - !Label
-        text: "Train track"
-        location: { x: 23, y: 50 }
-      - !Rectangle
-        class: "town"
-        coordinates: { left: 82, right: 88, top: 38, bottom: 42 }
-      - !Label
-        text: "Municipal border"
-        location: { x: 93, y: 40}
-      - !Rectangle
-        class: "pond"
-        coordinates: { left: 82, right: 88, top: 48, bottom: 52 }
-      - !Rectangle
-        class: "stream"
-        coordinates: { left: 82, right: 88, top: 48, bottom: 52 }
-      - !Label
-        text: "Pond or river"
-        location: { x: 93, y: 50 }
-  - !Group
-    class: "legend legend-label"
-    frame: true
-    bounding_box: { left: 535, right: 590, top: 460, bottom: 590}
-    region: { left: 0, right: 55, top: 0, bottom: 130 }
-    contents:
-      - !Label
-        text: "Current representatives:"
-        location: { x: 10, y: 10}
-      - !Label
-        text: "1: Richald Neal"
-        location: { x: 10, y: 20}
-      - !Label
-        text: "2: Jim McGovern"
-        location: { x: 10, y: 30}
-      - !Label
-        text: "3: Lori Trahan"
-        location: { x: 10, y: 40}
-      - !Label
-        text: "4: Jake Auchincloss"
-        location: { x: 10, y: 50}
-      - !Label
-        text: "5: Katherine Clark"
-        location: { x: 10, y: 60}
-      - !Label
-        text: "6: Seth Moulton"
-        location: { x: 10, y: 70}
-      - !Label
-        text: "7: Ayanna Pressley"
-        location: { x: 10, y: 80}
-      - !Label
-        text: "8: Stephen Lynch"
-        location: { x: 10, y: 90}
-      - !Label
-        text: "9: William Keating"
-        location: { x: 10, y: 100}
+        class: "legend-label"
+        text: "Conformal conic projection"
+        location: { x: 5, y: 25 }

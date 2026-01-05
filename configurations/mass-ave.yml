@@ -1,0 +1,201 @@
+title: "Mass. Ave."
+description: "
+  A map of all major roads named Massachusetts Avenue, as per the
+  <a href=\"https://www.mass.gov/orgs/massgis-bureau-of-geographic-information\">
+    Massachusetts Bureau of Geographic Information
+  </a>'s dataset."
+style: |
+  .frame {
+    fill: none;
+    stroke: black;
+    stroke-width: 2.0;
+    stroke-linejoin: miter;
+  }
+  .background, .water {
+    fill: #b9e8f0;
+    stroke: none;
+  }
+  /* blue */
+  .ashby, .concord, .brookline, .leominster, .shirley, .watertown, .winthrop {
+    fill: #eff6ff;
+    stroke: none;
+  }
+  /* purple */
+  .belmont, .boxborough, .somerville, .maynard, .westford, .winchester {
+    fill: #f7f3ff;
+    stroke: none;
+  }
+  /* pink */
+  .carlisle, .everett, .groton, .lincoln, .lunenburg, .newton {
+    fill: #fff8fb;
+    stroke: none;
+  }
+  /* red */
+  .cambridge, .harvard, .quincy, .sudbury, .woburn {
+    fill: #fff4f2;
+    stroke: none;
+  }
+  /* orange */
+  .acton, .chelsea, .lexington, .medford, .townsend, .weston {
+    fill: #fffbf6;
+    stroke: none;
+  }
+  /* yellow */
+  .ayer, .boston, .lancaster {
+    fill: #fcfff5;
+    stroke: none;
+  }
+  /* green */
+  .arlington, .bedford, .littleton, .fitchburg, .malden, .stow, .waltham, .wayland {
+    fill: #ebf7f1;
+    stroke: none;
+  }
+  .border {
+    fill: none;
+    stroke: #000000;
+    stroke-width: 0.3;
+    stroke-linejoin: miter;
+    stroke-miterlimit: 2;
+    stroke-linecap: butt;
+    stroke-dasharray: 1.2 0.6 0.3 0.6;
+  }
+  .shore {
+    fill: none;
+    stroke: #5c8991;
+    stroke-width: 0.3;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .trail {
+    fill: none;
+    stroke: #5d6a33;
+    stroke-width: 0.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .rail .bottom {
+    fill: none;
+    stroke: #4e3d6c;
+    stroke-width: 0.9;
+    stroke-linejoin: round;
+    stroke-linecap: square;
+  }
+  .rail .top {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 0.3;
+    stroke-linejoin: round;
+    stroke-linecap: square;
+    stroke-dasharray: 2.0 3.0;
+  }
+  .road {
+    fill: none;
+    stroke: #2e2e2e;
+    stroke-width: 0.8;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .mass-ave.bottom {
+    fill: none;
+    stroke: #ff9d8d;
+    stroke-width: 2.0;
+    stroke-linejoin: round;
+    stroke-linecap: square;
+  }
+  .mass-ave.top {
+    fill: none;
+    stroke: #5c0300;
+    stroke-width: 0.6;
+    stroke-linejoin: round;
+    stroke-linecap: square;
+  }
+  .road-label {
+    font-size: 5px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+bounding_box: { left: -5, right: 725, top: -5, bottom: 125 }
+contents:
+  - !Group
+    bounding_box: { left: 0, right: 720, top: 0, bottom: 120 }
+    region: { left: 170000, right: 245000, bottom: 890000, top: 935000 }
+    transform:
+      !Affine
+      longitudinal_scale: 1e-5
+      latitudinal_scale: -1e-5
+      false_easting: -178000
+      false_northing: -934000
+      rotation: 25
+    frame: true
+    contents:
+      - !Layer
+        class: "town"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_POLYM_GENCOAST"
+        class_column: "TOWN"
+      - !Layer
+        class: "border"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC_GENCOAST"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [17]}
+      - !Layer
+        class: "water"
+        filename: "MassGIS/hydro100k/HYDRO100K_POLY"
+      - !Layer
+        class: "mass-ave bottom"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+        filters:
+          - !OneOf {key: "STREET_NAM", valid_values: ["MASSACHUSETTS AVENUE", "HARVARD BRIDGE"]}
+      # - !Layer
+      #   class: "mass-ave bottom"
+      #   filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
+      #   filters:
+      #     - !OneOf {key: "ROUTE_NUMB", valid_values: [214401]}
+      - !Layer
+        class: "shore"
+        filename: "MassGIS/townssurvey_shp/TOWNSSURVEY_ARC_GENCOAST"
+        filters:
+          - !OneOf {key: "OUTLINE", valid_values: [4]}
+      - !Layer
+        class: "shore"
+        filename: "MassGIS/hydro100k/HYDRO100K_ARC"
+      - !Layer
+        class: "trail"
+        filename: "MassGIS/biketrails_arc/BIKETRAILS_ARC"
+        filters:
+          - !OneOf {key: "FAC_TYPE_N", valid_values: ["Shared Use Path"]}
+          - !GreaterThan {key: "SHAPE_LEN", cutoff: 10}
+      - !Layer
+        class: "trail"
+        filename: "MassGIS/ldtrails/LONGDISTTRAILS_ARC"
+      - !Layer
+        class: "rail"
+        double: true
+        filename: "MassGIS/mbta_rapid_transit/MBTA_ARC"
+        filters:
+          - !OneOf {key: "LINE", valid_values: ["RED", "GREEN", "BLUE", "ORANGE"]}
+      - !Layer
+        class: "rail"
+        double: true
+        filename: "MassGIS/trains/TRAINS_RTE_TRAIN"
+      - !Layer
+        class: "road"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+        filters:
+          - !Either
+            filters:
+              - !OneOf {key: "CLASS", valid_values: [1, 2, 3]}
+              - !OneOf {key: "STREET_NAM", valid_values: ["MAIN STREET", "WEST MAIN STREET", "EAST MAIN STREET", "FRONT STREET", "NORTH GREAT ROAD", "LEXINGTON ROAD", "AYER ROAD", "LEOMINSTER ROAD", "LEOMINSTER SHIRLEY ROAD", "PROSPECT STREET", "CENTER ROAD", "PARKER ROAD"]}
+      - !Layer
+        class: "road-label"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+        label_column: "RT_NUMBER"
+      - !Layer
+        class: "mass-ave top"
+        filename: "MassGIS/MassDOT_Roads_SHP/EOTMAJROADS_ARC"
+        filters:
+          - !OneOf {key: "STREET_NAM", valid_values: ["MASSACHUSETTS AVENUE", "HARVARD BRIDGE"]}
+      # - !Layer
+      #   class: "mass-ave top"
+      #   filename: "MassGIS/MassDOT_Roads_SHP/EOTROADS_ARC"
+      #   filters:
+      #     - !OneOf {key: "ROUTE_NUMB", valid_values: [214401]}
