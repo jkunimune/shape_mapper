@@ -785,6 +785,7 @@ fn convert_content_to_path_points(content: Content) -> Result<Vec<Vec<Serializab
 
 fn load_SVG(marker_filename: &String) -> Result<String> {
     let marker_string = fs::read_to_string(format!("markers/{}.svg", marker_filename)).or(Err(anyhow!("couldn't read `markers/{}.svg`", marker_filename)))?;
+    let marker_string = marker_string.replace("\r\n", "\n");
     // extract the content from between the <svg> and </svg>
     let svg_captures = Regex::new(r"(?s)<svg[^>]*>\n(.*\n)\s*</svg>").unwrap().captures(&marker_string);
     let marker_string = match svg_captures {
