@@ -1,0 +1,6 @@
+<svg viewBox="-1 -1 2 2" xmlns="http://www.w3.org/2000/svg" version="1.1" fill="rgb(209,68,30)" stroke="white">
+    <circle stroke="none" cx="0" cy="0" r="1"/>
+    <path fill="none" stroke-width=".160" d="M-.225,.130 A.450,.450,0,1,1,0,.520"/>
+    <path fill="none" stroke-width=".160" d="M0,-.260 A.450,.450,0,1,1,-.450,-.260"/>
+    <path fill="none" stroke-width=".160" d="M.225,.130 A.450,.450,0,1,1,.450,-.260"/>
+</svg>

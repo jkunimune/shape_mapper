@@ -1,0 +1,458 @@
+title: "Portland, Oregon"
+description: "
+  A map of Portland and the surrounding cities in Oregon.
+  Based on data from the
+  <a href=\"www.oregonmetro.gov/rlis\">
+    Oregon Metro's Regional Land Information System
+  </a> (accessed 2026 Jan 17), which is copyrighted by Oregon Metro."
+style: |
+  .background {
+    fill: #f2f2f2;
+  }
+  .water {
+    fill: #6591f1;
+  }
+  .park, .pos, .rur { /* park, open space, and rural */
+    fill: #cccea9;
+  }
+  .ind { /* industrial */
+    fill: #bebebe;
+  }
+  .com { /* commercial */
+    fill: #f6e2c0;
+  }
+  .pf, .school { /* public facility or school */
+    fill: #f4cfbb;
+  }
+  .legend .background {
+    fill: #ffffff;
+  }
+  .frame {
+    fill: none;
+    stroke: #000000;
+    stroke-width: 3.0;
+  }
+  .county-line {
+    fill: none;
+    stroke: #1f1f1f;
+    stroke-width: 0.6;
+    stroke-linecap: square;
+    stroke-dasharray: 1.2 1.5 0.01 1.5;
+  }
+  .highway {
+    fill: none;
+    stroke: #938b7f;
+    stroke-width: 1.75;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .runway {
+    fill: #938b7f;
+    stroke: #938b7f;
+    stroke-width: 0.2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .trail {
+    fill: none;
+    stroke: #999a8c;
+    stroke-width: 0.35;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .major.street.bottom {
+    fill: none;
+    stroke: #929292;
+    stroke-width: 1.75;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .major.street.top {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 1.05;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .minor.street.bottom {
+    fill: none;
+    stroke: #929292;
+    stroke-width: 1.05;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .minor.street.top {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 0.35;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .railroad.bottom {
+    fill: none;
+    stroke: #91837c;
+    stroke-width: 1.40;
+    stroke-linecap: square;
+  }
+  .railroad.top {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 0.70;
+    stroke-dasharray: 1.05 3.50 1.05 0;
+    stroke-linecap: square;
+  }
+  .tram_line.bottom {
+    fill: none;
+    stroke: #91837c;
+    stroke-width: 1.05;
+    stroke-linecap: square;
+  }
+  .tram_line.top {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 0.35;
+    stroke-dasharray: 0.65 2.70 0.65 0;
+    stroke-linecap: square;
+  }
+  .station {
+    fill: red;
+    stroke: #ffffff;
+  }
+  .street-label {
+    fill: #303030;
+    font-family: Libertinus Sans,sans-serif;
+    font-size: 2.4px;
+    font-weight: normal;
+  }
+  .highway-label {
+    fill: #000000;
+    font-family: Libertinus Sans,sans-serif;
+    font-size: 3.2px;
+    font-weight: normal;
+  }
+  .location-label {
+    fill: #000000;
+    font-family: Libertinus Sans,sans-serif;
+    font-size: 3.2px;
+    font-weight: bold;
+  }
+  .town-label {
+    fill: #000000;
+    font-family: Libertinus Sans,sans-serif;
+    font-size: 4.8px;
+    font-weight: normal;
+    letter-spacing: 2.4px;
+    opacity: 0.6;
+  }
+  .park-label {
+    fill: #0f3200;
+    font-family: Libertinus Sans,sans-serif;
+    font-size: 3.2px;
+    font-weight: normal;
+  }
+  .institution-label {
+    fill: #581631;
+    font-family: Libertinus Sans,sans-serif;
+    font-size: 3.2px;
+    font-weight: normal;
+  }
+  .water-label {
+    fill: #002537;
+    font-family: Libertinus Serif,serif;
+    font-style: italic;
+    font-size: 4.0px;
+    font-weight: normal;
+  }
+  .small-legend-text {
+    fill: #000000;
+    font-family: Libertinus Sans,sans-serif;
+    font-size: 3.2px;
+    font-weight: normal;
+  }
+  .big-legend-text {
+    fill: #000000;
+    font-family: Libertinus Sans,sans-serif;
+    font-size: 6.0px;
+    font-weight: bold;
+  }
+  line.compass {
+    stroke: #000000;
+    stroke-width: 0.15;
+  }
+  .ruler line {
+    stroke: #000000;
+    stroke-width: 0.4;
+    stroke-linecap: square;
+  }
+  .centered {
+    text-anchor: middle;
+  }
+bounding_box: { left: 0, right: 609.6, top: 0, bottom: 457.2 }
+contents:
+  - !Group
+    frame: true
+    bounding_box: { left: 15, right: 594.6, top: 15, bottom: 442.2 }
+    region: { left: 7590000, right: 7710483.78, bottom: 645196.22, top: 734000 }
+    transform:
+      !Affine
+      longitudinal_scale: 0.0000048106
+      latitudinal_scale: -0.0000048106
+      false_easting: -7587000
+      false_northing: -737000
+      rotation: 1.5
+    contents:
+      # - !RasterLayer
+      #   filename: "RLIS/hillshd_10m"
+      - !Layer
+        filename: "RLIS/Zoning"
+        class_column: "ZONEGEN_CL"
+        filters:
+          - !OneOf {key: "ZONEGEN_CL", valid_values: ["RUR", "PF", "COM", "IND"]}
+      - !Layer
+        filename: "RLIS/ORCA_Sites"
+        class: "park"
+      - !Layer
+        filename: "RLIS/School_Sites"
+        class: "school"
+      - !Layer
+        class: "water"
+        filename: "RLIS/Major_Rivers_(poly)"
+      - !Layer
+        class: "tram_line bottom"
+        filename: "RLIS/Portland_Aerial_Tram"
+      - !Layer
+        class: "railroad bottom"
+        filename: "RLIS/Rail_Transit"
+        filters:
+          - !OneOf {key: "TYPE", valid_values: ["MAX", "WES"]}
+          - !OneOf {key: "STATUS", valid_values: ["Existing"]}
+      - !Layer
+        class: "railroad bottom"
+        filename: "RLIS/Railroads"
+      - !Layer
+        class: "tram_line top"
+        filename: "RLIS/Portland_Aerial_Tram"
+      - !Layer
+        class: "railroad top"
+        filename: "RLIS/Rail_Transit"
+        filters:
+          - !OneOf {key: "TYPE", valid_values: ["MAX", "WES"]}
+          - !OneOf {key: "STATUS", valid_values: ["Existing"]}
+      - !Layer
+        class: "railroad top"
+        filename: "RLIS/Railroads"
+      - !Layer
+        class: "minor street bottom"
+        filename: "RLIS/Streets"
+        filters:
+          - !Not {filter: !OneOf {key: "TYPE", valid_values: [1600, 1700, 1740, 1750, 1800, 1850, 1990, 1995, 2000, 8224, 900]}}
+      - !Layer
+        class: "major street bottom"
+        filename: "RLIS/Arterials"
+      - !Layer
+        class: "trail"
+        filename: "RLIS/Trails"
+        filters:
+          - !OneOf {key: "STATUS", valid_values: ["Open"]}
+          - !OneOf {key: "SYSTEMTYPE", valid_values: ["Community", "Regional", "State", "National"]}
+          - !Not {filter: !OneOf {key: "TRLSURFACE", valid_values: ["Water"]}}
+      - !Layer
+        class: "minor street top"
+        filename: "RLIS/Streets"
+        filters:
+          - !Not {filter: !OneOf {key: "TYPE", valid_values: [1600, 1700, 1740, 1750, 1800, 1850, 1990, 1995, 2000, 8224, 900]}}
+      - !Layer
+        class: "major street top"
+        filename: "RLIS/Arterials"
+      - !Layer
+        class: "highway"
+        filename: "RLIS/Freeways"
+      - !Layer
+        class: "runway"
+        filename: "RLIS/Airports"
+      - !Layer
+        class: "county-line"
+        filename: "RLIS/County_Lines_(line)"
+      - !Layer
+        class: "station"
+        filename: "RLIS/Rail_Transit_Stations"
+        class_column: "LINE"
+        filters:
+          - !OneOf {key: "TYPE", valid_values: ["MAX", "WES"]}
+          - !OneOf {key: "STATUS", valid_values: ["Existing"]}
+        marker_name: "trimet"
+        size: 5
+      - !Layer
+        class: "street-label"
+        filename: "RLIS/Arterials"
+        label_column: "STREETNAME"
+        filters:
+          - !GreaterThan {key: "Shape__Len", cutoff: 1320}
+      - !Layer
+        class: "highway-label"
+        filename: "RLIS/Freeways"
+        label_column: "STREETNAME"
+      - !Layer
+        class: "water-label"
+        filename: "RLIS/Stream_routes"
+        label_column: "NAME"
+        filters:
+          - !OneOf {key: "HYDRO_ID", valid_values: [1620, 1917, 173, 1193, 385]}
+      - !Layer
+        class: "park-label"
+        filename: "RLIS/ORCA_Sites"
+        label_column: "SITENAME"
+        filters:
+          - !GreaterThan {key: "Shape__Are", cutoff: 1742400}
+      - !Layer
+        class: "institution-label"
+        filename: "RLIS/School_Sites"
+        label_column: "SITE_NAME"
+        filters:
+          - !GreaterThan {key: "Shape__Are", cutoff: 1742400}
+      - !Layer
+        class: "institution-label"
+        filename: "RLIS/Hospitals"
+        label_column: "NAME"
+      - !Layer
+        class: "location-label"
+        filename: "RLIS/Rail_Transit_Stations"
+        label_column: "STATION"
+        filters:
+          - !OneOf {key: "TYPE", valid_values: ["MAX", "WES"]}
+          - !OneOf {key: "STATUS", valid_values: ["Existing"]}
+      - !Layer
+        class: "town-label"
+        filename: "RLIS/City_Halls"
+        label_column: "CITY"
+        case: !Upper
+      - !Group
+        class: "location-label"
+        contents:
+          - !Label
+            location: {x: 7617000, y: 659000}
+            text: "Washington Square"
+          - !Label
+            location: {x: 7593000, y: 690000}
+            text: "Tanasbourne"
+          - !Label
+            location: {x: 7650000, y: 688000}
+            text: "Lloyd Ctr."
+          - !Label
+            location: {x: 7643000, y: 717000}
+            text: "Jantzen Beach"
+          - !Label
+            location: {x: 7670000, y: 676000}
+            text: "Fubonn Shopping Ctr."
+          - !Label
+            location: {x: 7670000, y: 672000}
+            text: "Eastport Plaza"
+          - !Label
+            location: {x: 7670000, y: 652000}
+            text: "Clackamas"
+          - !Label
+            location: {x: 7609000, y: 676000}
+            text: "Cedar Hills Crossing"
+
+  # - !Group
+  #   class: "legend"
+  #   frame: true
+  #   bounding_box: {left: 308, right: 408, top: 368, bottom: 408}
+  #   region: {left: 0, right: 100, top: 0, bottom: 40}
+  #   contents:
+  #     - !Label
+  #       class: "centered big-legend-text"
+  #       location: {x: 50, y: 10}
+  #       text: "Newton, Massachusetts"
+
+  #     - !Line
+  #       class: "highway"
+  #       start: {x: 5, y: 25}
+  #       end: {x: 15.8, y: 25}
+  #     - !Label
+  #       class: "small-legend-text"
+  #       location: {x: 19, y: 25}
+  #       text: "Highway"
+
+  #     - !Line
+  #       class: "street bottom rdtype-4"
+  #       start: {x: 5, y: 30}
+  #       end: {x: 15.8, y: 30}
+  #     - !Line
+  #       class: "street top rdtype-4"
+  #       start: {x: 5, y: 30}
+  #       end: {x: 15.8, y: 30}
+  #     - !Label
+  #       class: "small-legend-text"
+  #       location: {x: 19, y: 30}
+  #       text: "Major street"
+
+  #     - !Line
+  #       class: "street bottom rdtype-5"
+  #       start: {x: 5, y: 35}
+  #       end: {x: 15.8, y: 35}
+  #     - !Line
+  #       class: "street top rdtype-5"
+  #       start: {x: 5, y: 35}
+  #       end: {x: 15.8, y: 35}
+  #     - !Label
+  #       class: "small-legend-text"
+  #       location: {x: 19, y: 35}
+  #       text: "Minor street"
+
+  #     - !Line
+  #       class: "trail"
+  #       start: {x: 45, y: 25}
+  #       end: {x: 55.8, y: 25}
+  #     - !Label
+  #       class: "small-legend-text"
+  #       location: {x: 59, y: 25}
+  #       text: "Bike lane or trail"
+
+  #     - !Line
+  #       class: "railroad bottom green-line"
+  #       start: {x: 45, y: 30}
+  #       end: {x: 55.8, y: 30}
+  #     - !Line
+  #       class: "railroad top green-line"
+  #       start: {x: 45, y: 30}
+  #       end: {x: 55.8, y: 30}
+  #     - !Label
+  #       class: "small-legend-text"
+  #       location: {x: 59, y: 30}
+  #       text: "Green Line"
+
+  #     - !Line
+  #       class: "railroad bottom commuter-rail"
+  #       start: {x: 45, y: 35}
+  #       end: {x: 55.8, y: 35}
+  #     - !Line
+  #       class: "railroad top commuter-rail"
+  #       start: {x: 45, y: 35}
+  #       end: {x: 55.8, y: 35}
+  #     - !Label
+  #       class: "small-legend-text"
+  #       location: {x: 59, y: 35}
+  #       text: "Commuter Rail"
+
+  #     - !Marker
+  #       class: "compass"
+  #       filename: "cross_arrow"
+  #       location: { x: 90, y: 25 }
+  #       size: 10
+  #     - !Label
+  #       class: "centered small-legend-text"
+  #       location: {x: 90, y: 15}
+  #       text: "North"
+
+  #     - !Label
+  #       class: "centered small-legend-text"
+  #       location: {x: 40, y: 15}
+  #       text: "Scale 1 : 25 000"
+  #     - !Ruler
+  #       class: "ruler centered small-legend-text"
+  #       location: {x: 10, y: 20}
+  #       scale: 64.3738  # 1mi * 1:25k = 64mm
+  #       ticks: [0, 0.25, 0.5, 0.75, 1.0]
+  #       unit: "mi"
+  #       tick_length: 1.5
