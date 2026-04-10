@@ -669,14 +669,19 @@ fn transcribe_content_as_svg(content: Content, outer_bounding_box: &Box, outer_r
 
         Content::Marker { detail, location, size, bearing, .. } =>
             match detail {
-                Some(detail) =>
-                    insert_attribute(
-                    &detail, "transform",
-                    &format!(
-                        "translate({:.2}, {:.2}) scale({:.4}) rotate({:.1})",
-                        location.x, location.y, f64::sqrt(size), bearing.unwrap_or(0.),
-                    ),
-                )?,
+                Some(detail) => {
+                    let transform = match bearing {
+                        Some(bearing) => format!(
+                            "translate({:.2}, {:.2}) scale({:.4}) rotate({:.1})",
+                            location.x, location.y, f64::sqrt(size), bearing,
+                        ),
+                        None => format!(
+                            "translate({:.2}, {:.2}) scale({:.4})",
+                            location.x, location.y, f64::sqrt(size),
+                        ),
+                    };
+                    insert_attribute(&detail, "transform", &transform)?
+                },
                 None => return Err(anyhow!("this marker should have had its detail filled in by now.")),
             },
 
@@ -899,7 +904,7 @@ fn bounds_of(shape: &Shape) -> Result<[[f64; 2]; 2], ()> {
 
 
 /// take an SVG string and insert the given attribute key and value to every top-level
-/// tag in it.  if the key is already there, append to the existing value
+/// tag in it.  if the key is already there, prepend to the existing value
 fn insert_attribute(element: &str, key: &str, value: &str) -> Result<String> {
     let mut modified_element = element.to_owned();
     let mut offset = 0;
@@ -913,10 +918,10 @@ fn insert_attribute(element: &str, key: &str, value: &str) -> Result<String> {
         let key_value_pattern = Regex::new(&format!("{}=\"([^\"]*)\"", key)).unwrap();
         // this will determine what you insert and where
         let infix = match key_value_pattern.captures_at(&element[..attribute_list.end()], attribute_list.start()) {
-            // if it is present, append this value to what's already there
+            // if it is present, prepend this value to what's already there
             Some(captures) => {
                 let tag = captures.get(1).unwrap();
-                Infix {content: format!(" {}", value), position: tag.end()}
+                Infix {content: format!("{} ", value), position: tag.start()}
             }
             // if it's not present, you have to add the whole key-value expression
             None => {
@@ -974,7 +979,11 @@ fn format_number(number: f64) -> String {
 /// replace problematic characters like , to _ and make it all lowercase
 fn sanitize_CSS(string: &str) -> String {
     let string = string.to_lowercase();
+    // most punctuation can become hypens
     let string = Regex::new(r"[{},.:;_]").unwrap().replace_all(&string, "-").into_owned();
+    // parentheses can just go away
+    let string = Regex::new(r"[{}\[\]()]").unwrap().replace_all(&string, "").into_owned();
+    // make sure it doesn't start with a number
     let string = Regex::new(r"^([0-9])").unwrap().replace(&string, "str$1").into_owned();
     return string;
 }
@@ -1367,10 +1376,14 @@ enum Transform {
         longitudinal_scale: f64,
         /// negative the x-coordinate of the point to put at the map origin (shapefile units)
         false_easting: f64,
+        /// the x-coordinate of the map origin (millimeters)
+        origin_x: Option<f64>,
         /// the scale in the y-direction (m per shapefile units, should be negative)
         latitudinal_scale: f64,
         /// negative the y-coordinate of the point to put at the map origin (shapefile units)
         false_northing: f64,
+        /// the y-coordinate of the map origin (millimeters)
+        origin_y: Option<f64>,
         /// the amount to rotate the data widdershins about the map origin (degrees)
         rotation: f64,
     },
@@ -1395,31 +1408,31 @@ enum Transform {
 impl Transform {
     fn between(input: &Box, output: &Box) -> Transform {
         let longitudinal_scale = (output.right - output.left)/(input.right - input.left)/1000.;
-        let false_easting = output.left/(1000.*longitudinal_scale) - input.left;
+        let false_easting = -input.left;
+        let origin_x = Some(output.left);
         let latitudinal_scale = (output.bottom - output.top)/(input.bottom - input.top)/1000.;
-        let false_northing = output.top/(1000.*latitudinal_scale) - input.top;
+        let false_northing = -input.top;
+        let origin_y = Some(output.top);
         let rotation = 0.;
         return Transform::Affine {
-            longitudinal_scale, false_easting,
-            latitudinal_scale, false_northing,
+            longitudinal_scale, false_easting, origin_x,
+            latitudinal_scale, false_northing, origin_y,
             rotation };
     }
 
     fn apply(self: &Transform, input: &SerializablePoint) -> SerializablePoint {
         return match self {
-            Transform::Affine { longitudinal_scale, false_easting, latitudinal_scale, false_northing, rotation } => {
+            Transform::Affine { longitudinal_scale, false_easting, origin_x, latitudinal_scale, false_northing, origin_y, rotation } => {
                 let x = (input.x + false_easting)*1000.*longitudinal_scale;
                 let y = (input.y + false_northing)*1000.*latitudinal_scale;
-                if *rotation == 0. {
-                    SerializablePoint {x, y}
+                let (x, y) = if *rotation == 0. {
+                    (x, y)
                 }
                 else {
                     let (sinθ, cosθ) = rotation.to_radians().sin_cos();
-                    SerializablePoint {
-                        x: cosθ*x + sinθ*y,
-                        y: -sinθ*x + cosθ*y,
-                    }
-                }
+                    (cosθ*x + sinθ*y, -sinθ*x + cosθ*y)
+                };
+                SerializablePoint {x: x + origin_x.unwrap_or(0.), y: y + origin_y.unwrap_or(0.)}
             },
             Transform::Mercator { central_meridian, scale } => {
                 SerializablePoint {
@@ -1449,7 +1462,7 @@ impl Transform {
 
     fn jacobian(self: &Transform, location: &SerializablePoint) -> Jacobian {
         return match self {
-            Transform::Affine { longitudinal_scale, false_easting: _, latitudinal_scale, false_northing: _, rotation } => Jacobian {
+            Transform::Affine { longitudinal_scale, false_easting: _, origin_x: _, latitudinal_scale, false_northing: _, origin_y: _, rotation } => Jacobian {
                 dx_dx: 1000.*longitudinal_scale*rotation.to_radians().cos(),
                 dx_dy: 1000.*latitudinal_scale*rotation.to_radians().sin(),
                 dy_dx: -1000.*longitudinal_scale*rotation.to_radians().sin(),
@@ -1488,13 +1501,13 @@ impl Transform {
 
     fn apply_to_box(self: &Transform, input: &Box) -> Result<Box> {
         return match self {
-            Transform::Affine { longitudinal_scale, false_easting, latitudinal_scale, false_northing, rotation } => 
+            Transform::Affine { longitudinal_scale, false_easting, origin_x, latitudinal_scale, false_northing, origin_y, rotation } => 
                 if *rotation == 0. {
                     Ok(Box {
-                        left: (input.left + false_easting)*1000.*longitudinal_scale,
-                        right: (input.right + false_easting)*1000.*longitudinal_scale,
-                        bottom: (input.bottom + false_northing)*1000.*latitudinal_scale,
-                        top: (input.top + false_northing)*1000.*latitudinal_scale,
+                        left: (input.left + false_easting)*1000.*longitudinal_scale + origin_x.unwrap_or(0.),
+                        right: (input.right + false_easting)*1000.*longitudinal_scale + origin_x.unwrap_or(0.),
+                        bottom: (input.bottom + false_northing)*1000.*latitudinal_scale + origin_y.unwrap_or(0.),
+                        top: (input.top + false_northing)*1000.*latitudinal_scale + origin_y.unwrap_or(0.),
                     })
                 }
                 else {
